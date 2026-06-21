@@ -22,7 +22,7 @@ from datetime import datetime
 
 from flask import Flask, jsonify, request, send_file, Response
 
-PURSE = 30000
+PURSE = 25000
 SLOTS = 3
 DEFAULT_TEAMS_IF_MISSING = 10
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -119,6 +119,7 @@ def default_state():
         "players": players_pool,
         "log": [],
         "current_bid_player_id": None,
+        "theme": "court",
     }
 
 
@@ -140,6 +141,8 @@ def load_state():
             state["config"] = {"num_teams": num_teams, "slots": SLOTS, "purse": PURSE}
         if "current_bid_player_id" not in state:
             state["current_bid_player_id"] = None
+        if "theme" not in state:
+            state["theme"] = "court"
         return state
     return default_state()
 
@@ -324,6 +327,27 @@ def api_current():
         return jsonify(state_with_budgets(state))
 
 
+VALID_THEMES = ("court", "bosch")
+
+
+@app.route("/api/theme", methods=["POST"])
+@require_host
+def api_theme():
+    """Switch the color theme for everyone — console and every connected
+    viewer pick it up immediately since it goes out over the same live
+    update channel as a sale or undo."""
+    data = request.get_json(force=True)
+    theme = data.get("theme")
+    if theme not in VALID_THEMES:
+        return jsonify(error=f"Theme must be one of {', '.join(VALID_THEMES)}."), 400
+    with _lock:
+        state = load_state()
+        state["theme"] = theme
+        save_state(state)
+        broadcast_update()
+        return jsonify(state_with_budgets(state))
+
+
 @app.route("/api/undo", methods=["POST"])
 @require_host
 def api_undo():
@@ -424,12 +448,18 @@ PAGE = """<!DOCTYPE html>
 <style>
 :root{
   --court:#0E2A2B; --court-deep:#0A1F20; --panel:#133C3D; --line:#2B5E5C;
-  --shuttle:#F4F1E6; --gold:#E8B23C; --gold-dim:#8a6c2e;
+  --shuttle:#F4F1E6; --gold:#E8B23C; --gold-dim:#8a6c2e; --glow:#143F40;
   --ok:#6FCF97; --warn:#F2994A; --danger:#EB5757; --text-dim:#9FC1BC;
 }
+body.theme-bosch{
+  --court:#161616; --court-deep:#0A0A0A; --panel:#232323; --line:#3C3C3C;
+  --shuttle:#FFFFFF; --gold:#E2001A; --gold-dim:#7A000E; --glow:#2A0408;
+  --ok:#4CAF50; --warn:#FF9800; --danger:#FF6B6B; --text-dim:#ABABAB;
+}
 *{box-sizing:border-box;}
-body{margin:0;background:radial-gradient(circle at 50% 0%, #143F40 0%, var(--court) 45%, var(--court-deep) 100%);
-  color:var(--shuttle);font-family:'Inter',sans-serif;min-height:100vh;padding:28px 20px 60px;}
+body{margin:0;background:radial-gradient(circle at 50% 0%, var(--glow) 0%, var(--court) 45%, var(--court-deep) 100%);
+  color:var(--shuttle);font-family:'Inter',sans-serif;min-height:100vh;padding:28px 20px 60px;
+  transition:background .25s ease,color .25s ease;}
 .wrap{max-width:1180px;margin:0 auto;}
 header{display:flex;align-items:flex-end;justify-content:space-between;flex-wrap:wrap;gap:16px;
   border-bottom:2px dashed var(--line);padding-bottom:18px;margin-bottom:22px;}
@@ -438,6 +468,15 @@ h1{font-family:'Oswald',sans-serif;font-weight:700;font-size:36px;margin:4px 0 0
 .ticker{font-family:'Space Mono',monospace;font-size:13px;color:var(--text-dim);background:var(--court-deep);
   border:1px solid var(--line);border-radius:6px;padding:10px 14px;min-width:280px;max-width:420px;}
 .ticker b{color:var(--gold);font-weight:700;}
+.header-right{display:flex;flex-direction:column;gap:8px;align-items:flex-end;}
+.theme-toggle{display:flex;align-items:center;gap:6px;background:var(--court-deep);border:1px solid var(--line);
+  border-radius:20px;padding:4px 6px;}
+.theme-toggle .tt-label{font-family:'Space Mono',monospace;font-size:10px;letter-spacing:.08em;color:var(--text-dim);
+  text-transform:uppercase;padding:0 4px;}
+.theme-toggle .tt-btn{background:transparent;border:none;color:var(--text-dim);font-family:'Inter',sans-serif;
+  font-size:12px;padding:5px 12px;border-radius:14px;cursor:pointer;transition:background .15s ease,color .15s ease;}
+.theme-toggle .tt-btn:hover{color:var(--shuttle);}
+.theme-toggle .tt-btn.active{background:var(--gold);color:var(--court-deep);font-weight:600;}
 .console{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:20px 22px;margin-bottom:30px;position:relative;}
 .console::before{content:"AUCTIONEER CONSOLE";position:absolute;top:-11px;left:18px;background:var(--gold);
   color:var(--court-deep);font-family:'Space Mono',monospace;font-size:11px;font-weight:700;letter-spacing:.1em;
@@ -518,7 +557,14 @@ footer{text-align:center;margin-top:34px;font-family:'Space Mono',monospace;font
       <div class="eyebrow">Office League · Live Auction</div>
       <h1>Badminton Bid Board</h1>
     </div>
-    <div class="ticker" id="ticker"><span>No sales yet — first lot is on the table.</span></div>
+    <div class="header-right">
+      <div class="ticker" id="ticker"><span>No sales yet — first lot is on the table.</span></div>
+      <div class="theme-toggle" id="themeToggle">
+        <span class="tt-label">Theme</span>
+        <button class="tt-btn" data-theme="court">Court</button>
+        <button class="tt-btn" data-theme="bosch">Bosch</button>
+      </div>
+    </div>
   </header>
 
   <div class="layout">
@@ -747,7 +793,25 @@ function renderTeams(){
   });
 }
 
-function renderAll(){ populateTeamSelect(); populatePlayerSelect(); renderTeams(); renderTicker(); renderSummary(); renderNowBidding(); renderPoolList(); }
+function renderAll(){ populateTeamSelect(); populatePlayerSelect(); renderTeams(); renderTicker(); renderSummary(); renderNowBidding(); renderPoolList(); applyTheme(); }
+
+function applyTheme(){
+  const theme = STATE.theme || 'court';
+  document.body.classList.toggle('theme-bosch', theme === 'bosch');
+  document.querySelectorAll('#themeToggle .tt-btn').forEach(btn=>{
+    btn.classList.toggle('active', btn.dataset.theme === theme);
+  });
+}
+
+async function setTheme(theme){
+  try{ STATE = await api('/api/theme', {method:'POST',headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({theme})}); applyTheme(); }
+  catch(err){ showMsg(err.message,'error'); }
+}
+
+document.querySelectorAll('#themeToggle .tt-btn').forEach(btn=>{
+  btn.addEventListener('click', ()=>setTheme(btn.dataset.theme));
+});
 
 async function confirmSale(){
   const teamId = parseInt(document.getElementById('teamSelect').value,10);
@@ -805,12 +869,18 @@ VIEW_PAGE = """<!DOCTYPE html>
 <style>
 :root{
   --court:#0E2A2B; --court-deep:#0A1F20; --panel:#133C3D; --line:#2B5E5C;
-  --shuttle:#F4F1E6; --gold:#E8B23C; --gold-dim:#8a6c2e;
+  --shuttle:#F4F1E6; --gold:#E8B23C; --gold-dim:#8a6c2e; --glow:#143F40;
   --ok:#6FCF97; --warn:#F2994A; --danger:#EB5757; --text-dim:#9FC1BC;
 }
+body.theme-bosch{
+  --court:#161616; --court-deep:#0A0A0A; --panel:#232323; --line:#3C3C3C;
+  --shuttle:#FFFFFF; --gold:#E2001A; --gold-dim:#7A000E; --glow:#2A0408;
+  --ok:#4CAF50; --warn:#FF9800; --danger:#FF6B6B; --text-dim:#ABABAB;
+}
 *{box-sizing:border-box;}
-body{margin:0;background:radial-gradient(circle at 50% 0%, #143F40 0%, var(--court) 45%, var(--court-deep) 100%);
-  color:var(--shuttle);font-family:'Inter',sans-serif;min-height:100vh;padding:28px 20px 60px;}
+body{margin:0;background:radial-gradient(circle at 50% 0%, var(--glow) 0%, var(--court) 45%, var(--court-deep) 100%);
+  color:var(--shuttle);font-family:'Inter',sans-serif;min-height:100vh;padding:28px 20px 60px;
+  transition:background .25s ease,color .25s ease;}
 .wrap{max-width:1180px;margin:0 auto;}
 header{display:flex;align-items:flex-end;justify-content:space-between;flex-wrap:wrap;gap:16px;
   border-bottom:2px dashed var(--line);padding-bottom:18px;margin-bottom:22px;}
@@ -984,11 +1054,15 @@ function renderPoolList(state){
   });
 }
 
+function applyTheme(state){
+  document.body.classList.toggle('theme-bosch', (state.theme || 'court') === 'bosch');
+}
+
 async function refresh(){
   try{
     const res = await fetch('/api/state');
     const state = await res.json();
-    renderTicker(state); renderSummary(state); renderTeams(state); renderNowBidding(state); renderPoolList(state);
+    renderTicker(state); renderSummary(state); renderTeams(state); renderNowBidding(state); renderPoolList(state); applyTheme(state);
   }catch(e){ /* ignore, the stream below will catch up once reconnected */ }
 }
 
@@ -998,7 +1072,7 @@ function connectStream(){
   const es = new EventSource('/api/stream');
   es.onmessage = (e)=>{
     const state = JSON.parse(e.data);
-    renderTicker(state); renderSummary(state); renderTeams(state); renderNowBidding(state); renderPoolList(state);
+    renderTicker(state); renderSummary(state); renderTeams(state); renderNowBidding(state); renderPoolList(state); applyTheme(state);
   };
   es.onerror = ()=>{
     // EventSource retries automatically; do an extra one-off fetch so the
