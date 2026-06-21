@@ -426,6 +426,8 @@ h1{font-family:'Oswald',sans-serif;font-weight:700;font-size:36px;margin:4px 0 0
   text-transform:uppercase;width:100%;padding:0;letter-spacing:.02em;}
 .team-name input:focus{outline:none;border-bottom:1px dashed var(--gold);}
 .slot-count{font-family:'Space Mono',monospace;font-size:12px;color:var(--text-dim);}
+.captain-row{display:flex;align-items:center;gap:6px;}
+.captain-row .captain-label{font-size:12px;color:var(--text-dim);white-space:nowrap;font-family:'Space Mono',monospace;}
 .captain-row input{background:transparent;border:none;border-bottom:1px dotted var(--line);color:var(--text-dim);
   font-size:12px;width:100%;padding:2px 0;font-family:'Inter',sans-serif;}
 .captain-row input:focus{outline:none;border-color:var(--gold);color:var(--shuttle);}
@@ -600,7 +602,7 @@ function renderTeams(){
         <div class="team-name"><input type="text" value="${esc(team.name)}" data-team="${team.id}" data-field="name"/></div>
         <div class="slot-count">${team.players.length}/${STATE.slots}</div>
       </div>
-      <div class="captain-row"><input type="text" placeholder="Captain name" value="${esc(team.captain)}" data-team="${team.id}" data-field="captain"/></div>
+      <div class="captain-row"><span class="captain-label">Captain :</span><input type="text" placeholder="Captain name" value="${esc(team.captain)}" data-team="${team.id}" data-field="captain"/></div>
       <div class="purse-meter"><div class="purse-fill ${fillClass}" style="width:${pct}%"></div></div>
       <div class="purse-nums"><span class="left">${rem.toLocaleString()} left</span><span>of ${STATE.purse.toLocaleString()}</span></div>
       <ul class="roster">${rosterHtml}</ul>`;
@@ -780,7 +782,7 @@ function renderTeams(state){
         <div class="team-name">${esc(team.name)}</div>
         <div class="slot-count">${team.players.length}/${state.slots}</div>
       </div>
-      <div class="captain-row">${team.captain ? esc(team.captain) : 'Captain TBD'}</div>
+      <div class="captain-row">Captain : ${team.captain ? esc(team.captain) : 'TBD'}</div>
       <div class="purse-meter"><div class="purse-fill ${fillClass}" style="width:${pct}%"></div></div>
       <div class="purse-nums"><span class="left">${rem.toLocaleString()} left</span><span>of ${state.purse.toLocaleString()}</span></div>
       <ul class="roster">${rosterHtml}</ul>`;
