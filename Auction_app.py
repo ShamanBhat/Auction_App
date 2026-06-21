@@ -7,7 +7,7 @@ A small local web app. Run this script from a terminal:
     pip install flask
     python auction_web.py
 
-Then open the address it prints (usually http://127.0.0.1:5000) in any
+Then open the address it prints (usually http://127.0.0.1:8080) in any
 browser. The page is the auctioneer console; all data is saved to
 auction_data.json next to this script, so closing the browser or the
 script is safe — reopen it later and everything is still there.
@@ -75,6 +75,25 @@ def state_with_budgets(state):
     return out
 
 
+def is_host():
+    """True only for requests coming from the machine running this script
+    (i.e. opened via 127.0.0.1 / localhost). Every other device on the
+    network — even on the same WiFi — is treated as read-only."""
+    return request.remote_addr in ("127.0.0.1", "::1")
+
+
+def require_host(view):
+    from functools import wraps
+
+    @wraps(view)
+    def wrapped(*args, **kwargs):
+        if not is_host():
+            return jsonify(error="Read-only view — open this on the auctioneer's "
+                                  "laptop to make changes."), 403
+        return view(*args, **kwargs)
+    return wrapped
+
+
 # ---------------------------------------------------------------------------
 # API routes
 # ---------------------------------------------------------------------------
@@ -87,6 +106,7 @@ def api_state():
 
 
 @app.route("/api/sale", methods=["POST"])
+@require_host
 def api_sale():
     data = request.get_json(force=True)
     team_id = data.get("team_id")
@@ -120,6 +140,7 @@ def api_sale():
 
 
 @app.route("/api/undo", methods=["POST"])
+@require_host
 def api_undo():
     with _lock:
         state = load_state()
@@ -137,6 +158,7 @@ def api_undo():
 
 
 @app.route("/api/remove", methods=["POST"])
+@require_host
 def api_remove():
     data = request.get_json(force=True)
     team_id = data.get("team_id")
@@ -156,6 +178,7 @@ def api_remove():
 
 
 @app.route("/api/team", methods=["POST"])
+@require_host
 def api_team():
     data = request.get_json(force=True)
     team_id = data.get("team_id")
@@ -173,6 +196,7 @@ def api_team():
 
 
 @app.route("/api/reset", methods=["POST"])
+@require_host
 def api_reset():
     with _lock:
         state = default_state()
@@ -181,6 +205,7 @@ def api_reset():
 
 
 @app.route("/api/export")
+@require_host
 def api_export():
     with _lock:
         if not os.path.exists(SAVE_FILE):
@@ -454,9 +479,143 @@ document.getElementById('playerName').addEventListener('keydown', e=>{ if(e.key=
 """
 
 
+VIEW_PAGE = """<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Office Badminton Auction — Live Board</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --court:#0E2A2B; --court-deep:#0A1F20; --panel:#133C3D; --line:#2B5E5C;
+  --shuttle:#F4F1E6; --gold:#E8B23C; --gold-dim:#8a6c2e;
+  --ok:#6FCF97; --warn:#F2994A; --danger:#EB5757; --text-dim:#9FC1BC;
+}
+*{box-sizing:border-box;}
+body{margin:0;background:radial-gradient(circle at 50% 0%, #143F40 0%, var(--court) 45%, var(--court-deep) 100%);
+  color:var(--shuttle);font-family:'Inter',sans-serif;min-height:100vh;padding:28px 20px 60px;}
+.wrap{max-width:1180px;margin:0 auto;}
+header{display:flex;align-items:flex-end;justify-content:space-between;flex-wrap:wrap;gap:16px;
+  border-bottom:2px dashed var(--line);padding-bottom:18px;margin-bottom:22px;}
+.eyebrow{font-family:'Space Mono',monospace;font-size:11px;letter-spacing:.18em;color:var(--gold);text-transform:uppercase;}
+h1{font-family:'Oswald',sans-serif;font-weight:700;font-size:36px;margin:4px 0 0;text-transform:uppercase;}
+.ticker{font-family:'Space Mono',monospace;font-size:13px;color:var(--text-dim);background:var(--court-deep);
+  border:1px solid var(--line);border-radius:6px;padding:10px 14px;min-width:280px;max-width:420px;}
+.ticker b{color:var(--gold);font-weight:700;}
+.readonly-tag{font-family:'Space Mono',monospace;font-size:11px;letter-spacing:.08em;color:var(--text-dim);
+  border:1px dashed var(--line);border-radius:5px;padding:3px 9px;display:inline-block;margin-top:6px;}
+.summary-bar{display:flex;gap:22px;flex-wrap:wrap;margin-bottom:18px;font-family:'Space Mono',monospace;font-size:13px;color:var(--text-dim);}
+.summary-bar b{color:var(--shuttle);font-size:15px;}
+.teams{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px;}
+.team-card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:16px 16px 14px;display:flex;flex-direction:column;gap:10px;}
+.team-card.full{border-color:var(--gold-dim);}
+.team-card.over{border-color:var(--danger);}
+.team-head{display:flex;justify-content:space-between;align-items:baseline;}
+.team-name{font-family:'Oswald',sans-serif;font-size:18px;text-transform:uppercase;letter-spacing:.02em;}
+.slot-count{font-family:'Space Mono',monospace;font-size:12px;color:var(--text-dim);}
+.captain-row{font-size:12px;color:var(--text-dim);}
+.purse-meter{background:var(--court-deep);border-radius:5px;height:8px;overflow:hidden;}
+.purse-fill{height:100%;background:var(--gold);transition:width .3s ease;}
+.purse-fill.low{background:var(--warn);}
+.purse-fill.crit{background:var(--danger);}
+.purse-nums{display:flex;justify-content:space-between;font-family:'Space Mono',monospace;font-size:12px;color:var(--text-dim);}
+.purse-nums .left{color:var(--ok);font-weight:700;}
+.roster{list-style:none;margin:4px 0 0;padding:0;display:flex;flex-direction:column;gap:4px;}
+.roster li{display:flex;justify-content:space-between;font-size:13px;background:var(--court-deep);border-radius:4px;padding:6px 9px;}
+.roster li .pcost{color:var(--gold);font-family:'Space Mono',monospace;}
+.roster .placeholder{font-size:12px;color:var(--text-dim);font-style:italic;background:none;padding:5px 2px;}
+footer{text-align:center;margin-top:34px;font-family:'Space Mono',monospace;font-size:11px;color:var(--text-dim);}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div>
+      <div class="eyebrow">Office League · Live Auction</div>
+      <h1>Badminton Bid Board</h1>
+      <div class="readonly-tag">VIEW ONLY — updates live, bids are entered by the auctioneer</div>
+    </div>
+    <div class="ticker" id="ticker"><span>No sales yet — first lot is on the table.</span></div>
+  </header>
+
+  <div class="summary-bar">
+    <div>Teams filled: <b id="sumFilled">0/10</b></div>
+    <div>Players sold: <b id="sumSold">0/30</b></div>
+    <div>Tokens spent: <b id="sumSpent">0</b></div>
+    <div>Tokens unspent: <b id="sumLeft">250000</b></div>
+  </div>
+
+  <div class="teams" id="teamGrid"></div>
+  <footer>This view refreshes automatically every few seconds</footer>
+</div>
+
+<script>
+function esc(s){ const d=document.createElement('div'); d.textContent = s==null?'':s; return d.innerHTML; }
+
+function renderTicker(state){
+  const el = document.getElementById('ticker');
+  if(!state.log.length){ el.innerHTML = '<span>No sales yet — first lot is on the table.</span>'; return; }
+  const last = state.log[state.log.length-1];
+  const team = state.teams.find(t=>t.id===last.team_id);
+  el.innerHTML = `SOLD &nbsp;<b>${esc(last.player)}</b> &nbsp;→&nbsp; ${esc(team?team.name:'?')} &nbsp;for&nbsp; <b>${last.cost.toLocaleString()}</b> tokens`;
+}
+
+function renderSummary(state){
+  const filled = state.teams.filter(t=>t.players.length>=state.slots).length;
+  const sold = state.teams.reduce((s,t)=>s+t.players.length,0);
+  document.getElementById('sumFilled').textContent = `${filled}/${state.teams.length}`;
+  document.getElementById('sumSold').textContent = `${sold}/${state.teams.length*state.slots}`;
+  const spentTotal = state.teams.reduce((s,t)=>s+t.spent,0);
+  document.getElementById('sumSpent').textContent = spentTotal.toLocaleString();
+  document.getElementById('sumLeft').textContent = (state.teams.length*state.purse - spentTotal).toLocaleString();
+}
+
+function renderTeams(state){
+  const grid = document.getElementById('teamGrid');
+  grid.innerHTML = '';
+  state.teams.forEach(team=>{
+    const rem = team.remaining;
+    const pct = Math.max(0, Math.min(100, (rem/state.purse)*100));
+    const full = team.players.length >= state.slots;
+    const card = document.createElement('div');
+    card.className = 'team-card' + (full?' full':'') + (rem<0?' over':'');
+    const fillClass = pct<=15?'crit':(pct<=35?'low':'');
+    let rosterHtml = team.players.length === 0
+      ? '<li class="placeholder">No players bought yet</li>'
+      : team.players.map(p=>`<li><span>${esc(p.name)}</span><span class="pcost">${p.cost.toLocaleString()}</span></li>`).join('');
+    card.innerHTML = `
+      <div class="team-head">
+        <div class="team-name">${esc(team.name)}</div>
+        <div class="slot-count">${team.players.length}/${state.slots}</div>
+      </div>
+      <div class="captain-row">${team.captain ? esc(team.captain) : 'Captain TBD'}</div>
+      <div class="purse-meter"><div class="purse-fill ${fillClass}" style="width:${pct}%"></div></div>
+      <div class="purse-nums"><span class="left">${rem.toLocaleString()} left</span><span>of ${state.purse.toLocaleString()}</span></div>
+      <ul class="roster">${rosterHtml}</ul>`;
+    grid.appendChild(card);
+  });
+}
+
+async function refresh(){
+  try{
+    const res = await fetch('/api/state');
+    const state = await res.json();
+    renderTicker(state); renderSummary(state); renderTeams(state);
+  }catch(e){ /* quietly retry next interval */ }
+}
+
+refresh();
+setInterval(refresh, 3000);
+</script>
+</body>
+</html>
+"""
+
+
 @app.route("/")
 def index():
-    return PAGE
+    return PAGE if is_host() else VIEW_PAGE
 
 
 def get_lan_ip():
