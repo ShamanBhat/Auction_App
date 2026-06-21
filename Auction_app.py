@@ -15,11 +15,12 @@ script is safe — reopen it later and everything is still there.
 
 import json
 import os
+import queue
 import webbrowser
 import threading
 from datetime import datetime
 
-from flask import Flask, jsonify, request, send_file
+from flask import Flask, jsonify, request, send_file, Response
 
 PURSE = 25000
 SLOTS = 3
@@ -27,7 +28,12 @@ NUM_TEAMS = 10
 SAVE_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "auction_data.json")
 
 app = Flask(__name__)
-_lock = threading.Lock()
+_lock = threading.RLock()
+
+# Live viewers connected to /api/stream. Each is a small queue that gets a
+# fresh copy of the state pushed to it whenever something changes.
+_subscribers = []
+_subscribers_lock = threading.Lock()
 
 
 # ---------------------------------------------------------------------------
@@ -94,6 +100,23 @@ def require_host(view):
     return wrapped
 
 
+def broadcast_update():
+    """Push the latest state to every connected viewer immediately. Called
+    once at the end of any action that changes the data."""
+    with _lock:
+        state = load_state()
+        payload = json.dumps(state_with_budgets(state))
+    with _subscribers_lock:
+        dead = []
+        for q in _subscribers:
+            try:
+                q.put_nowait(payload)
+            except queue.Full:
+                dead.append(q)
+        for q in dead:
+            _subscribers.remove(q)
+
+
 # ---------------------------------------------------------------------------
 # API routes
 # ---------------------------------------------------------------------------
@@ -103,6 +126,38 @@ def api_state():
     with _lock:
         state = load_state()
         return jsonify(state_with_budgets(state))
+
+
+@app.route("/api/stream")
+def api_stream():
+    """Server-Sent Events feed. The viewer page subscribes here instead of
+    polling — it receives a push the moment a sale/undo/edit happens, and
+    otherwise sits idle (just a small heartbeat so the connection doesn't
+    get dropped by an idle timeout)."""
+    def gen():
+        q = queue.Queue(maxsize=20)
+        with _subscribers_lock:
+            _subscribers.append(q)
+        try:
+            with _lock:
+                state = load_state()
+            yield f"data: {json.dumps(state_with_budgets(state))}\n\n"
+            while True:
+                try:
+                    payload = q.get(timeout=25)
+                    yield f"data: {payload}\n\n"
+                except queue.Empty:
+                    yield ": keep-alive\n\n"
+        finally:
+            with _subscribers_lock:
+                if q in _subscribers:
+                    _subscribers.remove(q)
+
+    return Response(
+        gen(),
+        mimetype="text/event-stream",
+        headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"},
+    )
 
 
 @app.route("/api/sale", methods=["POST"])
@@ -136,6 +191,7 @@ def api_sale():
             "ts": datetime.now().isoformat(timespec="seconds"),
         })
         save_state(state)
+        broadcast_update()
         return jsonify(state_with_budgets(state))
 
 
@@ -154,6 +210,7 @@ def api_undo():
                     team["players"].pop(i)
                     break
         save_state(state)
+        broadcast_update()
         return jsonify(state_with_budgets(state))
 
 
@@ -174,6 +231,7 @@ def api_remove():
             if not (l["team_id"] == team_id and l["player"] == removed["name"] and l["cost"] == removed["cost"])
         ]
         save_state(state)
+        broadcast_update()
         return jsonify(state_with_budgets(state))
 
 
@@ -192,6 +250,7 @@ def api_team():
         if "captain" in data:
             team["captain"] = data["captain"].strip()
         save_state(state)
+        broadcast_update()
         return jsonify(state_with_budgets(state))
 
 
@@ -201,6 +260,7 @@ def api_reset():
     with _lock:
         state = default_state()
         save_state(state)
+        broadcast_update()
         return jsonify(state_with_budgets(state))
 
 
@@ -602,11 +662,25 @@ async function refresh(){
     const res = await fetch('/api/state');
     const state = await res.json();
     renderTicker(state); renderSummary(state); renderTeams(state);
-  }catch(e){ /* quietly retry next interval */ }
+  }catch(e){ /* ignore, the stream below will catch up once reconnected */ }
 }
 
-refresh();
-setInterval(refresh, 3000);
+// Live push connection — the page updates the instant the auctioneer
+// records a sale, undo, or edit, instead of polling on a timer.
+function connectStream(){
+  const es = new EventSource('/api/stream');
+  es.onmessage = (e)=>{
+    const state = JSON.parse(e.data);
+    renderTicker(state); renderSummary(state); renderTeams(state);
+  };
+  es.onerror = ()=>{
+    // EventSource retries automatically; do an extra one-off fetch so the
+    // board still has fresh data while it's reconnecting.
+    refresh();
+  };
+}
+
+connectStream();
 </script>
 </body>
 </html>
@@ -647,7 +721,10 @@ def main():
     threading.Timer(1.0, lambda: webbrowser.open(local_url)).start()
     # host="0.0.0.0" makes the server listen on every network interface,
     # not just localhost, so other devices on the WiFi can reach it.
-    app.run(debug=False, port=8080, host="0.0.0.0")
+    # threaded=True matters here: the live viewer connections (SSE) stay
+    # open continuously, so without this the server could only handle one
+    # browser tab at a time.
+    app.run(debug=False, port=8080, host="0.0.0.0", threaded=True)
 
 
 if __name__ == "__main__":
