@@ -25,7 +25,10 @@ from flask import Flask, jsonify, request, send_file, Response
 PURSE = 25000
 SLOTS = 3
 NUM_TEAMS = 10
-SAVE_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "auction_data.json")
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+SAVE_FILE = os.path.join(SCRIPT_DIR, "auction_data.json")
+PLAYERS_FILE = os.path.join(SCRIPT_DIR, "players.json")
+TEAMS_FILE = os.path.join(SCRIPT_DIR, "teams.json")
 
 app = Flask(__name__)
 _lock = threading.RLock()
@@ -37,23 +40,88 @@ _subscribers_lock = threading.Lock()
 
 
 # ---------------------------------------------------------------------------
+# players.json / teams.json — edited by the auctioneer before the auction,
+# loaded fresh every time the player pool / team roster is (re)built.
+# ---------------------------------------------------------------------------
+
+def ensure_players_file():
+    """Create a starter players.json the first time the script runs, so
+    there's something to edit. Returns the pool as a list of dicts with a
+    stable numeric id assigned by position in the file."""
+    if not os.path.exists(PLAYERS_FILE):
+        sample = [
+            {"name": f"Player {i}", "base_price": 500, "skill": "B"}
+            for i in range(1, (NUM_TEAMS * SLOTS) + 1)
+        ]
+        with open(PLAYERS_FILE, "w") as f:
+            json.dump(sample, f, indent=2)
+
+    with open(PLAYERS_FILE, "r") as f:
+        raw = json.load(f)
+
+    pool = []
+    for i, p in enumerate(raw, start=1):
+        pool.append({
+            "id": i,
+            "name": (p.get("name") or f"Player {i}").strip(),
+            "base_price": int(p.get("base_price") or 0),
+            "skill": (p.get("skill") or "").strip(),
+        })
+    return pool
+
+
+def ensure_teams_file():
+    """Create a starter teams.json the first time the script runs. Each
+    entry pre-fills a team's name and captain."""
+    if not os.path.exists(TEAMS_FILE):
+        sample = [
+            {"name": f"Team {i}", "captain": ""}
+            for i in range(1, NUM_TEAMS + 1)
+        ]
+        with open(TEAMS_FILE, "w") as f:
+            json.dump(sample, f, indent=2)
+
+    with open(TEAMS_FILE, "r") as f:
+        return json.load(f)
+
+
+# ---------------------------------------------------------------------------
 # State handling
 # ---------------------------------------------------------------------------
 
 def default_state():
-    return {
-        "teams": [
-            {"id": i, "name": f"Team {i}", "captain": "", "players": []}
-            for i in range(1, NUM_TEAMS + 1)
-        ],
-        "log": [],
-    }
+    players_pool = ensure_players_file()
+    teams_info = ensure_teams_file()
+
+    teams = []
+    for i in range(1, NUM_TEAMS + 1):
+        info = teams_info[i - 1] if i - 1 < len(teams_info) else {}
+        teams.append({
+            "id": i,
+            "name": (info.get("name") or f"Team {i}").strip() or f"Team {i}",
+            "captain": (info.get("captain") or "").strip(),
+            "players": [],
+        })
+
+    for p in players_pool:
+        p["sold"] = False
+        p["team_id"] = None
+
+    return {"teams": teams, "players": players_pool, "log": []}
 
 
 def load_state():
     if os.path.exists(SAVE_FILE):
         with open(SAVE_FILE, "r") as f:
-            return json.load(f)
+            state = json.load(f)
+        # Migrate saves from before the player pool / captain presets existed.
+        if "players" not in state:
+            pool = ensure_players_file()
+            for p in pool:
+                p["sold"] = False
+                p["team_id"] = None
+            state["players"] = pool
+        return state
     return default_state()
 
 
@@ -165,28 +233,43 @@ def api_stream():
 def api_sale():
     data = request.get_json(force=True)
     team_id = data.get("team_id")
-    name = (data.get("player") or "").strip()
+    player_id = data.get("player_id")
     cost = data.get("cost")
 
     with _lock:
         state = load_state()
         team = next((t for t in state["teams"] if t["id"] == team_id), None)
+        player = next((p for p in state["players"] if p["id"] == player_id), None)
 
         if team is None:
             return jsonify(error="Team not found."), 400
-        if not name:
-            return jsonify(error="Player name can't be empty."), 400
+        if player is None:
+            return jsonify(error="Pick a player from the list."), 400
+        if player["sold"]:
+            return jsonify(error=f"{player['name']} has already been sold."), 400
         if not isinstance(cost, int) or cost <= 0:
             return jsonify(error="Cost must be a positive whole number."), 400
+        if cost < player["base_price"]:
+            return jsonify(error=f"Cost can't be below {player['name']}'s base price "
+                                  f"of {player['base_price']:,}."), 400
         if len(team["players"]) >= SLOTS:
             return jsonify(error=f"{team['name']} already has {SLOTS} players."), 400
         if cost > remaining(team):
             return jsonify(error=f"{team['name']} only has {remaining(team):,} tokens left."), 400
 
-        team["players"].append({"name": name, "cost": cost})
+        player["sold"] = True
+        player["team_id"] = team_id
+        team["players"].append({
+            "player_id": player["id"],
+            "name": player["name"],
+            "base_price": player["base_price"],
+            "skill": player["skill"],
+            "cost": cost,
+        })
         state["log"].append({
             "team_id": team_id,
-            "player": name,
+            "player_id": player["id"],
+            "player": player["name"],
             "cost": cost,
             "ts": datetime.now().isoformat(timespec="seconds"),
         })
@@ -206,9 +289,13 @@ def api_undo():
         team = next((t for t in state["teams"] if t["id"] == last["team_id"]), None)
         if team:
             for i, p in enumerate(team["players"]):
-                if p["name"] == last["player"] and p["cost"] == last["cost"]:
+                if p.get("player_id") == last.get("player_id"):
                     team["players"].pop(i)
                     break
+        player = next((p for p in state["players"] if p["id"] == last.get("player_id")), None)
+        if player:
+            player["sold"] = False
+            player["team_id"] = None
         save_state(state)
         broadcast_update()
         return jsonify(state_with_budgets(state))
@@ -228,8 +315,12 @@ def api_remove():
         removed = team["players"].pop(index)
         state["log"] = [
             l for l in state["log"]
-            if not (l["team_id"] == team_id and l["player"] == removed["name"] and l["cost"] == removed["cost"])
+            if not (l["team_id"] == team_id and l.get("player_id") == removed.get("player_id"))
         ]
+        player = next((p for p in state["players"] if p["id"] == removed.get("player_id")), None)
+        if player:
+            player["sold"] = False
+            player["team_id"] = None
         save_state(state)
         broadcast_update()
         return jsonify(state_with_budgets(state))
@@ -319,6 +410,7 @@ h1{font-family:'Oswald',sans-serif;font-weight:700;font-size:36px;margin:4px 0 0
 .btn.secondary{background:transparent;color:var(--text-dim);border:1px solid var(--line);}
 .btn.secondary:hover{color:var(--shuttle);border-color:var(--shuttle);}
 .console-msg{margin-top:12px;font-family:'Space Mono',monospace;font-size:13px;min-height:18px;}
+.field .hint{font-family:'Space Mono',monospace;font-size:11px;color:var(--text-dim);margin-top:5px;min-height:14px;}
 .console-msg.error{color:var(--danger);}
 .console-msg.ok{color:var(--ok);}
 .console-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:14px;border-top:1px solid var(--line);padding-top:14px;}
@@ -369,8 +461,9 @@ footer{text-align:center;margin-top:34px;font-family:'Space Mono',monospace;font
         <select id="teamSelect"></select>
       </div>
       <div class="field">
-        <label for="playerName">Player assigned</label>
-        <input type="text" id="playerName" placeholder="e.g. Arjun Rao" autocomplete="off">
+        <label for="playerSelect">Player assigned</label>
+        <select id="playerSelect"></select>
+        <div class="hint" id="baseHint">&nbsp;</div>
       </div>
       <div class="field">
         <label for="playerCost">Cost (tokens)</label>
@@ -430,6 +523,43 @@ function populateTeamSelect(){
   if(prev) sel.value = prev;
 }
 
+function populatePlayerSelect(){
+  const sel = document.getElementById('playerSelect');
+  const prev = sel.value;
+  const available = STATE.players.filter(p=>!p.sold);
+  sel.innerHTML = '';
+  if(available.length === 0){
+    const opt = document.createElement('option');
+    opt.value = '';
+    opt.textContent = 'No players left in the pool';
+    sel.appendChild(opt);
+  } else {
+    available.forEach(p=>{
+      const opt = document.createElement('option');
+      opt.value = p.id;
+      const skill = p.skill ? ` · ${p.skill}` : '';
+      opt.textContent = `${p.name} — base ${p.base_price.toLocaleString()}${skill}`;
+      sel.appendChild(opt);
+    });
+  }
+  if(prev) sel.value = prev;
+  updateBaseHint();
+}
+
+function updateBaseHint(){
+  const sel = document.getElementById('playerSelect');
+  const hint = document.getElementById('baseHint');
+  const costInput = document.getElementById('playerCost');
+  const player = STATE.players.find(p=>String(p.id)===sel.value);
+  if(player){
+    hint.textContent = `Base price: ${player.base_price.toLocaleString()}${player.skill ? ' · Skill '+player.skill : ''}`;
+    if(!costInput.value){ costInput.value = player.base_price; }
+    costInput.min = player.base_price;
+  } else {
+    hint.textContent = '\u00A0';
+  }
+}
+
 function renderTicker(){
   const el = document.getElementById('ticker');
   if(!STATE.log.length){ el.innerHTML = '<span>No sales yet — first lot is on the table.</span>'; return; }
@@ -461,7 +591,7 @@ function renderTeams(){
     let rosterHtml = team.players.length === 0
       ? '<li class="placeholder">No players bought yet</li>'
       : team.players.map((p,idx)=>`
-          <li><span>${esc(p.name)}</span>
+          <li><span>${esc(p.name)}${p.skill?` <span style="color:var(--text-dim)">(${esc(p.skill)})</span>`:''}</span>
             <span><span class="pcost">${p.cost.toLocaleString()}</span>
             <span class="rm" data-team="${team.id}" data-idx="${idx}" title="Remove">✕</span></span>
           </li>`).join('');
@@ -492,22 +622,23 @@ function renderTeams(){
   });
 }
 
-function renderAll(){ populateTeamSelect(); renderTeams(); renderTicker(); renderSummary(); }
+function renderAll(){ populateTeamSelect(); populatePlayerSelect(); renderTeams(); renderTicker(); renderSummary(); }
 
 async function confirmSale(){
   const teamId = parseInt(document.getElementById('teamSelect').value,10);
-  const nameInput = document.getElementById('playerName');
+  const playerSelect = document.getElementById('playerSelect');
   const costInput = document.getElementById('playerCost');
-  const name = nameInput.value.trim();
+  const playerId = parseInt(playerSelect.value,10);
   const cost = parseInt(costInput.value,10);
-  if(!name){ showMsg("Enter the player's name.",'error'); nameInput.focus(); return; }
+  if(!playerId){ showMsg('Pick a player from the list.','error'); playerSelect.focus(); return; }
   if(isNaN(cost) || cost<=0){ showMsg('Enter a valid cost greater than 0.','error'); costInput.focus(); return; }
   try{
     STATE = await api('/api/sale', {method:'POST',headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({team_id:teamId, player:name, cost:cost})});
-    nameInput.value=''; costInput.value='';
-    showMsg(`✓ ${name} sold for ${cost.toLocaleString()} tokens.`,'ok');
-    renderAll(); nameInput.focus();
+      body: JSON.stringify({team_id:teamId, player_id:playerId, cost:cost})});
+    const soldName = playerSelect.options[playerSelect.selectedIndex]?.textContent.split(' — ')[0] || 'Player';
+    costInput.value='';
+    showMsg(`✓ ${soldName} sold for ${cost.toLocaleString()} tokens.`,'ok');
+    renderAll();
   }catch(err){ showMsg(err.message,'error'); }
 }
 
@@ -526,8 +657,8 @@ async function resetAuction(){
 document.getElementById('confirmBtn').addEventListener('click', confirmSale);
 document.getElementById('undoBtn').addEventListener('click', undoLast);
 document.getElementById('resetBtn').addEventListener('click', resetAuction);
+document.getElementById('playerSelect').addEventListener('change', updateBaseHint);
 document.getElementById('playerCost').addEventListener('keydown', e=>{ if(e.key==='Enter') confirmSale(); });
-document.getElementById('playerName').addEventListener('keydown', e=>{ if(e.key==='Enter') document.getElementById('playerCost').focus(); });
 
 (async function init(){
   STATE = await api('/api/state');
@@ -643,7 +774,7 @@ function renderTeams(state){
     const fillClass = pct<=15?'crit':(pct<=35?'low':'');
     let rosterHtml = team.players.length === 0
       ? '<li class="placeholder">No players bought yet</li>'
-      : team.players.map(p=>`<li><span>${esc(p.name)}</span><span class="pcost">${p.cost.toLocaleString()}</span></li>`).join('');
+      : team.players.map(p=>`<li><span>${esc(p.name)}${p.skill?` <span style="color:var(--text-dim)">(${esc(p.skill)})</span>`:''}</span><span class="pcost">${p.cost.toLocaleString()}</span></li>`).join('');
     card.innerHTML = `
       <div class="team-head">
         <div class="team-name">${esc(team.name)}</div>
