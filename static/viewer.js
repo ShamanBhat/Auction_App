@@ -37,7 +37,7 @@ function renderTeams(state){
     const captainHtml = `
       <li class="captain-entry">
         <span class="c-badge">C</span>
-        <span class="c-name">${esc(team.captain) || 'TBD'}</span>
+        <span class="c-name">${esc(team.captain)}</span>
         <span class="c-meta">${team.captain_skill ? esc(team.captain_skill)+' · ' : ''}${genderBadge(team.captain_gender||'M')}</span>
       </li>`;
     let rosterHtml = team.players.length === 0
@@ -101,7 +101,9 @@ function renderPoolList(state){
 }
 
 function applyTheme(state){
-  document.body.classList.toggle('theme-bosch', (state.theme || 'court') === 'bosch');
+  const theme = state.theme || 'court';
+  document.body.classList.toggle('theme-bosch', theme === 'bosch');
+  document.body.classList.toggle('theme-stage', theme === 'stage');
 }
 
 async function refresh(){

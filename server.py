@@ -471,7 +471,7 @@ def api_current():
         return jsonify(state_with_budgets(state))
 
 
-VALID_THEMES = ("court", "bosch")
+VALID_THEMES = ("court", "bosch", "stage")
 
 
 @app.route("/api/theme", methods=["POST"])

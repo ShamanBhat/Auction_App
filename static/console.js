@@ -229,6 +229,7 @@ function renderViewerCount(){
 function applyTheme(){
   const theme = STATE.theme || 'court';
   document.body.classList.toggle('theme-bosch', theme === 'bosch');
+  document.body.classList.toggle('theme-stage', theme === 'stage');
   document.querySelectorAll('#themeToggle .tt-btn').forEach(btn=>{
     btn.classList.toggle('active', btn.dataset.theme === theme);
   });
