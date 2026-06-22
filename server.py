@@ -21,6 +21,7 @@ default templates/ and static/ folders next to this script.
 import json
 import os
 import queue
+import shutil
 import webbrowser
 import threading
 from datetime import datetime
@@ -32,6 +33,7 @@ SLOTS = 3   # players each team bids for — fixed, not derived from players.jso
 DEFAULT_TEAMS_IF_MISSING = 10
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 SAVE_FILE = os.path.join(SCRIPT_DIR, "auction_data.json")
+BACKUPS_DIR = os.path.join(SCRIPT_DIR, "backups")
 PLAYERS_FILE = os.path.join(SCRIPT_DIR, "players.json")
 TEAMS_FILE = os.path.join(SCRIPT_DIR, "teams.json")
 
@@ -157,6 +159,19 @@ def load_state():
 def save_state(state):
     with open(SAVE_FILE, "w") as f:
         json.dump(state, f, indent=2)
+
+
+def backup_current_data():
+    """Copy the current auction_data.json into backups/ before it gets
+    overwritten by a reset. Returns the backup path, or None if there was
+    nothing to back up yet."""
+    if not os.path.exists(SAVE_FILE):
+        return None
+    os.makedirs(BACKUPS_DIR, exist_ok=True)
+    stamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    backup_path = os.path.join(BACKUPS_DIR, f"auction_data_backup_{stamp}.json")
+    shutil.copy2(SAVE_FILE, backup_path)
+    return backup_path
 
 
 def spent(team):
@@ -426,10 +441,13 @@ def api_team():
 @require_host
 def api_reset():
     with _lock:
+        backup_path = backup_current_data()
         state = default_state()
         save_state(state)
         broadcast_update()
-        return jsonify(state_with_budgets(state))
+        out = state_with_budgets(state)
+        out["backup_file"] = os.path.basename(backup_path) if backup_path else None
+        return jsonify(out)
 
 
 @app.route("/api/export")

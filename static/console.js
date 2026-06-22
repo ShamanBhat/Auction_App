@@ -222,7 +222,8 @@ async function resetAuction(){
   if(!confirm('This clears every sale, budget and name. Are you sure?')) return;
   if(!confirm('Really sure? This cannot be undone.')) return;
   STATE = await api('/api/reset', {method:'POST'});
-  renderAll(); showMsg('Auction reset.','ok');
+  renderAll();
+  showMsg(STATE.backup_file ? `Auction reset. Previous data backed up to backups/${STATE.backup_file}` : 'Auction reset.', 'ok');
 }
 
 document.getElementById('confirmBtn').addEventListener('click', confirmSale);
