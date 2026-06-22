@@ -4,6 +4,7 @@
 // devices, so this is belt-and-suspenders, not the only safeguard.
 
 function esc(s){ const d=document.createElement('div'); d.textContent = s==null?'':s; return d.innerHTML; }
+function genderBadge(g){ return `<span class="gender-badge ${g}">${g==='F'?'She/Her':'He/Him'}</span>`; }
 
 function renderTicker(state){
   const el = document.getElementById('ticker');
@@ -35,7 +36,7 @@ function renderTeams(state){
     const fillClass = pct<=15?'crit':(pct<=35?'low':'');
     let rosterHtml = team.players.length === 0
       ? '<li class="placeholder">No players bought yet</li>'
-      : team.players.map(p=>`<li><span>${esc(p.name)}${p.skill?` <span style="color:var(--text-dim)">(${esc(p.skill)})</span>`:''}</span><span class="pcost">${p.cost.toLocaleString()}</span></li>`).join('');
+      : team.players.map(p=>`<li><span>${esc(p.name)}${p.skill?` <span style="color:var(--text-dim)">(${esc(p.skill)})</span>`:''} ${genderBadge(p.gender||'M')}</span><span class="pcost">${p.cost.toLocaleString()}</span></li>`).join('');
     card.innerHTML = `
       <div class="team-head">
         <div class="team-name">${esc(team.name)}</div>
@@ -80,7 +81,7 @@ function renderPoolList(state){
     } else {
       statusHtml = `<span class="ps available">Available</span>`;
     }
-    li.innerHTML = `<span class="pn"><span>${esc(p.name)}</span><span class="sk">Base ${p.base_price.toLocaleString()}${p.skill?' · '+esc(p.skill):''}</span></span>${statusHtml}`;
+    li.innerHTML = `<span class="pn"><span>${esc(p.name)} ${genderBadge(p.gender||'M')}</span><span class="sk">Base ${p.base_price.toLocaleString()}${p.skill?' · '+esc(p.skill):''}</span></span>${statusHtml}`;
     list.appendChild(li);
   });
 }

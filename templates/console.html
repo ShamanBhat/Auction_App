@@ -17,10 +17,13 @@
     </div>
     <div class="header-right">
       <div class="ticker" id="ticker"><span>No sales yet — first lot is on the table.</span></div>
-      <div class="theme-toggle" id="themeToggle">
-        <span class="tt-label">Theme</span>
-        <button class="tt-btn" data-theme="court">Court</button>
-        <button class="tt-btn" data-theme="bosch">Bosch</button>
+      <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;justify-content:flex-end;">
+        <div class="viewer-count none" id="viewerCount"><span class="vc-dot"></span><span id="viewerNum">0</span> viewing</div>
+        <div class="theme-toggle" id="themeToggle">
+          <span class="tt-label">Theme</span>
+          <button class="tt-btn" data-theme="court">Court</button>
+          <button class="tt-btn" data-theme="bosch">Bosch</button>
+        </div>
       </div>
     </div>
   </header>
@@ -37,6 +40,7 @@
             <label for="playerSelect">Player assigned</label>
             <select id="playerSelect"></select>
             <div class="hint" id="baseHint">&nbsp;</div>
+            <div class="female-warn" id="femaleWarn"></div>
           </div>
           <div class="field">
             <label for="playerCost">Cost (tokens)</label>

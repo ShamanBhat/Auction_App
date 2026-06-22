@@ -60,3 +60,11 @@
 
 .roster li .rm{cursor:pointer;color:var(--danger);font-family:'Space Mono',monospace;margin-left:8px;opacity:.7;}
 .roster li .rm:hover{opacity:1;}
+.viewer-count{font-family:'Space Mono',monospace;font-size:12px;color:var(--text-dim);
+  background:var(--court-deep);border:1px solid var(--line);border-radius:12px;
+  padding:4px 10px;white-space:nowrap;}
+.viewer-count .vc-dot{display:inline-block;width:7px;height:7px;border-radius:50%;
+  background:var(--ok);margin-right:5px;vertical-align:middle;}
+.viewer-count.none .vc-dot{background:var(--text-dim);}
+.female-warn{font-family:'Space Mono',monospace;font-size:11px;color:#f77ec0;
+  margin-top:4px;min-height:14px;}

@@ -37,6 +37,10 @@ function populateTeamSelect(){
 function populatePlayerSelect(){
   const sel = document.getElementById('playerSelect');
   const prev = sel.value;
+  const teamId = parseInt(document.getElementById('teamSelect').value,10);
+  const team = STATE.teams.find(t=>t.id===teamId);
+  const isLastSlot = team && team.players.length === STATE.slots - 1;
+  const teamHasFemale = team && team.players.some(p=>p.gender==='F');
   const available = STATE.players.filter(p=>!p.sold);
   sel.innerHTML = '';
   if(available.length === 0){
@@ -49,7 +53,10 @@ function populatePlayerSelect(){
       const opt = document.createElement('option');
       opt.value = p.id;
       const skill = p.skill ? ` · ${p.skill}` : '';
-      opt.textContent = `${p.name} — base ${p.base_price.toLocaleString()}${skill}`;
+      const gLabel = p.gender === 'F' ? ' · She/Her' : ' · He/Him';
+      opt.textContent = `${p.name} — base ${p.base_price.toLocaleString()}${skill}${gLabel}`;
+      // Grey out males when last slot requires a female
+      if(isLastSlot && !teamHasFemale && p.gender !== 'F') opt.disabled = true;
       sel.appendChild(opt);
     });
   }
@@ -57,17 +64,34 @@ function populatePlayerSelect(){
   updateBaseHint();
 }
 
+function genderBadge(g){ return `<span class="gender-badge ${g}">${g==='F'?'She/Her':'He/Him'}</span>`; }
+
 function updateBaseHint(){
   const sel = document.getElementById('playerSelect');
   const hint = document.getElementById('baseHint');
+  const warn = document.getElementById('femaleWarn');
   const costInput = document.getElementById('playerCost');
   const player = STATE.players.find(p=>String(p.id)===sel.value);
   if(player){
-    hint.textContent = `Base price: ${player.base_price.toLocaleString()}${player.skill ? ' · Skill '+player.skill : ''}`;
+    hint.innerHTML = `Base price: ${player.base_price.toLocaleString()}${player.skill ? ' · Skill '+player.skill : ''} ${genderBadge(player.gender)}`;
     if(!costInput.value){ costInput.value = player.base_price; }
     costInput.min = player.base_price;
   } else {
     hint.textContent = '\u00A0';
+  }
+  // Check if selected team's last slot requires a female player
+  if(warn){
+    const teamId = parseInt(document.getElementById('teamSelect').value,10);
+    const team = STATE.teams.find(t=>t.id===teamId);
+    if(team){
+      const isLastSlot = team.players.length === STATE.slots - 1;
+      const teamHasFemale = team.players.some(p=>p.gender==='F');
+      if(isLastSlot && !teamHasFemale){
+        warn.textContent = '⚠ Last slot — must be a female player (She/Her)';
+      } else {
+        warn.textContent = '';
+      }
+    }
   }
 }
 
@@ -108,7 +132,7 @@ function renderPoolList(){
     } else {
       statusHtml = `<span class="ps available">Available</span>`;
     }
-    li.innerHTML = `<span class="pn"><span>${esc(p.name)}</span><span class="sk">Base ${p.base_price.toLocaleString()}${p.skill?' · '+esc(p.skill):''}</span></span>${statusHtml}`;
+    li.innerHTML = `<span class="pn"><span>${esc(p.name)} ${genderBadge(p.gender||'M')}</span><span class="sk">Base ${p.base_price.toLocaleString()}${p.skill?' · '+esc(p.skill):''}</span></span>${statusHtml}`;
     list.appendChild(li);
   });
 }
@@ -144,7 +168,7 @@ function renderTeams(){
     let rosterHtml = team.players.length === 0
       ? '<li class="placeholder">No players bought yet</li>'
       : team.players.map((p,idx)=>`
-          <li><span>${esc(p.name)}${p.skill?` <span style="color:var(--text-dim)">(${esc(p.skill)})</span>`:''}</span>
+          <li><span>${esc(p.name)}${p.skill?` <span style="color:var(--text-dim)">(${esc(p.skill)})</span>`:''} ${genderBadge(p.gender||'M')}</span>
             <span><span class="pcost">${p.cost.toLocaleString()}</span>
             <span class="rm" data-team="${team.id}" data-idx="${idx}" title="Remove">✕</span></span>
           </li>`).join('');
@@ -175,7 +199,16 @@ function renderTeams(){
   });
 }
 
-function renderAll(){ populateTeamSelect(); populatePlayerSelect(); renderTeams(); renderTicker(); renderSummary(); renderNowBidding(); renderPoolList(); applyTheme(); }
+function renderAll(){ populateTeamSelect(); populatePlayerSelect(); renderTeams(); renderTicker(); renderSummary(); renderNowBidding(); renderPoolList(); applyTheme(); renderViewerCount(); }
+
+function renderViewerCount(){
+  const n = STATE.viewer_count || 0;
+  const el = document.getElementById('viewerCount');
+  const num = document.getElementById('viewerNum');
+  if(!el || !num) return;
+  num.textContent = n;
+  el.className = 'viewer-count' + (n === 0 ? ' none' : '');
+}
 
 function applyTheme(){
   const theme = STATE.theme || 'court';
@@ -229,6 +262,7 @@ async function resetAuction(){
 document.getElementById('confirmBtn').addEventListener('click', confirmSale);
 document.getElementById('undoBtn').addEventListener('click', undoLast);
 document.getElementById('resetBtn').addEventListener('click', resetAuction);
+document.getElementById('teamSelect').addEventListener('change', ()=>{ populatePlayerSelect(); });
 document.getElementById('playerSelect').addEventListener('change', ()=>{ updateBaseHint(); announceCurrentBid(); });
 document.getElementById('playerCost').addEventListener('keydown', e=>{ if(e.key==='Enter') confirmSale(); });
 

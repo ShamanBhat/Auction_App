@@ -79,7 +79,7 @@ def ensure_players_file(num_teams):
     if not os.path.exists(PLAYERS_FILE):
         total = max(1, num_teams) * SLOTS
         sample = [
-            {"name": f"Player {i}", "base_price": 500, "skill": "B"}
+            {"name": f"Player {i}", "base_price": 500, "skill": "B", "gender": "M"}
             for i in range(1, total + 1)
         ]
         with open(PLAYERS_FILE, "w") as f:
@@ -90,11 +90,14 @@ def ensure_players_file(num_teams):
 
     pool = []
     for i, p in enumerate(raw, start=1):
+        raw_gender = (p.get("gender") or "M").strip().upper()
+        gender = "F" if raw_gender in ("F", "FEMALE", "SHE", "HER") else "M"
         pool.append({
             "id": i,
             "name": (p.get("name") or f"Player {i}").strip(),
             "base_price": int(p.get("base_price") or 0),
             "skill": (p.get("skill") or "").strip(),
+            "gender": gender,
         })
     return pool
 
@@ -152,6 +155,28 @@ def load_state():
             state["current_bid_player_id"] = None
         if "theme" not in state:
             state["theme"] = "court"
+
+        # Migrate: backfill missing 'gender' field on any player entry (both
+        # in the pool and already bought into teams). Read the current
+        # players.json to get the canonical gender for each id, then fall
+        # back to "M" if it's genuinely not specified anywhere.
+        needs_gender = any("gender" not in p for p in state.get("players", []))
+        if needs_gender:
+            try:
+                num_teams = len(state.get("teams", [])) or DEFAULT_TEAMS_IF_MISSING
+                fresh_pool = ensure_players_file(num_teams)
+                gender_map = {p["id"]: p["gender"] for p in fresh_pool}
+            except Exception:
+                gender_map = {}
+            for p in state.get("players", []):
+                if "gender" not in p:
+                    p["gender"] = gender_map.get(p["id"], "M")
+            # Also patch players already stored inside team rosters
+            for team in state.get("teams", []):
+                for rp in team.get("players", []):
+                    if "gender" not in rp:
+                        rp["gender"] = gender_map.get(rp.get("player_id"), "M")
+
         return state
     return default_state()
 
@@ -193,6 +218,8 @@ def state_with_budgets(state):
     out["current_bid_player"] = next(
         (p for p in out["players"] if p["id"] == out.get("current_bid_player_id")), None
     )
+    with _subscribers_lock:
+        out["viewer_count"] = len(_subscribers)
     return out
 
 
@@ -304,6 +331,23 @@ def api_sale():
         if cost > remaining(team, state):
             return jsonify(error=f"{team['name']} only has {remaining(team, state):,} tokens left."), 400
 
+        # Enforce: each team must have at least 1 female player. If this is
+        # the last slot and there are no females yet, only a female player
+        # can be bought.
+        slots = state["config"]["slots"]
+        is_last_slot = len(team["players"]) == slots - 1
+        team_has_female = any(p.get("gender") == "F" for p in team["players"])
+        if is_last_slot and not team_has_female and player.get("gender") != "F":
+            # Count available female players to give a helpful message
+            available_females = [
+                p for p in state["players"]
+                if not p["sold"] and p.get("gender") == "F"
+            ]
+            return jsonify(
+                error=f"{team['name']} has no female players yet — the last slot must be filled by a female player. "
+                      f"({len(available_females)} female player{'s' if len(available_females) != 1 else ''} still available)"
+            ), 400
+
         player["sold"] = True
         player["team_id"] = team_id
         team["players"].append({
@@ -311,6 +355,7 @@ def api_sale():
             "name": player["name"],
             "base_price": player["base_price"],
             "skill": player["skill"],
+            "gender": player.get("gender", "M"),
             "cost": cost,
         })
         state["log"].append({
