@@ -269,4 +269,25 @@ document.getElementById('playerCost').addEventListener('keydown', e=>{ if(e.key=
 (async function init(){
   STATE = await api('/api/state');
   renderAll();
+  connectConsoleStream();
 })();
+
+function connectConsoleStream(){
+  const es = new EventSource('/api/console-stream');
+  es.onmessage = (e)=>{
+    const incoming = JSON.parse(e.data);
+    // Only update STATE if it came from an external action (viewer connecting,
+    // another tab doing a sale, etc.) — don't clobber a pending input.
+    STATE = incoming;
+    renderViewerCount();
+    // Re-render only the parts that change from external pushes;
+    // avoid re-rendering dropdowns mid-input by checking focus.
+    const focused = document.activeElement;
+    const inputFocused = focused && (focused.tagName === 'INPUT' || focused.tagName === 'SELECT');
+    if(!inputFocused){ renderAll(); } else { renderViewerCount(); renderTicker(); renderSummary(); }
+  };
+  es.onerror = ()=>{
+    // Browser will auto-reconnect; do a one-off fetch to stay in sync.
+    api('/api/state').then(s=>{ STATE=s; renderViewerCount(); }).catch(()=>{});
+  };
+}

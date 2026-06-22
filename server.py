@@ -42,9 +42,11 @@ TEAMS_FILE = os.path.join(SCRIPT_DIR, "teams.json")
 app = Flask(__name__)
 _lock = threading.RLock()
 
-# Live viewers connected to /api/stream. Each is a small queue that gets a
-# fresh copy of the state pushed to it whenever something changes.
+# _subscribers   — viewer SSE connections (non-host). Counted in viewer_count.
+# _console_subs  — console SSE connections (host).   NOT counted in viewer_count.
+# Both receive every broadcast so the console sees viewer_count changes live.
 _subscribers = []
+_console_subs = []
 _subscribers_lock = threading.Lock()
 
 
@@ -242,21 +244,31 @@ def require_host(view):
     return wrapped
 
 
+def _push_to_list(lst, payload):
+    """Push payload to every queue in lst; return queues that are dead."""
+    dead = []
+    for q in lst:
+        try:
+            q.put_nowait(payload)
+        except queue.Full:
+            dead.append(q)
+    return dead
+
+
 def broadcast_update():
-    """Push the latest state to every connected viewer immediately. Called
-    once at the end of any action that changes the data."""
+    """Push the latest state to every connected viewer and console immediately.
+    Called at the end of any action that changes data, and also whenever a
+    viewer connects or disconnects (so the console's viewer count stays live)."""
     with _lock:
         state = load_state()
         payload = json.dumps(state_with_budgets(state))
     with _subscribers_lock:
-        dead = []
-        for q in _subscribers:
-            try:
-                q.put_nowait(payload)
-            except queue.Full:
-                dead.append(q)
-        for q in dead:
+        dead_v = _push_to_list(_subscribers, payload)
+        dead_c = _push_to_list(_console_subs, payload)
+        for q in dead_v:
             _subscribers.remove(q)
+        for q in dead_c:
+            _console_subs.remove(q)
 
 
 # ---------------------------------------------------------------------------
@@ -272,14 +284,15 @@ def api_state():
 
 @app.route("/api/stream")
 def api_stream():
-    """Server-Sent Events feed. The viewer page subscribes here instead of
-    polling — it receives a push the moment a sale/undo/edit happens, and
-    otherwise sits idle (just a small heartbeat so the connection doesn't
-    get dropped by an idle timeout)."""
+    """Server-Sent Events feed for viewers. Broadcasts on connect and
+    disconnect so the console's viewer count updates in real time."""
     def gen():
         q = queue.Queue(maxsize=20)
         with _subscribers_lock:
             _subscribers.append(q)
+        # Notify console of updated viewer count — run in a daemon thread so
+        # we're not holding _subscribers_lock during the broadcast.
+        threading.Thread(target=broadcast_update, daemon=True).start()
         try:
             with _lock:
                 state = load_state()
@@ -294,6 +307,42 @@ def api_stream():
             with _subscribers_lock:
                 if q in _subscribers:
                     _subscribers.remove(q)
+            threading.Thread(target=broadcast_update, daemon=True).start()
+
+    return Response(
+        gen(),
+        mimetype="text/event-stream",
+        headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"},
+    )
+
+
+@app.route("/api/console-stream")
+def api_console_stream():
+    """SSE feed for the auctioneer console only (host-only). Connections here
+    are NOT counted in viewer_count — the console subscribes to this so it
+    can receive live broadcasts (including viewer count changes) without
+    inflating the viewer number shown to the room."""
+    if not is_host():
+        return jsonify(error="Console stream is host-only."), 403
+
+    def gen():
+        q = queue.Queue(maxsize=20)
+        with _subscribers_lock:
+            _console_subs.append(q)
+        try:
+            with _lock:
+                state = load_state()
+            yield f"data: {json.dumps(state_with_budgets(state))}\n\n"
+            while True:
+                try:
+                    payload = q.get(timeout=25)
+                    yield f"data: {payload}\n\n"
+                except queue.Empty:
+                    yield ": keep-alive\n\n"
+        finally:
+            with _subscribers_lock:
+                if q in _console_subs:
+                    _console_subs.remove(q)
 
     return Response(
         gen(),
