@@ -24,7 +24,7 @@ body{margin:0;background:radial-gradient(circle at 50% 0%, var(--glow) 0%, var(-
 .wrap{width:100%;}
 header{display:flex;align-items:flex-end;justify-content:space-between;flex-wrap:wrap;gap:16px;
   border-bottom:2px dashed var(--line);padding-bottom:18px;margin-bottom:22px;}
-.eyebrow{font-family:'Space Mono',monospace;font-size:11px;letter-spacing:.18em;color:var(--gold);text-transform:uppercase;}
+.eyebrow{font-family:'Space Mono',monospace;font-size:14px;letter-spacing:.18em;color:var(--gold);text-transform:uppercase;}
 h1{font-family:'Oswald',sans-serif;font-weight:700;font-size:36px;margin:4px 0 0;text-transform:uppercase;}
 .ticker{font-family:'Space Mono',monospace;font-size:13px;color:var(--text-dim);background:var(--court-deep);
   border:1px solid var(--line);border-radius:6px;padding:10px 14px;min-width:280px;max-width:420px;}
