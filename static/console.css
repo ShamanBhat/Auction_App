@@ -1,0 +1,62 @@
+/* ---------------------------------------------------------------------------
+   Auctioneer console — only loaded on the host page (auction_web's index
+   route only serves console.html to requests from 127.0.0.1). Builds on
+   top of style.css.
+--------------------------------------------------------------------------- */
+
+.header-right{display:flex;flex-direction:column;gap:8px;align-items:flex-end;}
+
+.theme-toggle{display:flex;align-items:center;gap:6px;background:var(--court-deep);border:1px solid var(--line);
+  border-radius:20px;padding:4px 6px;}
+.theme-toggle .tt-label{font-family:'Space Mono',monospace;font-size:10px;letter-spacing:.08em;color:var(--text-dim);
+  text-transform:uppercase;padding:0 4px;}
+.theme-toggle .tt-btn{background:transparent;border:none;color:var(--text-dim);font-family:'Inter',sans-serif;
+  font-size:12px;padding:5px 12px;border-radius:14px;cursor:pointer;transition:background .15s ease,color .15s ease;}
+.theme-toggle .tt-btn:hover{color:var(--shuttle);}
+.theme-toggle .tt-btn.active{background:var(--gold);color:var(--court-deep);font-weight:600;}
+
+.console{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:20px 22px;margin-bottom:30px;position:relative;}
+.console::before{content:"AUCTIONEER CONSOLE";position:absolute;top:-11px;left:18px;background:var(--gold);
+  color:var(--court-deep);font-family:'Space Mono',monospace;font-size:11px;font-weight:700;letter-spacing:.1em;
+  padding:3px 10px;border-radius:4px;}
+.console-grid{display:grid;grid-template-columns:1.4fr 1.4fr 1fr auto;gap:14px;align-items:end;margin-top:10px;}
+@media (max-width:760px){.console-grid{grid-template-columns:1fr 1fr;}}
+.field label{display:block;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--text-dim);margin-bottom:6px;}
+.field select,.field input{width:100%;background:var(--court-deep);border:1px solid var(--line);color:var(--shuttle);
+  border-radius:6px;padding:10px 12px;font-size:15px;font-family:'Inter',sans-serif;}
+.field select:focus,.field input:focus{outline:none;border-color:var(--gold);}
+.field .hint{font-family:'Space Mono',monospace;font-size:11px;color:var(--text-dim);margin-top:5px;min-height:14px;}
+
+.btn{background:var(--gold);color:var(--court-deep);border:none;border-radius:6px;padding:11px 18px;
+  font-family:'Oswald',sans-serif;font-weight:600;letter-spacing:.04em;font-size:15px;text-transform:uppercase;
+  cursor:pointer;white-space:nowrap;}
+.btn:hover{background:#f3c869;}
+.btn:disabled{background:#5b5642;color:#9a9682;cursor:not-allowed;}
+.btn.secondary{background:transparent;color:var(--text-dim);border:1px solid var(--line);}
+.btn.secondary:hover{color:var(--shuttle);border-color:var(--shuttle);}
+
+.console-msg{margin-top:12px;font-family:'Space Mono',monospace;font-size:13px;min-height:18px;}
+.console-msg.error{color:var(--danger);}
+.console-msg.ok{color:var(--ok);}
+.console-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:14px;border-top:1px solid var(--line);padding-top:14px;}
+
+/* Compact "now bidding" card — viewer.css has a bigger banner version */
+.now-bidding{background:var(--panel);border:2px solid var(--gold);border-radius:10px;padding:14px 16px;}
+.now-bidding .nb-label{font-family:'Space Mono',monospace;font-size:10px;letter-spacing:.14em;color:var(--gold);text-transform:uppercase;}
+.now-bidding .nb-name{font-family:'Oswald',sans-serif;font-size:20px;margin-top:4px;text-transform:uppercase;}
+.now-bidding .nb-meta{font-family:'Space Mono',monospace;font-size:12px;color:var(--text-dim);margin-top:2px;}
+.now-bidding.empty{border-color:var(--line);}
+.now-bidding.empty .nb-name{color:var(--text-dim);font-size:14px;text-transform:none;font-family:'Inter',sans-serif;}
+
+/* Editable fields on each team card — captain/name can be changed inline */
+.team-name input{background:transparent;border:none;color:var(--shuttle);font-family:'Oswald',sans-serif;font-size:18px;
+  text-transform:uppercase;width:100%;padding:0;letter-spacing:.02em;}
+.team-name input:focus{outline:none;border-bottom:1px dashed var(--gold);}
+.captain-row{display:flex;align-items:center;gap:6px;}
+.captain-row .captain-label{font-size:12px;color:var(--text-dim);white-space:nowrap;font-family:'Space Mono',monospace;}
+.captain-row input{background:transparent;border:none;border-bottom:1px dotted var(--line);color:var(--text-dim);
+  font-size:12px;width:100%;padding:2px 0;font-family:'Inter',sans-serif;}
+.captain-row input:focus{outline:none;border-color:var(--gold);color:var(--shuttle);}
+
+.roster li .rm{cursor:pointer;color:var(--danger);font-family:'Space Mono',monospace;margin-left:8px;opacity:.7;}
+.roster li .rm:hover{opacity:1;}

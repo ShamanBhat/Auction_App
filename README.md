@@ -12,9 +12,32 @@ below.
 
 ## What's in this folder
 
+```
+auction_app/
+├── server.py              ← run this
+├── players.json            ← edit with your real player list
+├── teams.json               ← edit with your real teams/captains
+├── auction_data.json        ← created automatically once the auction starts
+├── templates/
+│   ├── console.html         ← the auctioneer's page (markup only)
+│   └── viewer.html          ← the read-only scoreboard (markup only)
+└── static/
+    ├── style.css             ← shared look (theme colors, team cards, layout)
+    ├── console.css            ← console-only styling (the bid form, toggle, etc.)
+    ├── viewer.css              ← viewer-only styling
+    ├── console.js              ← console's logic (talks to the API, renders the page)
+    └── viewer.js                ← viewer's logic (listens for live updates)
+```
+
+Everything is split by concern on purpose: `server.py` is pure backend
+(routes and state), the `templates/` files are just HTML structure, and
+`static/` holds the styling and the browser-side JavaScript — so if you
+want to tweak a color, you're in `static/*.css`, not hunting through
+Python. Nothing here needs editing to run the app as-is.
+
 | File                | What it is                                                              |
 |---------------------|--------------------------------------------------------------------------|
-| `auction_web.py`     | The app itself. Run this.                                               |
+| `server.py`          | The app itself. Run this.                                               |
 | `players.json`       | The pool of players up for auction — **edit this with your real list.** |
 | `teams.json`         | Team names and captains — **edit this with your real teams.**           |
 | `auction_data.json`  | Created automatically once the auction starts. This is the live save file — don't edit by hand while the app is running. |
@@ -60,7 +83,7 @@ You need Python 3 and Flask:
 
 ```bash
 pip install flask
-python auction_web.py
+python server.py
 ```
 
 You'll see something like:
@@ -157,7 +180,7 @@ If a device can't connect:
 ## 6. Customization
 
 A few things are deliberately hardcoded constants near the top of
-`auction_web.py` rather than exposed in the UI — change them there if
+`server.py` rather than exposed in the UI — change them there if
 needed:
 
 | Constant | Default | What it controls |
