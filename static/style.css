@@ -51,7 +51,13 @@ h1{font-family:'Oswald',sans-serif;font-weight:700;font-size:36px;margin:4px 0 0
 .roster{list-style:none;margin:4px 0 0;padding:0;display:flex;flex-direction:column;gap:4px;}
 .roster li{display:flex;justify-content:space-between;font-size:13px;background:var(--court-deep);border-radius:4px;padding:6px 9px;}
 .roster li .pcost{color:var(--gold);font-family:'Space Mono',monospace;}
-.roster .placeholder{font-size:12px;color:var(--text-dim);font-style:italic;background:none;padding:5px 2px;}
+.roster.captain-section{margin-top:0;padding-top:8px;border-top:1px dashed var(--line);}
+.roster .captain-entry{background:rgba(255,255,255,.04);border:1px solid var(--line);
+  border-radius:4px;padding:6px 9px;font-size:13px;display:flex;justify-content:space-between;align-items:center;}
+.roster .captain-entry .c-badge{font-family:'Space Mono',monospace;font-size:10px;font-weight:700;
+  background:var(--gold);color:var(--court-deep);padding:1px 6px;border-radius:3px;margin-right:6px;flex-shrink:0;}
+.roster .captain-entry .c-name{flex:1;}
+.roster .captain-entry .c-meta{font-size:11px;color:var(--text-dim);font-family:'Space Mono',monospace;text-align:right;white-space:nowrap;}
 
 .pool-panel{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px 16px;}
 .pool-panel h2{font-family:'Oswald',sans-serif;font-size:14px;text-transform:uppercase;letter-spacing:.05em;margin:0 0 10px;color:var(--text-dim);}

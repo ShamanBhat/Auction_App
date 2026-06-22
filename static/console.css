@@ -52,11 +52,9 @@
 .team-name input{background:transparent;border:none;color:var(--shuttle);font-family:'Oswald',sans-serif;font-size:18px;
   text-transform:uppercase;width:100%;padding:0;letter-spacing:.02em;}
 .team-name input:focus{outline:none;border-bottom:1px dashed var(--gold);}
-.captain-row{display:flex;align-items:center;gap:6px;}
-.captain-row .captain-label{font-size:12px;color:var(--text-dim);white-space:nowrap;font-family:'Space Mono',monospace;}
-.captain-row input{background:transparent;border:none;border-bottom:1px dotted var(--line);color:var(--text-dim);
-  font-size:12px;width:100%;padding:2px 0;font-family:'Inter',sans-serif;}
-.captain-row input:focus{outline:none;border-color:var(--gold);color:var(--shuttle);}
+.captain-entry-input{background:transparent;border:none;border-bottom:1px dotted var(--line);
+  color:var(--shuttle);font-size:13px;font-family:'Inter',sans-serif;padding:1px 0;width:100%;}
+.captain-entry-input:focus{outline:none;border-color:var(--gold);}
 
 .roster li .rm{cursor:pointer;color:var(--danger);font-family:'Space Mono',monospace;margin-left:8px;opacity:.7;}
 .roster li .rm:hover{opacity:1;}

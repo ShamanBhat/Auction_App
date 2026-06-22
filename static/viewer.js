@@ -34,6 +34,12 @@ function renderTeams(state){
     const card = document.createElement('div');
     card.className = 'team-card' + (full?' full':'') + (rem<0?' over':'');
     const fillClass = pct<=15?'crit':(pct<=35?'low':'');
+    const captainHtml = `
+      <li class="captain-entry">
+        <span class="c-badge">C</span>
+        <span class="c-name">${esc(team.captain) || 'TBD'}</span>
+        <span class="c-meta">${team.captain_skill ? esc(team.captain_skill)+' · ' : ''}${genderBadge(team.captain_gender||'M')}</span>
+      </li>`;
     let rosterHtml = team.players.length === 0
       ? '<li class="placeholder">No players bought yet</li>'
       : team.players.map(p=>`<li><span>${esc(p.name)}${p.skill?` <span style="color:var(--text-dim)">(${esc(p.skill)})</span>`:''} ${genderBadge(p.gender||'M')}</span><span class="pcost">${p.cost.toLocaleString()}</span></li>`).join('');
@@ -42,10 +48,10 @@ function renderTeams(state){
         <div class="team-name">${esc(team.name)}</div>
         <div class="slot-count">${team.players.length}/${state.slots}</div>
       </div>
-      <div class="captain-row">Captain : ${team.captain ? esc(team.captain) : 'TBD'}</div>
       <div class="purse-meter"><div class="purse-fill ${fillClass}" style="width:${pct}%"></div></div>
       <div class="purse-nums"><span class="left">${rem.toLocaleString()} left</span><span>of ${state.purse.toLocaleString()}</span></div>
-      <ul class="roster">${rosterHtml}</ul>`;
+      <ul class="roster">${rosterHtml}</ul>
+      <ul class="roster captain-section">${captainHtml}</ul>`;
     grid.appendChild(card);
   });
 }

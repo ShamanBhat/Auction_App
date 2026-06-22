@@ -116,10 +116,14 @@ def default_state():
     teams = []
     for i in range(1, num_teams + 1):
         info = teams_info[i - 1] if i - 1 < len(teams_info) else {}
+        raw_gender = (info.get("gender") or "M").strip().upper()
+        captain_gender = "F" if raw_gender in ("F", "FEMALE", "SHE", "HER") else "M"
         teams.append({
             "id": i,
             "name": (info.get("name") or f"Team {i}").strip() or f"Team {i}",
             "captain": (info.get("captain") or "").strip(),
+            "captain_gender": captain_gender,
+            "captain_skill": (info.get("skill") or "").strip(),
             "players": [],
         })
 
@@ -178,6 +182,28 @@ def load_state():
                 for rp in team.get("players", []):
                     if "gender" not in rp:
                         rp["gender"] = gender_map.get(rp.get("player_id"), "M")
+
+        # Migrate: backfill missing captain_gender/captain_skill from teams.json
+        needs_captain_fields = any(
+            "captain_gender" not in t for t in state.get("teams", [])
+        )
+        if needs_captain_fields:
+            try:
+                teams_info = ensure_teams_file()
+                captain_meta = {}
+                for i, info in enumerate(teams_info, start=1):
+                    raw_g = (info.get("gender") or "M").strip().upper()
+                    captain_meta[i] = {
+                        "captain_gender": "F" if raw_g in ("F", "FEMALE", "SHE", "HER") else "M",
+                        "captain_skill": (info.get("skill") or "").strip(),
+                    }
+            except Exception:
+                captain_meta = {}
+            for team in state.get("teams", []):
+                if "captain_gender" not in team:
+                    meta = captain_meta.get(team["id"], {})
+                    team["captain_gender"] = meta.get("captain_gender", "M")
+                    team["captain_skill"] = meta.get("captain_skill", "")
 
         return state
     return default_state()
@@ -380,14 +406,16 @@ def api_sale():
         if cost > remaining(team, state):
             return jsonify(error=f"{team['name']} only has {remaining(team, state):,} tokens left."), 400
 
-        # Enforce: each team must have at least 1 female player. If this is
-        # the last slot and there are no females yet, only a female player
-        # can be bought.
+        # Enforce: each team must have at least 1 female player overall
+        # (captain + 3 bid slots). If the captain is already female, the
+        # requirement is satisfied and any player can fill any slot.
         slots = state["config"]["slots"]
+        captain_is_female = team.get("captain_gender") == "F"
         is_last_slot = len(team["players"]) == slots - 1
         team_has_female = any(p.get("gender") == "F" for p in team["players"])
-        if is_last_slot and not team_has_female and player.get("gender") != "F":
-            # Count available female players to give a helpful message
+        if (is_last_slot and not team_has_female
+                and not captain_is_female
+                and player.get("gender") != "F"):
             available_females = [
                 p for p in state["players"]
                 if not p["sold"] and p.get("gender") == "F"
@@ -526,6 +554,11 @@ def api_team():
             team["name"] = data["name"].strip()
         if "captain" in data:
             team["captain"] = data["captain"].strip()
+        if "captain_skill" in data:
+            team["captain_skill"] = data["captain_skill"].strip()
+        if "captain_gender" in data:
+            raw = data["captain_gender"].strip().upper()
+            team["captain_gender"] = "F" if raw in ("F", "FEMALE", "SHE", "HER") else "M"
         save_state(state)
         broadcast_update()
         return jsonify(state_with_budgets(state))

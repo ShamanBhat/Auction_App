@@ -40,7 +40,9 @@ function populatePlayerSelect(){
   const teamId = parseInt(document.getElementById('teamSelect').value,10);
   const team = STATE.teams.find(t=>t.id===teamId);
   const isLastSlot = team && team.players.length === STATE.slots - 1;
+  const captainIsFemale = team && team.captain_gender === 'F';
   const teamHasFemale = team && team.players.some(p=>p.gender==='F');
+  const needsFemale = isLastSlot && !teamHasFemale && !captainIsFemale;
   const available = STATE.players.filter(p=>!p.sold);
   sel.innerHTML = '';
   if(available.length === 0){
@@ -56,7 +58,7 @@ function populatePlayerSelect(){
       const gLabel = p.gender === 'F' ? ' · She/Her' : ' · He/Him';
       opt.textContent = `${p.name} — base ${p.base_price.toLocaleString()}${skill}${gLabel}`;
       // Grey out males when last slot requires a female
-      if(isLastSlot && !teamHasFemale && p.gender !== 'F') opt.disabled = true;
+      if(needsFemale && p.gender !== 'F') opt.disabled = true;
       sel.appendChild(opt);
     });
   }
@@ -85,8 +87,9 @@ function updateBaseHint(){
     const team = STATE.teams.find(t=>t.id===teamId);
     if(team){
       const isLastSlot = team.players.length === STATE.slots - 1;
+      const captainIsFemale = team.captain_gender === 'F';
       const teamHasFemale = team.players.some(p=>p.gender==='F');
-      if(isLastSlot && !teamHasFemale){
+      if(isLastSlot && !teamHasFemale && !captainIsFemale){
         warn.textContent = '⚠ Last slot — must be a female player (She/Her)';
       } else {
         warn.textContent = '';
@@ -165,6 +168,12 @@ function renderTeams(){
     const card = document.createElement('div');
     card.className = 'team-card' + (full?' full':'') + (rem<0?' over':'');
     const fillClass = pct<=15?'crit':(pct<=35?'low':'');
+    const captainHtml = `
+      <li class="captain-entry">
+        <span class="c-badge">C</span>
+        <span class="c-name"><input class="captain-entry-input" type="text" value="${esc(team.captain)}" placeholder="Captain name" data-team="${team.id}" data-field="captain"/></span>
+        <span class="c-meta">${team.captain_skill ? esc(team.captain_skill)+' · ' : ''}${genderBadge(team.captain_gender||'M')}</span>
+      </li>`;
     let rosterHtml = team.players.length === 0
       ? '<li class="placeholder">No players bought yet</li>'
       : team.players.map((p,idx)=>`
@@ -177,9 +186,9 @@ function renderTeams(){
         <div class="team-name"><input type="text" value="${esc(team.name)}" data-team="${team.id}" data-field="name"/></div>
         <div class="slot-count">${team.players.length}/${STATE.slots}</div>
       </div>
-      <div class="captain-row"><span class="captain-label">Captain :</span><input type="text" placeholder="Captain name" value="${esc(team.captain)}" data-team="${team.id}" data-field="captain"/></div>
       <div class="purse-meter"><div class="purse-fill ${fillClass}" style="width:${pct}%"></div></div>
       <div class="purse-nums"><span class="left">${rem.toLocaleString()} left</span><span>of ${STATE.purse.toLocaleString()}</span></div>
+      <ul class="roster captain-section">${captainHtml}</ul>
       <ul class="roster">${rosterHtml}</ul>`;
     grid.appendChild(card);
   });

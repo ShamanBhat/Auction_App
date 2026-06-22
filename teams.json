@@ -1,12 +1,12 @@
 [
-  {"name": "Team 1",   "captain": "Shaman"},
-  {"name": "Team 2",   "captain": "Kiran"},
-  {"name": "Team 3",   "captain": "Pai"},
-  {"name": "Team 4",   "captain": "Sandhya"},
-  {"name": "Team 5",   "captain": "Shashank"},
-  {"name": "Team 6",   "captain": "Richard"},
-  {"name": "Team 7",   "captain": "Chetan"},
-  {"name": "Team 8",   "captain": "Puneet"},
-  {"name": "Team 9",   "captain": "Manogna"},
-  {"name": "Team 10",  "captain": "Kowshik"}
+  {"name": "Team 1",  "captain": "Shaman",    "skill": "Intermediate", "gender": "M"},
+  {"name": "Team 2",  "captain": "Kiran",     "skill": "Beginner",     "gender": "M"},
+  {"name": "Team 3",  "captain": "Pai",       "skill": "Beginner",     "gender": "M"},
+  {"name": "Team 4",  "captain": "Sandhya",   "skill": "Intermediate", "gender": "F"},
+  {"name": "Team 5",  "captain": "Shashank",  "skill": "Beginner",     "gender": "M"},
+  {"name": "Team 6",  "captain": "Richard",   "skill": "Intermediate", "gender": "M"},
+  {"name": "Team 7",  "captain": "Chetan",    "skill": "Beginner",     "gender": "M"},
+  {"name": "Team 8",  "captain": "Puneet",    "skill": "Intermediate", "gender": "M"},
+  {"name": "Team 9",  "captain": "Manogna",   "skill": "Intermediate", "gender": "F"},
+  {"name": "Team 10", "captain": "Kowshik",   "skill": "Beginner",     "gender": "M"}
 ]
