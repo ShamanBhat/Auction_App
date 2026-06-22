@@ -31,29 +31,30 @@
   <div class="layout">
     <div class="main">
       <div class="console">
-        <div class="console-grid">
-          <div class="field">
-            <label for="teamSelect">Team (buyer)</label>
+        <div class="console-row">
+          <div class="field field-team">
+            <label for="teamSelect">Team</label>
             <select id="teamSelect"></select>
           </div>
-          <div class="field">
-            <label for="playerSelect">Player assigned</label>
+          <div class="field field-player">
+            <label for="playerSelect">Player</label>
             <select id="playerSelect"></select>
             <div class="hint" id="baseHint">&nbsp;</div>
             <div class="female-warn" id="femaleWarn"></div>
           </div>
-          <div class="field">
-            <label for="playerCost">Cost (tokens)</label>
+          <div class="field field-cost">
+            <label for="playerCost">Tokens</label>
             <input type="number" id="playerCost" placeholder="0" min="0" step="50">
           </div>
-          <button class="btn" id="confirmBtn">Confirm Sale</button>
+          <div class="console-actions-inline">
+            <button class="btn" id="confirmBtn">Confirm Sale</button>
+            <div class="console-divider"></div>
+            <button class="btn secondary sm" id="undoBtn">Undo</button>
+            <a class="btn secondary sm" id="exportBtn" href="/api/export">Export</a>
+            <button class="btn secondary sm danger" id="resetBtn">Reset</button>
+          </div>
         </div>
         <div class="console-msg" id="consoleMsg"></div>
-        <div class="console-actions">
-          <button class="btn secondary" id="undoBtn">Undo last sale</button>
-          <a class="btn secondary" id="exportBtn" href="/api/export">Export log (.json)</a>
-          <button class="btn secondary" id="resetBtn">Reset auction</button>
-        </div>
       </div>
 
       <div class="summary-bar">
