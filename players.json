@@ -1,0 +1,8 @@
+[
+  {"name": "Arjun Rao", "base_price": 1000, "skill": "Beginner"},
+  {"name": "Sneha Iyer", "base_price": 800, "skill": "Intermediate"},
+  {"name": "Kabir Singh", "base_price": 1200, "skill": "Professional"},
+  {"name": "Meera Nair", "base_price": 600, "skill": "Beginner"},
+  {"name": "Rohan Das", "base_price": 900, "skill": "Intermediate"},
+  {"name": "Anjali Menon", "base_price": 750, "skill": "Professional"}
+]
