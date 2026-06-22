@@ -181,6 +181,12 @@ function renderTeams(){
             <span><span class="pcost">${p.cost.toLocaleString()}</span>
             <span class="rm" data-team="${team.id}" data-idx="${idx}" title="Remove">✕</span></span>
           </li>`).join('');
+    const isLastSlotCard = !full && team.players.length === STATE.slots - 1;
+    const captainIsFemaleCard = team.captain_gender === 'F';
+    const teamHasFemaleCard = team.players.some(p => p.gender === 'F');
+    const cardFemaleWarn = (isLastSlotCard && !teamHasFemaleCard && !captainIsFemaleCard)
+      ? `<div class="card-female-warn">⚠ Next player must be female</div>`
+      : '';
     card.innerHTML = `
       <div class="team-head">
         <div class="team-name"><input type="text" value="${esc(team.name)}" data-team="${team.id}" data-field="name"/></div>
@@ -189,7 +195,8 @@ function renderTeams(){
       <div class="purse-meter"><div class="purse-fill ${fillClass}" style="width:${pct}%"></div></div>
       <div class="purse-nums"><span class="left">${rem.toLocaleString()} left</span><span>of ${STATE.purse.toLocaleString()}</span></div>
       <ul class="roster captain-section">${captainHtml}</ul>
-      <ul class="roster">${rosterHtml}</ul>`;
+      <ul class="roster">${rosterHtml}</ul>
+      ${cardFemaleWarn}`;
     grid.appendChild(card);
   });
   grid.querySelectorAll('input[data-field]').forEach(inp=>{

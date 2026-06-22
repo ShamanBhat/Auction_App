@@ -74,5 +74,7 @@ h1{font-family:'Oswald',sans-serif;font-weight:700;font-size:36px;margin:4px 0 0
   font-weight:700;padding:1px 5px;border-radius:3px;margin-left:4px;vertical-align:middle;}
 .gender-badge.M{background:rgba(100,160,220,.18);color:#7eb8f7;}
 .gender-badge.F{background:rgba(255,120,180,.18);color:#f77ec0;}
+.card-female-warn{font-family:'Space Mono',monospace;font-size:11px;color:#f77ec0;
+  border-top:1px dashed rgba(247,126,192,.3);padding-top:7px;margin-top:2px;}
 
 footer{text-align:center;margin-top:34px;font-family:'Space Mono',monospace;font-size:11px;color:var(--text-dim);}

@@ -43,6 +43,13 @@ function renderTeams(state){
     let rosterHtml = team.players.length === 0
       ? '<li class="placeholder">No players bought yet</li>'
       : team.players.map(p=>`<li><span>${esc(p.name)}${p.skill?` <span style="color:var(--text-dim)">(${esc(p.skill)})</span>`:''} ${genderBadge(p.gender||'M')}</span><span class="pcost">${p.cost.toLocaleString()}</span></li>`).join('');
+    const isLastSlot = !full && team.players.length === state.slots - 1;
+    const captainIsFemale = team.captain_gender === 'F';
+    const teamHasFemale = team.players.some(p => p.gender === 'F');
+    const needsFemale = isLastSlot && !teamHasFemale && !captainIsFemale;
+    const femaleWarnHtml = needsFemale
+      ? `<div class="card-female-warn">⚠ Next player must be female</div>`
+      : '';
     card.innerHTML = `
       <div class="team-head">
         <div class="team-name">${esc(team.name)}</div>
@@ -50,8 +57,9 @@ function renderTeams(state){
       </div>
       <div class="purse-meter"><div class="purse-fill ${fillClass}" style="width:${pct}%"></div></div>
       <div class="purse-nums"><span class="left">${rem.toLocaleString()} left</span><span>of ${state.purse.toLocaleString()}</span></div>
+      <ul class="roster captain-section">${captainHtml}</ul>
       <ul class="roster">${rosterHtml}</ul>
-      <ul class="roster captain-section">${captainHtml}</ul>`;
+      ${femaleWarnHtml}`;
     grid.appendChild(card);
   });
 }
