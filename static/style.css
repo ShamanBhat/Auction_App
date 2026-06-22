@@ -19,7 +19,9 @@ body.theme-bosch{
 body{margin:0;background:radial-gradient(circle at 50% 0%, var(--glow) 0%, var(--court) 45%, var(--court-deep) 100%);
   color:var(--shuttle);font-family:'Inter',sans-serif;min-height:100vh;padding:28px 20px 60px;
   transition:background .25s ease,color .25s ease;}
-.wrap{max-width:1180px;margin:0 auto;}
+/* No max-width — the layout fills the full screen so wide displays get
+   more columns of team cards automatically. */
+.wrap{width:100%;}
 header{display:flex;align-items:flex-end;justify-content:space-between;flex-wrap:wrap;gap:16px;
   border-bottom:2px dashed var(--line);padding-bottom:18px;margin-bottom:22px;}
 .eyebrow{font-family:'Space Mono',monospace;font-size:11px;letter-spacing:.18em;color:var(--gold);text-transform:uppercase;}
@@ -31,11 +33,15 @@ h1{font-family:'Oswald',sans-serif;font-weight:700;font-size:36px;margin:4px 0 0
 .summary-bar{display:flex;gap:22px;flex-wrap:wrap;margin-bottom:18px;font-family:'Space Mono',monospace;font-size:13px;color:var(--text-dim);}
 .summary-bar b{color:var(--shuttle);font-size:15px;}
 
-.layout{display:grid;grid-template-columns:1fr 300px;gap:22px;align-items:start;}
+/* Sidebar is a fixed 280px; the main column takes everything else.
+   On screens narrower than 900px the sidebar drops below the cards. */
+.layout{display:grid;grid-template-columns:1fr 280px;gap:22px;align-items:start;}
 @media (max-width:900px){.layout{grid-template-columns:1fr;}}
 .sidebar{display:flex;flex-direction:column;gap:16px;position:sticky;top:20px;}
 
-.teams{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px;}
+/* auto-fill with a 230px minimum — each extra ~250px of screen width
+   adds another column: 3 cols ≈ 900px, 4 ≈ 1200px, 5 ≈ 1450px, etc. */
+.teams{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:14px;}
 .team-card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:16px 16px 14px;display:flex;flex-direction:column;gap:10px;}
 .team-card.full{border-color:var(--gold-dim);}
 .team-card.over{border-color:var(--danger);}
