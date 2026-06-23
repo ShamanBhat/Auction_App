@@ -248,6 +248,7 @@ def state_with_budgets(state):
     )
     with _subscribers_lock:
         out["viewer_count"] = len(_subscribers)
+    out["lan_ip"] = get_lan_ip()
     return out
 
 

@@ -47,9 +47,8 @@ h1{font-family:'Oswald',sans-serif;font-weight:700;font-size:36px;margin:4px 0 0
 @media (max-width:900px){.layout{grid-template-columns:1fr;}}
 .sidebar{display:flex;flex-direction:column;gap:16px;position:sticky;top:20px;}
 
-/* auto-fill with a 230px minimum — each extra ~250px of screen width
-   adds another column: 3 cols ≈ 900px, 4 ≈ 1200px, 5 ≈ 1450px, etc. */
-.teams{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:14px;}
+/* auto-fill with a 270px minimum — slightly wider so longer names don't overflow */
+.teams{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:14px;}
 .team-card{background:var(--panel);border:2px solid var(--line);border-radius:10px;padding:16px 16px 14px;display:flex;flex-direction:column;gap:10px;}
 .team-card.full{border-color:var(--gold-dim);}
 .team-card.over{border-color:var(--danger);}
@@ -63,19 +62,30 @@ h1{font-family:'Oswald',sans-serif;font-weight:700;font-size:36px;margin:4px 0 0
 .purse-nums{display:flex;justify-content:space-between;font-family:'Space Mono',monospace;font-size:13px;color:var(--text-dim);}
 .purse-nums .left{color:var(--ok);font-weight:700;}
 .roster{list-style:none;margin:4px 0 0;padding:0;display:flex;flex-direction:column;gap:4px;}
-.roster li{display:flex;justify-content:space-between;font-size:14px;background:var(--court-deep);border-radius:4px;padding:7px 10px;}
-.roster li .pcost{color:var(--gold);font-family:'Space Mono',monospace;}
+.roster li{background:var(--court-deep);border-radius:4px;padding:7px 10px;position:relative;}
+.roster li .pcost{color:var(--gold);font-family:'Space Mono',monospace;white-space:nowrap;}
+/* Two-row layout: name+cost on top, skill+badge below */
+.roster-item{display:flex;flex-direction:column;gap:3px;}
+.ri-top{display:flex;justify-content:space-between;align-items:baseline;gap:6px;}
+.ri-name{font-size:14px;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;min-width:0;}
+.ri-sub{display:flex;align-items:center;gap:5px;flex-wrap:wrap;}
+.ri-skill{font-size:11px;color:var(--text-dim);}
+.roster li .rm{position:absolute;top:6px;right:6px;cursor:pointer;color:var(--danger);
+  font-family:'Space Mono',monospace;font-size:11px;opacity:.6;}
+.roster li .rm:hover{opacity:1;}
 .roster.captain-section{margin-top:0;padding-top:8px;border-top:1px dashed var(--line);}
 .roster .captain-entry{background:rgba(255,255,255,.04);border:2px solid var(--line);
-  border-radius:4px;padding:7px 10px;font-size:14px;display:flex;justify-content:space-between;align-items:center;}
+  border-radius:4px;padding:7px 10px;display:flex;flex-direction:column;gap:4px;}
+.cap-top{display:flex;align-items:center;gap:6px;}
+.cap-sub{display:flex;align-items:center;gap:5px;flex-wrap:wrap;padding-left:2px;}
 .roster .captain-entry .c-badge{font-family:'Space Mono',monospace;font-size:10px;font-weight:700;
-  background:var(--gold);color:var(--court-deep);padding:1px 6px;border-radius:3px;margin-right:6px;flex-shrink:0;}
-.roster .captain-entry .c-name{flex:1;font-size:13px;font-family:'Inter',sans-serif;color:var(--shuttle);}
-.roster .captain-entry .c-meta{font-size:11px;color:var(--text-dim);font-family:'Space Mono',monospace;text-align:right;white-space:nowrap;}
+  background:var(--gold);color:var(--court-deep);padding:1px 6px;border-radius:3px;flex-shrink:0;}
+.roster .captain-entry .c-name{font-size:14px;font-family:'Inter',sans-serif;color:var(--shuttle);font-weight:500;}
+.roster .captain-entry .c-meta{font-size:11px;color:var(--text-dim);font-family:'Space Mono',monospace;}
 
 .pool-panel{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px 16px;}
 .pool-panel h2{font-family:'Oswald',sans-serif;font-size:14px;text-transform:uppercase;letter-spacing:.05em;margin:0 0 10px;color:var(--text-dim);}
-.pool-list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px;max-height:60vh;overflow-y:auto;}
+.pool-list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px;max-height:calc(100vh - 280px);overflow-y:auto;}
 .pool-list li{background:var(--court-deep);border-radius:6px;padding:8px 10px;font-size:13px;display:flex;justify-content:space-between;gap:8px;align-items:center;}
 .pool-list li.sold{opacity:.5;}
 .pool-list li.current{outline:1px solid var(--gold);}
@@ -91,5 +101,5 @@ h1{font-family:'Oswald',sans-serif;font-weight:700;font-size:36px;margin:4px 0 0
 .card-female-warn{font-family:'Space Mono',monospace;font-size:11px;color:#f77ec0;
   border-top:1px dashed rgba(247,126,192,.3);padding-top:7px;margin-top:2px;}
 
-footer{text-align:center;margin-top:34px;font-family:'Space Mono',monospace;font-size:11px;color:var(--text-dim);}
+footer{text-align:center;margin-top:18px;font-family:'Space Mono',monospace;font-size:11px;color:var(--text-dim);}
 .footer-credit{color:var(--gold);font-size:12px;letter-spacing:.04em;}

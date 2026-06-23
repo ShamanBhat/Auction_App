@@ -36,13 +36,28 @@ function renderTeams(state){
     const fillClass = pct<=15?'crit':(pct<=35?'low':'');
     const captainHtml = `
       <li class="captain-entry">
-        <span class="c-badge">C</span>
-        <span class="c-name">${esc(team.captain)}</span>
-        <span class="c-meta">${team.captain_skill ? esc(team.captain_skill)+' · ' : ''}${genderBadge(team.captain_gender||'M')}</span>
+        <div class="cap-top">
+          <span class="c-badge">C</span>
+          <span class="c-name">${esc(team.captain)}</span>
+        </div>
+        <div class="cap-sub">
+          ${team.captain_skill ? `<span class="c-meta">${esc(team.captain_skill)}</span>` : ''}
+          ${genderBadge(team.captain_gender||'M')}
+        </div>
       </li>`;
     let rosterHtml = team.players.length === 0
       ? '<li class="placeholder">No players bought yet</li>'
-      : team.players.map(p=>`<li><span>${esc(p.name)}${p.skill?` <span style="color:var(--text-dim)">(${esc(p.skill)})</span>`:''} ${genderBadge(p.gender||'M')}</span><span class="pcost">${p.cost.toLocaleString()}</span></li>`).join('');
+      : team.players.map(p=>`
+          <li class="roster-item">
+            <div class="ri-top">
+              <span class="ri-name">${esc(p.name)}</span>
+              <span class="pcost">${p.cost.toLocaleString()}</span>
+            </div>
+            <div class="ri-sub">
+              ${p.skill?`<span class="ri-skill">(${esc(p.skill)})</span>`:''}
+              ${genderBadge(p.gender||'M')}
+            </div>
+          </li>`).join('');
     const isLastSlot = !full && team.players.length === state.slots - 1;
     const captainIsFemale = team.captain_gender === 'F';
     const teamHasFemale = team.players.some(p => p.gender === 'F');

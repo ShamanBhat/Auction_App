@@ -170,16 +170,28 @@ function renderTeams(){
     const fillClass = pct<=15?'crit':(pct<=35?'low':'');
     const captainHtml = `
       <li class="captain-entry">
-        <span class="c-badge">C</span>
-        <span class="c-name"><input class="captain-entry-input" type="text" value="${esc(team.captain)}" placeholder="Captain name" data-team="${team.id}" data-field="captain"/></span>
-        <span class="c-meta">${team.captain_skill ? esc(team.captain_skill)+' · ' : ''}${genderBadge(team.captain_gender||'M')}</span>
+        <div class="cap-top">
+          <span class="c-badge">C</span>
+          <span class="c-name"><input class="captain-entry-input" type="text" value="${esc(team.captain)}" placeholder="Captain name" data-team="${team.id}" data-field="captain"/></span>
+        </div>
+        <div class="cap-sub">
+          ${team.captain_skill ? `<span class="c-meta">${esc(team.captain_skill)}</span>` : ''}
+          ${genderBadge(team.captain_gender||'M')}
+        </div>
       </li>`;
     let rosterHtml = team.players.length === 0
       ? '<li class="placeholder">No players bought yet</li>'
       : team.players.map((p,idx)=>`
-          <li><span>${esc(p.name)}${p.skill?` <span style="color:var(--text-dim)">(${esc(p.skill)})</span>`:''} ${genderBadge(p.gender||'M')}</span>
-            <span><span class="pcost">${p.cost.toLocaleString()}</span>
-            <span class="rm" data-team="${team.id}" data-idx="${idx}" title="Remove">✕</span></span>
+          <li class="roster-item">
+            <div class="ri-top">
+              <span class="ri-name">${esc(p.name)}</span>
+              <span class="pcost">${p.cost.toLocaleString()}</span>
+            </div>
+            <div class="ri-sub">
+              ${p.skill?`<span class="ri-skill">(${esc(p.skill)})</span>`:''}
+              ${genderBadge(p.gender||'M')}
+            </div>
+            <span class="rm" data-team="${team.id}" data-idx="${idx}" title="Remove">✕</span>
           </li>`).join('');
     const isLastSlotCard = !full && team.players.length === STATE.slots - 1;
     const captainIsFemaleCard = team.captain_gender === 'F';
@@ -221,9 +233,14 @@ function renderViewerCount(){
   const n = STATE.viewer_count || 0;
   const el = document.getElementById('viewerCount');
   const num = document.getElementById('viewerNum');
+  const lanEl = document.getElementById('lanIp');
   if(!el || !num) return;
   num.textContent = n;
   el.className = 'viewer-count' + (n === 0 ? ' none' : '');
+  if(lanEl){
+    const ip = STATE.lan_ip;
+    lanEl.textContent = (ip && ip !== '127.0.0.1') ? `📡 ${ip}:8080` : '';
+  }
 }
 
 function applyTheme(){
