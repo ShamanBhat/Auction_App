@@ -101,5 +101,26 @@ h1{font-family:'Oswald',sans-serif;font-weight:700;font-size:36px;margin:4px 0 0
 .card-female-warn{font-family:'Space Mono',monospace;font-size:11px;color:#f77ec0;
   border-top:1px dashed rgba(247,126,192,.3);padding-top:7px;margin-top:2px;}
 
-footer{text-align:center;margin-top:18px;font-family:'Space Mono',monospace;font-size:11px;color:var(--text-dim);}
-.footer-credit{color:var(--gold);font-size:12px;letter-spacing:.04em;}
+footer{
+  position:fixed;
+  bottom:0;left:0;right:0;
+  z-index:100;
+  padding:18px 28px 14px;
+  text-align:center;
+  /* layered: blur the content behind, then a gradient fade on top */
+  backdrop-filter:blur(12px);
+  -webkit-backdrop-filter:blur(12px);
+  background:linear-gradient(to bottom, transparent 0%, rgba(0,0,0,.55) 40%, rgba(0,0,0,.82) 100%);
+  /* no hard border — just the fade */
+  pointer-events:none; /* lets clicks pass through to cards behind */
+}
+.footer-credit{
+  color:var(--gold);
+  font-family:'Space Mono',monospace;
+  font-size:12px;
+  letter-spacing:.06em;
+  pointer-events:auto;
+  opacity:.85;
+}
+/* Push page content up so the last card never sits behind the sticky footer */
+.wrap{padding-bottom:60px;}
