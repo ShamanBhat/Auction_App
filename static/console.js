@@ -54,9 +54,7 @@ function populatePlayerSelect(){
     available.forEach(p=>{
       const opt = document.createElement('option');
       opt.value = p.id;
-      const skill = p.skill ? ` · ${p.skill}` : '';
-      const gLabel = p.gender === 'F' ? ' · She/Her' : ' · He/Him';
-      opt.textContent = `${p.name} — base ${p.base_price.toLocaleString()}${skill}${gLabel}`;
+      opt.textContent = p.name;
       // Grey out males when last slot requires a female
       if(needsFemale && p.gender !== 'F') opt.disabled = true;
       sel.appendChild(opt);
@@ -71,17 +69,18 @@ function genderBadge(g){ return `<span class="gender-badge ${g}">${g==='F'?'She/
 function updateBaseHint(){
   const sel = document.getElementById('playerSelect');
   const hint = document.getElementById('baseHint');
-  const warn = document.getElementById('femaleWarn');
+  const warn = document.getElementById('teamWarn');
   const costInput = document.getElementById('playerCost');
   const player = STATE.players.find(p=>String(p.id)===sel.value);
   if(player){
-    hint.innerHTML = `Base price: ${player.base_price.toLocaleString()}${player.skill ? ' · Skill '+player.skill : ''} ${genderBadge(player.gender)}`;
+    const gLabel = player.gender === 'F' ? 'She/Her' : 'He/Him';
+    hint.style.color = 'var(--text-dim)';
+    hint.textContent = `Base ${player.base_price.toLocaleString()} · ${player.skill || ''} · ${gLabel}`;
     if(!costInput.value){ costInput.value = player.base_price; }
     costInput.min = player.base_price;
   } else {
-    hint.textContent = '\u00A0';
+    hint.textContent = '';
   }
-  // Check if selected team's last slot requires a female player
   if(warn){
     const teamId = parseInt(document.getElementById('teamSelect').value,10);
     const team = STATE.teams.find(t=>t.id===teamId);
@@ -90,7 +89,8 @@ function updateBaseHint(){
       const captainIsFemale = team.captain_gender === 'F';
       const teamHasFemale = team.players.some(p=>p.gender==='F');
       if(isLastSlot && !teamHasFemale && !captainIsFemale){
-        warn.textContent = '⚠ Last slot — must be a female player (She/Her)';
+        warn.style.color = '#f77ec0';
+        warn.textContent = '⚠ Last slot must be female';
       } else {
         warn.textContent = '';
       }

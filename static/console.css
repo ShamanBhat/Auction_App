@@ -20,8 +20,10 @@
   color:var(--court-deep);font-family:'Space Mono',monospace;font-size:11px;font-weight:700;letter-spacing:.1em;
   padding:3px 10px;border-radius:4px;}
 
-/* Single inline row: all inputs + buttons on one baseline */
-.console-row{display:flex;gap:10px;align-items:flex-end;margin-top:12px;flex-wrap:wrap;}
+/* Single inline row — align-items: flex-start locks all inputs to the same
+   top edge; each field can then have an independent sub-text row below
+   without pushing other fields out of position */
+.console-row{display:flex;gap:10px;align-items:flex-start;margin-top:12px;flex-wrap:wrap;}
 .field{display:flex;flex-direction:column;min-width:0;}
 .field-team{flex:1.5;}
 .field-player{flex:2;}
@@ -30,10 +32,12 @@
 .field select,.field input{width:100%;background:var(--court-deep);border:1px solid var(--line);color:var(--shuttle);
   border-radius:6px;padding:9px 10px;font-size:14px;font-family:'Inter',sans-serif;height:38px;}
 .field select:focus,.field input:focus{outline:none;border-color:var(--gold);}
-.field .hint{font-family:'Space Mono',monospace;font-size:10px;color:var(--text-dim);margin-top:4px;min-height:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+/* Sub-text row under each field — hint under Player, warnings under Team */
+.field-sub{font-family:'Space Mono',monospace;font-size:10px;margin-top:5px;min-height:14px;line-height:1.4;}
 
 /* Confirm + secondary action buttons grouped at the right end of the row */
-.console-actions-inline{display:flex;align-items:center;gap:6px;flex-shrink:0;padding-bottom:1px;}
+.console-actions-inline{display:flex;align-items:center;gap:6px;flex-shrink:0;
+  padding-top:23px;} /* offset matches label height so buttons align with the inputs */
 .console-divider{width:1px;height:28px;background:var(--line);margin:0 2px;}
 
 .btn{background:var(--gold);color:var(--court-deep);border:none;border-radius:6px;padding:0 16px;
@@ -80,5 +84,4 @@
 .viewer-count .vc-dot{display:inline-block;width:7px;height:7px;border-radius:50%;
   background:var(--ok);margin-right:5px;vertical-align:middle;}
 .viewer-count.none .vc-dot{background:var(--text-dim);}
-.female-warn{font-family:'Space Mono',monospace;font-size:11px;color:#f77ec0;
-  margin-top:4px;min-height:14px;}
+
