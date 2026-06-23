@@ -100,3 +100,4 @@ h1{font-family:'Oswald',sans-serif;font-weight:700;font-size:36px;margin:4px 0 0
   border-top:1px dashed rgba(247,126,192,.3);padding-top:7px;margin-top:2px;}
 
 footer{text-align:center;margin-top:34px;font-family:'Space Mono',monospace;font-size:11px;color:var(--text-dim);}
+.footer-credit{color:var(--gold);font-size:12px;letter-spacing:.04em;}
