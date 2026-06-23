@@ -16,12 +16,12 @@ body.theme-bosch{
   --ok:#4CAF50; --warn:#FF9800; --danger:#FF6B6B; --text-dim:#ABABAB;
 }
 /* Stage / Projector theme — maximum contrast for large-screen projection.
-   Pure black background, pure white text, bright yellow accent.
-   Everything that was muted or tinted becomes fully saturated. */
+   Deep navy-black background with a hint of blue, pure white text, bright
+   accents that are slightly desaturated so they don't bleed on a projector. */
 body.theme-stage{
-  --court:#000000; --court-deep:#000000; --panel:#111111; --line:#404040;
-  --shuttle:#FFFFFF; --gold:#FFD600; --gold-dim:#7A6600; --glow:#0A0800;
-  --ok:#00E676; --warn:#FFB300; --danger:#FF3D3D; --text-dim:#CCCCCC;
+  --court:#080C14; --court-deep:#050810; --panel:#0E1520; --line:#1E2E45;
+  --shuttle:#F0F4FF; --gold:#F5C842; --gold-dim:#7A6010; --glow:#0A1228;
+  --ok:#3DD68C; --warn:#F0A030; --danger:#F05060; --text-dim:#8EA8CC;
 }
 /* Boost card and text legibility at projection distance */
 body.theme-stage .team-card{ border-width:2px; }
