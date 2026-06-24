@@ -35,6 +35,8 @@
 /* Sub-text row under each field — hint under Player, warnings under Team */
 .field-sub{font-family:'Space Mono',monospace;font-size:10px;margin-top:5px;min-height:14px;line-height:1.4;}
 
+#baseHint{font-size:14px;}
+
 /* Confirm + secondary action buttons grouped at the right end of the row */
 .console-actions-inline{display:flex;align-items:center;gap:6px;flex-shrink:0;
   padding-top:23px;} /* offset matches label height so buttons align with the inputs */
