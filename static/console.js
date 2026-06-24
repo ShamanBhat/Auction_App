@@ -287,12 +287,13 @@ async function confirmSale(){
   const costInput = document.getElementById('playerCost');
   const playerId = parseInt(playerSelect.value,10);
   const cost = parseInt(costInput.value,10);
+  const selectedPlayer = STATE.players.find(p=>p.id===playerId);
+  const soldName = selectedPlayer ? selectedPlayer.name : 'Player';
   if(!playerId){ showMsg('Pick a player from the list.','error'); playerSelect.focus(); return; }
   if(isNaN(cost) || cost<=0){ showMsg('Enter a valid cost greater than 0.','error'); costInput.focus(); return; }
   try{
     STATE = await api('/api/sale', {method:'POST',headers:{'Content-Type':'application/json'},
       body: JSON.stringify({team_id:teamId, player_id:playerId, cost:cost})});
-    const soldName = playerSelect.options[playerSelect.selectedIndex]?.textContent.split(' — ')[0] || 'Player';
     costInput.value='';
     showMsg(`✓ ${soldName} sold for ${cost.toLocaleString()} tokens.`,'ok');
     renderAll();
