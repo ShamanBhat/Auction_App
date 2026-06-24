@@ -6,6 +6,16 @@
 function esc(s){ const d=document.createElement('div'); d.textContent = s==null?'':s; return d.innerHTML; }
 function genderBadge(g){ return `<span class="gender-badge ${g}">${g==='F'?'She/Her':'He/Him'}</span>`; }
 
+function syncViewportChrome(){
+  const header = document.querySelector('header');
+  const footer = document.querySelector('footer');
+  const root = document.documentElement;
+  if(header){ root.style.setProperty('--header-safe', `${Math.ceil(header.offsetHeight)}px`); }
+  if(footer){ root.style.setProperty('--footer-safe', `${Math.ceil(footer.offsetHeight)}px`); }
+}
+
+window.addEventListener('resize', syncViewportChrome);
+
 function renderTicker(state){
   const el = document.getElementById('ticker');
   if(!state.log.length){ el.innerHTML = '<span>No sales yet — first lot is on the table.</span>'; return; }
@@ -137,3 +147,4 @@ function connectStream(){
 }
 
 connectStream();
+syncViewportChrome();

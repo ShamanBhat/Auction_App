@@ -4,6 +4,16 @@
 
 let STATE = null;
 
+function syncViewportChrome(){
+  const header = document.querySelector('header');
+  const footer = document.querySelector('footer');
+  const root = document.documentElement;
+  if(header){ root.style.setProperty('--header-safe', `${Math.ceil(header.offsetHeight)}px`); }
+  if(footer){ root.style.setProperty('--footer-safe', `${Math.ceil(footer.offsetHeight)}px`); }
+}
+
+window.addEventListener('resize', syncViewportChrome);
+
 function esc(s){ const d=document.createElement('div'); d.textContent = s==null?'':s; return d.innerHTML; }
 
 async function api(path, opts){
@@ -311,6 +321,7 @@ document.getElementById('playerCost').addEventListener('keydown', e=>{ if(e.key=
 
 (async function init(){
   STATE = await api('/api/state');
+  syncViewportChrome();
   renderAll();
   connectConsoleStream();
 })();
