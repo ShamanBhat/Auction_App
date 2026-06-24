@@ -51,6 +51,12 @@ function populatePlayerSelect(){
     opt.textContent = 'No players left in the pool';
     sel.appendChild(opt);
   } else {
+    const ph = document.createElement('option');
+    ph.value = '';
+    ph.textContent = 'Select a player';
+    ph.selected = true;
+    sel.appendChild(ph);
+
     available.forEach(p=>{
       const opt = document.createElement('option');
       opt.value = p.id;
@@ -60,7 +66,9 @@ function populatePlayerSelect(){
       sel.appendChild(opt);
     });
   }
-  if(prev) sel.value = prev;
+  if(prev && Array.from(sel.options).some(o=>o.value===prev && !o.disabled)){
+    sel.value = prev;
+  }
   updateBaseHint();
 }
 
