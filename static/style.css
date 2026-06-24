@@ -93,7 +93,8 @@ footer{
 .eyebrow{font-family:'Space Mono',monospace;font-size:14px;letter-spacing:.18em;color:var(--gold);text-transform:uppercase;}
 h1{font-family:'Oswald',sans-serif;font-weight:700;font-size:36px;margin:4px 0 0;text-transform:uppercase;}
 .ticker{font-family:'Space Mono',monospace;font-size:13px;color:var(--text-dim);background:var(--court-deep);
-  border:1px solid var(--line);border-radius:6px;padding:10px 14px;min-width:200px;max-width:300px;}
+  border:1px solid var(--line);border-radius:6px;padding:10px 14px;min-width:200px;width:max-content;max-width:45vw;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .ticker b{color:var(--gold);font-weight:700;}
 .summary-bar{display:flex;gap:22px;flex-wrap:wrap;margin-bottom:18px;font-family:'Space Mono',monospace;font-size:13px;color:var(--text-dim);}
 .summary-bar b{color:var(--shuttle);font-size:15px;}
