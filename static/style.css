@@ -15,47 +15,127 @@ body.theme-bosch{
   --shuttle:#FFFFFF; --gold:#E2001A; --gold-dim:#7A000E; --glow:#2A0408;
   --ok:#4CAF50; --warn:#FF9800; --danger:#FF6B6B; --text-dim:#ABABAB;
 }
+/* Stage / Projector theme — maximum contrast for large-screen projection.
+   Deep navy-black background with a hint of blue, pure white text, bright
+   accents that are slightly desaturated so they don't bleed on a projector. */
+body.theme-stage{
+  --court:#080C14; --court-deep:#050810; --panel:#0E1520; --line:#1E2E45;
+  --shuttle:#F0F4FF; --gold:#F5C842; --gold-dim:#7A6010; --glow:#0A1228;
+  --ok:#3DD68C; --warn:#F0A030; --danger:#F05060; --text-dim:#8EA8CC;
+}
 *{box-sizing:border-box;}
 body{margin:0;background:radial-gradient(circle at 50% 0%, var(--glow) 0%, var(--court) 45%, var(--court-deep) 100%);
-  color:var(--shuttle);font-family:'Inter',sans-serif;min-height:100vh;padding:28px 20px 60px;
+  color:var(--shuttle);font-family:'Inter',sans-serif;min-height:100vh;padding:0px 20px 60px;
   transition:background .25s ease,color .25s ease;}
-.wrap{max-width:1180px;margin:0 auto;}
-header{display:flex;align-items:flex-end;justify-content:space-between;flex-wrap:wrap;gap:16px;
-  border-bottom:2px dashed var(--line);padding-bottom:18px;margin-bottom:22px;}
-.eyebrow{font-family:'Space Mono',monospace;font-size:11px;letter-spacing:.18em;color:var(--gold);text-transform:uppercase;}
+/* No max-width — the layout fills the full screen so wide displays get
+   more columns of team cards automatically. */
+.wrap{width:100%;}
+/* Sticky header — stays fixed at top while content scrolls beneath */
+header{
+  position:sticky;
+  top:0;
+  z-index:50;
+  background:var(--court);
+  display:flex;align-items:center;justify-content:space-between;flex-wrap:nowrap;gap:16px;
+  border-bottom:2px dashed var(--line);
+  padding-bottom:14px;
+  margin-bottom:22px;
+  padding-top:4px;
+  /* subtle shadow so cards slide cleanly under it when scrolling */
+  box-shadow:0 4px 24px rgba(0,0,0,.35);
+}
+/* Centre slot in the header for "Now Bidding" */
+.header-now-bidding{
+  flex:1;
+  text-align:center;
+  padding:0 12px;
+  min-width:0;
+}
+.header-now-bidding .nb-label{
+  font-family:'Space Mono',monospace;font-size:14px;letter-spacing:.16em;
+  color:var(--gold);text-transform:uppercase;
+}
+.header-now-bidding .nb-name{
+  font-family:'Oswald',sans-serif;font-size:30px;text-transform:uppercase;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:2px;
+}
+.header-now-bidding .nb-meta{
+  font-family:'Space Mono',monospace;font-size:14px;color:var(--text-dim);margin-top:2px;
+}
+.header-now-bidding.empty .nb-name{
+  color:var(--text-dim);font-size:13px;text-transform:none;font-family:'Inter',sans-serif;
+}
+footer{
+  position:fixed;
+  bottom:0;left:0;right:0;
+  z-index:100;
+  padding:18px 28px 14px;
+  text-align:center;
+  background:linear-gradient(to bottom, transparent 0%, rgba(0,0,0,.55) 40%, rgba(0,0,0,.82) 100%);
+  pointer-events:none;
+}
+.footer-credit{
+  color:var(--gold);
+  font-family:'Space Mono',monospace;
+  font-size:12px;
+  letter-spacing:.06em;
+  pointer-events:auto;
+  opacity:.85;
+}
+.wrap{padding-bottom:60px;}
+.eyebrow{font-family:'Space Mono',monospace;font-size:14px;letter-spacing:.18em;color:var(--gold);text-transform:uppercase;}
 h1{font-family:'Oswald',sans-serif;font-weight:700;font-size:36px;margin:4px 0 0;text-transform:uppercase;}
 .ticker{font-family:'Space Mono',monospace;font-size:13px;color:var(--text-dim);background:var(--court-deep);
-  border:1px solid var(--line);border-radius:6px;padding:10px 14px;min-width:280px;max-width:420px;}
+  border:1px solid var(--line);border-radius:6px;padding:10px 14px;min-width:200px;max-width:300px;}
 .ticker b{color:var(--gold);font-weight:700;}
-
 .summary-bar{display:flex;gap:22px;flex-wrap:wrap;margin-bottom:18px;font-family:'Space Mono',monospace;font-size:13px;color:var(--text-dim);}
 .summary-bar b{color:var(--shuttle);font-size:15px;}
 
-.layout{display:grid;grid-template-columns:1fr 300px;gap:22px;align-items:start;}
+/* Sidebar is a fixed 280px; the main column takes everything else.
+   On screens narrower than 900px the sidebar drops below the cards. */
+.layout{display:grid;grid-template-columns:1fr 280px;gap:22px;align-items:start;}
 @media (max-width:900px){.layout{grid-template-columns:1fr;}}
 .sidebar{display:flex;flex-direction:column;gap:16px;position:sticky;top:20px;}
 
-.teams{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px;}
-.team-card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:16px 16px 14px;display:flex;flex-direction:column;gap:10px;}
+/* auto-fill with a 270px minimum — slightly wider so longer names don't overflow */
+.teams{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:14px;}
+.team-card{background:var(--panel);border:2px solid var(--line);border-radius:10px;padding:16px 16px 14px;display:flex;flex-direction:column;gap:10px;}
 .team-card.full{border-color:var(--gold-dim);}
 .team-card.over{border-color:var(--danger);}
 .team-head{display:flex;justify-content:space-between;align-items:baseline;}
-.team-name{font-family:'Oswald',sans-serif;font-size:18px;text-transform:uppercase;letter-spacing:.02em;}
-.slot-count{font-family:'Space Mono',monospace;font-size:12px;color:var(--text-dim);}
-.purse-meter{background:var(--court-deep);border-radius:5px;height:8px;overflow:hidden;}
+.team-name{font-family:'Oswald',sans-serif;font-size:20px;text-transform:uppercase;letter-spacing:.02em;}
+.slot-count{font-family:'Space Mono',monospace;font-size:13px;color:var(--text-dim);}
+.purse-meter{background:var(--court-deep);border-radius:5px;height:10px;overflow:hidden;}
 .purse-fill{height:100%;background:var(--gold);transition:width .3s ease;}
 .purse-fill.low{background:var(--warn);}
 .purse-fill.crit{background:var(--danger);}
-.purse-nums{display:flex;justify-content:space-between;font-family:'Space Mono',monospace;font-size:12px;color:var(--text-dim);}
+.purse-nums{display:flex;justify-content:space-between;font-family:'Space Mono',monospace;font-size:13px;color:var(--text-dim);}
 .purse-nums .left{color:var(--ok);font-weight:700;}
 .roster{list-style:none;margin:4px 0 0;padding:0;display:flex;flex-direction:column;gap:4px;}
-.roster li{display:flex;justify-content:space-between;font-size:13px;background:var(--court-deep);border-radius:4px;padding:6px 9px;}
-.roster li .pcost{color:var(--gold);font-family:'Space Mono',monospace;}
-.roster .placeholder{font-size:12px;color:var(--text-dim);font-style:italic;background:none;padding:5px 2px;}
+.roster li{background:var(--court-deep);border-radius:4px;padding:7px 10px;position:relative;}
+.roster li .pcost{color:var(--gold);font-family:'Space Mono',monospace;white-space:nowrap;}
+/* Two-row layout: name+cost on top, skill+badge below */
+.roster-item{display:flex;flex-direction:column;gap:3px;}
+.ri-top{display:flex;justify-content:space-between;align-items:baseline;gap:6px;}
+.ri-name{font-size:14px;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;min-width:0;}
+.ri-sub{display:flex;align-items:center;gap:5px;flex-wrap:wrap;}
+.ri-skill{font-size:11px;color:var(--text-dim);}
+.roster li .rm{position:absolute;top:6px;right:6px;cursor:pointer;color:var(--danger);
+  font-family:'Space Mono',monospace;font-size:11px;opacity:.6;}
+.roster li .rm:hover{opacity:1;}
+.roster.captain-section{margin-top:0;padding-top:8px;border-top:1px dashed var(--line);}
+.roster .captain-entry{background:rgba(255,255,255,.04);border:2px solid var(--line);
+  border-radius:4px;padding:7px 10px;display:flex;flex-direction:column;gap:4px;}
+.cap-top{display:flex;align-items:center;gap:6px;}
+.cap-sub{display:flex;align-items:center;gap:5px;flex-wrap:wrap;padding-left:2px;}
+.roster .captain-entry .c-badge{font-family:'Space Mono',monospace;font-size:10px;font-weight:700;
+  background:var(--gold);color:var(--court-deep);padding:1px 6px;border-radius:3px;flex-shrink:0;}
+.roster .captain-entry .c-name{font-size:14px;font-family:'Inter',sans-serif;color:var(--shuttle);font-weight:500;}
+.roster .captain-entry .c-meta{font-size:11px;color:var(--text-dim);font-family:'Space Mono',monospace;}
 
 .pool-panel{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px 16px;}
 .pool-panel h2{font-family:'Oswald',sans-serif;font-size:14px;text-transform:uppercase;letter-spacing:.05em;margin:0 0 10px;color:var(--text-dim);}
-.pool-list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px;max-height:60vh;overflow-y:auto;}
+.pool-list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px;max-height:calc(100vh - 280px);overflow-y:auto;}
 .pool-list li{background:var(--court-deep);border-radius:6px;padding:8px 10px;font-size:13px;display:flex;justify-content:space-between;gap:8px;align-items:center;}
 .pool-list li.sold{opacity:.5;}
 .pool-list li.current{outline:1px solid var(--gold);}
@@ -64,5 +144,33 @@ h1{font-family:'Oswald',sans-serif;font-weight:700;font-size:36px;margin:4px 0 0
 .pool-list .ps{font-family:'Space Mono',monospace;font-size:11px;text-align:right;white-space:nowrap;}
 .pool-list .ps.available{color:var(--ok);}
 .pool-list .ps.sold{color:var(--gold);}
+.gender-badge{display:inline-block;font-family:'Space Mono',monospace;font-size:10px;
+  font-weight:700;padding:1px 5px;border-radius:3px;margin-left:4px;vertical-align:middle;}
+.gender-badge.M{background:rgba(100,160,220,.18);color:#7eb8f7;}
+.gender-badge.F{background:rgba(255,120,180,.18);color:#f77ec0;}
+.card-female-warn{font-family:'Space Mono',monospace;font-size:11px;color:#f77ec0;
+  border-top:1px dashed rgba(247,126,192,.3);padding-top:7px;margin-top:2px;}
 
-footer{text-align:center;margin-top:34px;font-family:'Space Mono',monospace;font-size:11px;color:var(--text-dim);}
+footer{
+  position:fixed;
+  bottom:0;left:0;right:0;
+  z-index:100;
+  padding: 10px 28px 10px;
+  text-align:center;
+  /* layered: blur the content behind, then a gradient fade on top */
+  backdrop-filter:blur(5px);
+  -webkit-backdrop-filter:blur(5px);
+  background:linear-gradient(to bottom, transparent 0%, rgba(0, 0, 0, 0.398) 40%, rgba(0, 0, 0, 0.657) 100%);
+  /* no hard border — just the fade */
+  pointer-events:none; /* lets clicks pass through to cards behind */
+}
+.footer-credit{
+  color:var(--gold);
+  font-family:'Space Mono',monospace;
+  font-size:12px;
+  letter-spacing:.06em;
+  pointer-events:auto;
+  opacity:.85;
+}
+/* Push page content up so the last card never sits behind the sticky footer */
+.wrap{padding-bottom:60px;}

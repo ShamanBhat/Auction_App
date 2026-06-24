@@ -21,6 +21,7 @@ default templates/ and static/ folders next to this script.
 import json
 import os
 import queue
+import shutil
 import webbrowser
 import threading
 from datetime import datetime
@@ -32,6 +33,7 @@ SLOTS = 3   # players each team bids for — fixed, not derived from players.jso
 DEFAULT_TEAMS_IF_MISSING = 10
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 SAVE_FILE = os.path.join(SCRIPT_DIR, "auction_data.json")
+BACKUPS_DIR = os.path.join(SCRIPT_DIR, "backups")
 PLAYERS_FILE = os.path.join(SCRIPT_DIR, "players.json")
 TEAMS_FILE = os.path.join(SCRIPT_DIR, "teams.json")
 
@@ -40,9 +42,11 @@ TEAMS_FILE = os.path.join(SCRIPT_DIR, "teams.json")
 app = Flask(__name__)
 _lock = threading.RLock()
 
-# Live viewers connected to /api/stream. Each is a small queue that gets a
-# fresh copy of the state pushed to it whenever something changes.
+# _subscribers   — viewer SSE connections (non-host). Counted in viewer_count.
+# _console_subs  — console SSE connections (host).   NOT counted in viewer_count.
+# Both receive every broadcast so the console sees viewer_count changes live.
 _subscribers = []
+_console_subs = []
 _subscribers_lock = threading.Lock()
 
 
@@ -77,7 +81,7 @@ def ensure_players_file(num_teams):
     if not os.path.exists(PLAYERS_FILE):
         total = max(1, num_teams) * SLOTS
         sample = [
-            {"name": f"Player {i}", "base_price": 500, "skill": "B"}
+            {"name": f"Player {i}", "base_price": 500, "skill": "B", "gender": "M"}
             for i in range(1, total + 1)
         ]
         with open(PLAYERS_FILE, "w") as f:
@@ -88,11 +92,14 @@ def ensure_players_file(num_teams):
 
     pool = []
     for i, p in enumerate(raw, start=1):
+        raw_gender = (p.get("gender") or "M").strip().upper()
+        gender = "F" if raw_gender in ("F", "FEMALE", "SHE", "HER") else "M"
         pool.append({
             "id": i,
             "name": (p.get("name") or f"Player {i}").strip(),
             "base_price": int(p.get("base_price") or 0),
             "skill": (p.get("skill") or "").strip(),
+            "gender": gender,
         })
     return pool
 
@@ -109,10 +116,14 @@ def default_state():
     teams = []
     for i in range(1, num_teams + 1):
         info = teams_info[i - 1] if i - 1 < len(teams_info) else {}
+        raw_gender = (info.get("gender") or "M").strip().upper()
+        captain_gender = "F" if raw_gender in ("F", "FEMALE", "SHE", "HER") else "M"
         teams.append({
             "id": i,
             "name": (info.get("name") or f"Team {i}").strip() or f"Team {i}",
             "captain": (info.get("captain") or "").strip(),
+            "captain_gender": captain_gender,
+            "captain_skill": (info.get("skill") or "").strip(),
             "players": [],
         })
 
@@ -150,6 +161,50 @@ def load_state():
             state["current_bid_player_id"] = None
         if "theme" not in state:
             state["theme"] = "court"
+
+        # Migrate: backfill missing 'gender' field on any player entry (both
+        # in the pool and already bought into teams). Read the current
+        # players.json to get the canonical gender for each id, then fall
+        # back to "M" if it's genuinely not specified anywhere.
+        needs_gender = any("gender" not in p for p in state.get("players", []))
+        if needs_gender:
+            try:
+                num_teams = len(state.get("teams", [])) or DEFAULT_TEAMS_IF_MISSING
+                fresh_pool = ensure_players_file(num_teams)
+                gender_map = {p["id"]: p["gender"] for p in fresh_pool}
+            except Exception:
+                gender_map = {}
+            for p in state.get("players", []):
+                if "gender" not in p:
+                    p["gender"] = gender_map.get(p["id"], "M")
+            # Also patch players already stored inside team rosters
+            for team in state.get("teams", []):
+                for rp in team.get("players", []):
+                    if "gender" not in rp:
+                        rp["gender"] = gender_map.get(rp.get("player_id"), "M")
+
+        # Migrate: backfill missing captain_gender/captain_skill from teams.json
+        needs_captain_fields = any(
+            "captain_gender" not in t for t in state.get("teams", [])
+        )
+        if needs_captain_fields:
+            try:
+                teams_info = ensure_teams_file()
+                captain_meta = {}
+                for i, info in enumerate(teams_info, start=1):
+                    raw_g = (info.get("gender") or "M").strip().upper()
+                    captain_meta[i] = {
+                        "captain_gender": "F" if raw_g in ("F", "FEMALE", "SHE", "HER") else "M",
+                        "captain_skill": (info.get("skill") or "").strip(),
+                    }
+            except Exception:
+                captain_meta = {}
+            for team in state.get("teams", []):
+                if "captain_gender" not in team:
+                    meta = captain_meta.get(team["id"], {})
+                    team["captain_gender"] = meta.get("captain_gender", "M")
+                    team["captain_skill"] = meta.get("captain_skill", "")
+
         return state
     return default_state()
 
@@ -157,6 +212,19 @@ def load_state():
 def save_state(state):
     with open(SAVE_FILE, "w") as f:
         json.dump(state, f, indent=2)
+
+
+def backup_current_data():
+    """Copy the current auction_data.json into backups/ before it gets
+    overwritten by a reset. Returns the backup path, or None if there was
+    nothing to back up yet."""
+    if not os.path.exists(SAVE_FILE):
+        return None
+    os.makedirs(BACKUPS_DIR, exist_ok=True)
+    stamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    backup_path = os.path.join(BACKUPS_DIR, f"auction_data_backup_{stamp}.json")
+    shutil.copy2(SAVE_FILE, backup_path)
+    return backup_path
 
 
 def spent(team):
@@ -178,6 +246,9 @@ def state_with_budgets(state):
     out["current_bid_player"] = next(
         (p for p in out["players"] if p["id"] == out.get("current_bid_player_id")), None
     )
+    with _subscribers_lock:
+        out["viewer_count"] = len(_subscribers)
+    out["lan_ip"] = get_lan_ip()
     return out
 
 
@@ -200,21 +271,31 @@ def require_host(view):
     return wrapped
 
 
+def _push_to_list(lst, payload):
+    """Push payload to every queue in lst; return queues that are dead."""
+    dead = []
+    for q in lst:
+        try:
+            q.put_nowait(payload)
+        except queue.Full:
+            dead.append(q)
+    return dead
+
+
 def broadcast_update():
-    """Push the latest state to every connected viewer immediately. Called
-    once at the end of any action that changes the data."""
+    """Push the latest state to every connected viewer and console immediately.
+    Called at the end of any action that changes data, and also whenever a
+    viewer connects or disconnects (so the console's viewer count stays live)."""
     with _lock:
         state = load_state()
         payload = json.dumps(state_with_budgets(state))
     with _subscribers_lock:
-        dead = []
-        for q in _subscribers:
-            try:
-                q.put_nowait(payload)
-            except queue.Full:
-                dead.append(q)
-        for q in dead:
+        dead_v = _push_to_list(_subscribers, payload)
+        dead_c = _push_to_list(_console_subs, payload)
+        for q in dead_v:
             _subscribers.remove(q)
+        for q in dead_c:
+            _console_subs.remove(q)
 
 
 # ---------------------------------------------------------------------------
@@ -230,14 +311,15 @@ def api_state():
 
 @app.route("/api/stream")
 def api_stream():
-    """Server-Sent Events feed. The viewer page subscribes here instead of
-    polling — it receives a push the moment a sale/undo/edit happens, and
-    otherwise sits idle (just a small heartbeat so the connection doesn't
-    get dropped by an idle timeout)."""
+    """Server-Sent Events feed for viewers. Broadcasts on connect and
+    disconnect so the console's viewer count updates in real time."""
     def gen():
         q = queue.Queue(maxsize=20)
         with _subscribers_lock:
             _subscribers.append(q)
+        # Notify console of updated viewer count — run in a daemon thread so
+        # we're not holding _subscribers_lock during the broadcast.
+        threading.Thread(target=broadcast_update, daemon=True).start()
         try:
             with _lock:
                 state = load_state()
@@ -252,6 +334,42 @@ def api_stream():
             with _subscribers_lock:
                 if q in _subscribers:
                     _subscribers.remove(q)
+            threading.Thread(target=broadcast_update, daemon=True).start()
+
+    return Response(
+        gen(),
+        mimetype="text/event-stream",
+        headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"},
+    )
+
+
+@app.route("/api/console-stream")
+def api_console_stream():
+    """SSE feed for the auctioneer console only (host-only). Connections here
+    are NOT counted in viewer_count — the console subscribes to this so it
+    can receive live broadcasts (including viewer count changes) without
+    inflating the viewer number shown to the room."""
+    if not is_host():
+        return jsonify(error="Console stream is host-only."), 403
+
+    def gen():
+        q = queue.Queue(maxsize=20)
+        with _subscribers_lock:
+            _console_subs.append(q)
+        try:
+            with _lock:
+                state = load_state()
+            yield f"data: {json.dumps(state_with_budgets(state))}\n\n"
+            while True:
+                try:
+                    payload = q.get(timeout=25)
+                    yield f"data: {payload}\n\n"
+                except queue.Empty:
+                    yield ": keep-alive\n\n"
+        finally:
+            with _subscribers_lock:
+                if q in _console_subs:
+                    _console_subs.remove(q)
 
     return Response(
         gen(),
@@ -289,6 +407,25 @@ def api_sale():
         if cost > remaining(team, state):
             return jsonify(error=f"{team['name']} only has {remaining(team, state):,} tokens left."), 400
 
+        # Enforce: each team must have at least 1 female player overall
+        # (captain + 3 bid slots). If the captain is already female, the
+        # requirement is satisfied and any player can fill any slot.
+        slots = state["config"]["slots"]
+        captain_is_female = team.get("captain_gender") == "F"
+        is_last_slot = len(team["players"]) == slots - 1
+        team_has_female = any(p.get("gender") == "F" for p in team["players"])
+        if (is_last_slot and not team_has_female
+                and not captain_is_female
+                and player.get("gender") != "F"):
+            available_females = [
+                p for p in state["players"]
+                if not p["sold"] and p.get("gender") == "F"
+            ]
+            return jsonify(
+                error=f"{team['name']} has no female players yet — the last slot must be filled by a female player. "
+                      f"({len(available_females)} female player{'s' if len(available_females) != 1 else ''} still available)"
+            ), 400
+
         player["sold"] = True
         player["team_id"] = team_id
         team["players"].append({
@@ -296,6 +433,7 @@ def api_sale():
             "name": player["name"],
             "base_price": player["base_price"],
             "skill": player["skill"],
+            "gender": player.get("gender", "M"),
             "cost": cost,
         })
         state["log"].append({
@@ -334,7 +472,7 @@ def api_current():
         return jsonify(state_with_budgets(state))
 
 
-VALID_THEMES = ("court", "bosch")
+VALID_THEMES = ("court", "bosch", "stage")
 
 
 @app.route("/api/theme", methods=["POST"])
@@ -417,6 +555,11 @@ def api_team():
             team["name"] = data["name"].strip()
         if "captain" in data:
             team["captain"] = data["captain"].strip()
+        if "captain_skill" in data:
+            team["captain_skill"] = data["captain_skill"].strip()
+        if "captain_gender" in data:
+            raw = data["captain_gender"].strip().upper()
+            team["captain_gender"] = "F" if raw in ("F", "FEMALE", "SHE", "HER") else "M"
         save_state(state)
         broadcast_update()
         return jsonify(state_with_budgets(state))
@@ -426,10 +569,13 @@ def api_team():
 @require_host
 def api_reset():
     with _lock:
+        backup_path = backup_current_data()
         state = default_state()
         save_state(state)
         broadcast_update()
-        return jsonify(state_with_budgets(state))
+        out = state_with_budgets(state)
+        out["backup_file"] = os.path.basename(backup_path) if backup_path else None
+        return jsonify(out)
 
 
 @app.route("/api/export")

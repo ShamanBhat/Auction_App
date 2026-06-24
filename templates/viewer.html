@@ -12,9 +12,13 @@
 <div class="wrap">
   <header>
     <div>
-      <div class="eyebrow">Office League · Live Auction</div>
-      <h1>Badminton Bid Board</h1>
-      <div class="readonly-tag">VIEW ONLY — updates live, bids are entered by the auctioneer</div>
+      <div class="eyebrow">High Performance Team · Live Auction</div>
+      <h1>EPT Badminton League 2026</h1>
+      <div class="readonly-tag">VIEW ONLY — updates live</div>
+    </div>
+    <div class="header-now-bidding empty" id="nowBidding">
+      <div class="nb-label">Now bidding</div>
+      <div class="nb-name">—</div>
     </div>
     <div class="ticker" id="ticker"><span>No sales yet — first lot is on the table.</span></div>
   </header>
@@ -32,10 +36,6 @@
     </div>
 
     <aside class="sidebar">
-      <div class="now-bidding empty" id="nowBidding">
-        <div class="nb-label">Now bidding</div>
-        <div class="nb-name">Waiting for the next player</div>
-      </div>
       <div class="pool-panel">
         <h2>All Players</h2>
         <ul class="pool-list" id="poolList"></ul>
@@ -43,7 +43,7 @@
     </aside>
   </div>
 
-  <footer>This view refreshes automatically every few seconds</footer>
+  <footer><span class="footer-credit">Made with care, passion and love by Shaman Bhat BU</span></footer>
 </div>
 
 <script src="/static/viewer.js"></script>

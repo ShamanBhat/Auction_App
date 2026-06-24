@@ -12,15 +12,24 @@
 <div class="wrap">
   <header>
     <div>
-      <div class="eyebrow">Office League · Live Auction</div>
-      <h1>Badminton Bid Board</h1>
+      <div class="eyebrow">High Performance Team · Live Auction</div>
+      <h1>EPT Badminton League 2026</h1>
+    </div>
+    <div class="header-now-bidding empty" id="nowBidding">
+      <div class="nb-label">Now bidding</div>
+      <div class="nb-name">—</div>
     </div>
     <div class="header-right">
       <div class="ticker" id="ticker"><span>No sales yet — first lot is on the table.</span></div>
-      <div class="theme-toggle" id="themeToggle">
-        <span class="tt-label">Theme</span>
-        <button class="tt-btn" data-theme="court">Court</button>
-        <button class="tt-btn" data-theme="bosch">Bosch</button>
+      <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;justify-content:flex-end;">
+        <div class="lan-ip" id="lanIp"></div>
+        <div class="viewer-count none" id="viewerCount"><span class="vc-dot"></span><span id="viewerNum">0</span> viewing</div>
+        <div class="theme-toggle" id="themeToggle">
+          <span class="tt-label">Theme</span>
+          <button class="tt-btn" data-theme="court">Court</button>
+          <button class="tt-btn" data-theme="bosch">Bosch</button>
+          <button class="tt-btn" data-theme="stage">Stage</button>
+        </div>
       </div>
     </div>
   </header>
@@ -28,28 +37,30 @@
   <div class="layout">
     <div class="main">
       <div class="console">
-        <div class="console-grid">
-          <div class="field">
-            <label for="teamSelect">Team (buyer)</label>
+        <div class="console-row">
+          <div class="field field-team">
+            <label for="teamSelect">Team</label>
             <select id="teamSelect"></select>
+            <div class="field-sub" id="teamWarn"></div>
           </div>
-          <div class="field">
-            <label for="playerSelect">Player assigned</label>
+          <div class="field field-player">
+            <label for="playerSelect">Player</label>
             <select id="playerSelect"></select>
-            <div class="hint" id="baseHint">&nbsp;</div>
+            <div class="field-sub" id="baseHint"></div>
           </div>
-          <div class="field">
-            <label for="playerCost">Cost (tokens)</label>
+          <div class="field field-cost">
+            <label for="playerCost">Tokens</label>
             <input type="number" id="playerCost" placeholder="0" min="0" step="50">
           </div>
-          <button class="btn" id="confirmBtn">Confirm Sale</button>
+          <div class="console-actions-inline">
+            <button class="btn" id="confirmBtn">Confirm Sale</button>
+            <div class="console-divider"></div>
+            <button class="btn secondary sm" id="undoBtn">Undo</button>
+            <a class="btn secondary sm" id="exportBtn" href="/api/export">Export</a>
+            <button class="btn secondary sm danger" id="resetBtn">Reset</button>
+          </div>
         </div>
         <div class="console-msg" id="consoleMsg"></div>
-        <div class="console-actions">
-          <button class="btn secondary" id="undoBtn">Undo last sale</button>
-          <a class="btn secondary" id="exportBtn" href="/api/export">Export log (.json)</a>
-          <button class="btn secondary" id="resetBtn">Reset auction</button>
-        </div>
       </div>
 
       <div class="summary-bar">
@@ -63,10 +74,6 @@
     </div>
 
     <aside class="sidebar">
-      <div class="now-bidding empty" id="nowBidding">
-        <div class="nb-label">Now bidding</div>
-        <div class="nb-name">Select a player to show it here</div>
-      </div>
       <div class="pool-panel">
         <h2>All Players</h2>
         <ul class="pool-list" id="poolList"></ul>
@@ -74,7 +81,7 @@
     </aside>
   </div>
 
-  <footer>Saved automatically to auction_data.json next to the script</footer>
+  <footer><span class="footer-credit">Made with care, passion and love by Shaman Bhat BU</span></footer>
 </div>
 
 <script src="/static/console.js"></script>

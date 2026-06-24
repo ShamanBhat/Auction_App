@@ -37,6 +37,12 @@ function populateTeamSelect(){
 function populatePlayerSelect(){
   const sel = document.getElementById('playerSelect');
   const prev = sel.value;
+  const teamId = parseInt(document.getElementById('teamSelect').value,10);
+  const team = STATE.teams.find(t=>t.id===teamId);
+  const isLastSlot = team && team.players.length === STATE.slots - 1;
+  const captainIsFemale = team && team.captain_gender === 'F';
+  const teamHasFemale = team && team.players.some(p=>p.gender==='F');
+  const needsFemale = isLastSlot && !teamHasFemale && !captainIsFemale;
   const available = STATE.players.filter(p=>!p.sold);
   sel.innerHTML = '';
   if(available.length === 0){
@@ -48,8 +54,9 @@ function populatePlayerSelect(){
     available.forEach(p=>{
       const opt = document.createElement('option');
       opt.value = p.id;
-      const skill = p.skill ? ` · ${p.skill}` : '';
-      opt.textContent = `${p.name} — base ${p.base_price.toLocaleString()}${skill}`;
+      opt.textContent = p.name;
+      // Grey out males when last slot requires a female
+      if(needsFemale && p.gender !== 'F') opt.disabled = true;
       sel.appendChild(opt);
     });
   }
@@ -57,17 +64,37 @@ function populatePlayerSelect(){
   updateBaseHint();
 }
 
+function genderBadge(g){ return `<span class="gender-badge ${g}">${g==='F'?'She/Her':'He/Him'}</span>`; }
+
 function updateBaseHint(){
   const sel = document.getElementById('playerSelect');
   const hint = document.getElementById('baseHint');
+  const warn = document.getElementById('teamWarn');
   const costInput = document.getElementById('playerCost');
   const player = STATE.players.find(p=>String(p.id)===sel.value);
   if(player){
-    hint.textContent = `Base price: ${player.base_price.toLocaleString()}${player.skill ? ' · Skill '+player.skill : ''}`;
+    const gLabel = player.gender === 'F' ? 'She/Her' : 'He/Him';
+    hint.style.color = 'var(--text-dim)';
+    hint.textContent = `Base ${player.base_price.toLocaleString()} · ${player.skill || ''} · ${gLabel}`;
     if(!costInput.value){ costInput.value = player.base_price; }
     costInput.min = player.base_price;
   } else {
-    hint.textContent = '\u00A0';
+    hint.textContent = '';
+  }
+  if(warn){
+    const teamId = parseInt(document.getElementById('teamSelect').value,10);
+    const team = STATE.teams.find(t=>t.id===teamId);
+    if(team){
+      const isLastSlot = team.players.length === STATE.slots - 1;
+      const captainIsFemale = team.captain_gender === 'F';
+      const teamHasFemale = team.players.some(p=>p.gender==='F');
+      if(isLastSlot && !teamHasFemale && !captainIsFemale){
+        warn.style.color = '#f77ec0';
+        warn.textContent = '⚠ Last slot must be female';
+      } else {
+        warn.textContent = '';
+      }
+    }
   }
 }
 
@@ -83,15 +110,16 @@ async function announceCurrentBid(){
 
 function renderNowBidding(){
   const box = document.getElementById('nowBidding');
+  if(!box) return;
   const p = STATE.current_bid_player;
   if(p){
     box.classList.remove('empty');
     box.innerHTML = `<div class="nb-label">Now bidding</div>
       <div class="nb-name">${esc(p.name)}</div>
-      <div class="nb-meta">Base ${p.base_price.toLocaleString()}${p.skill ? ' · Skill '+esc(p.skill) : ''}</div>`;
+      <div class="nb-meta">Base ${p.base_price.toLocaleString()}${p.skill ? ' · '+esc(p.skill) : ''}${p.gender ? ' · '+(p.gender==='F'?'She/Her':'He/Him') : ''}</div>`;
   } else {
     box.classList.add('empty');
-    box.innerHTML = `<div class="nb-label">Now bidding</div><div class="nb-name">Select a player to show it here</div>`;
+    box.innerHTML = `<div class="nb-label">Now bidding</div><div class="nb-name">—</div>`;
   }
 }
 
@@ -108,7 +136,7 @@ function renderPoolList(){
     } else {
       statusHtml = `<span class="ps available">Available</span>`;
     }
-    li.innerHTML = `<span class="pn"><span>${esc(p.name)}</span><span class="sk">Base ${p.base_price.toLocaleString()}${p.skill?' · '+esc(p.skill):''}</span></span>${statusHtml}`;
+    li.innerHTML = `<span class="pn"><span>${esc(p.name)} ${genderBadge(p.gender||'M')}</span><span class="sk">Base ${p.base_price.toLocaleString()}${p.skill?' · '+esc(p.skill):''}</span></span>${statusHtml}`;
     list.appendChild(li);
   });
 }
@@ -141,22 +169,47 @@ function renderTeams(){
     const card = document.createElement('div');
     card.className = 'team-card' + (full?' full':'') + (rem<0?' over':'');
     const fillClass = pct<=15?'crit':(pct<=35?'low':'');
+    const captainHtml = `
+      <li class="captain-entry">
+        <div class="cap-top">
+          <span class="c-badge">C</span>
+          <span class="c-name"><input class="captain-entry-input" type="text" value="${esc(team.captain)}" placeholder="Captain name" data-team="${team.id}" data-field="captain"/></span>
+        </div>
+        <div class="cap-sub">
+          ${team.captain_skill ? `<span class="c-meta">${esc(team.captain_skill)}</span>` : ''}
+          ${genderBadge(team.captain_gender||'M')}
+        </div>
+      </li>`;
     let rosterHtml = team.players.length === 0
       ? '<li class="placeholder">No players bought yet</li>'
       : team.players.map((p,idx)=>`
-          <li><span>${esc(p.name)}${p.skill?` <span style="color:var(--text-dim)">(${esc(p.skill)})</span>`:''}</span>
-            <span><span class="pcost">${p.cost.toLocaleString()}</span>
-            <span class="rm" data-team="${team.id}" data-idx="${idx}" title="Remove">✕</span></span>
+          <li class="roster-item">
+            <div class="ri-top">
+              <span class="ri-name">${esc(p.name)}</span>
+              <span class="pcost">${p.cost.toLocaleString()}</span>
+            </div>
+            <div class="ri-sub">
+              ${p.skill?`<span class="ri-skill">(${esc(p.skill)})</span>`:''}
+              ${genderBadge(p.gender||'M')}
+            </div>
+            <span class="rm" data-team="${team.id}" data-idx="${idx}" title="Remove">✕</span>
           </li>`).join('');
+    const isLastSlotCard = !full && team.players.length === STATE.slots - 1;
+    const captainIsFemaleCard = team.captain_gender === 'F';
+    const teamHasFemaleCard = team.players.some(p => p.gender === 'F');
+    const cardFemaleWarn = (isLastSlotCard && !teamHasFemaleCard && !captainIsFemaleCard)
+      ? `<div class="card-female-warn">⚠ Next player must be female</div>`
+      : '';
     card.innerHTML = `
       <div class="team-head">
         <div class="team-name"><input type="text" value="${esc(team.name)}" data-team="${team.id}" data-field="name"/></div>
         <div class="slot-count">${team.players.length}/${STATE.slots}</div>
       </div>
-      <div class="captain-row"><span class="captain-label">Captain :</span><input type="text" placeholder="Captain name" value="${esc(team.captain)}" data-team="${team.id}" data-field="captain"/></div>
       <div class="purse-meter"><div class="purse-fill ${fillClass}" style="width:${pct}%"></div></div>
       <div class="purse-nums"><span class="left">${rem.toLocaleString()} left</span><span>of ${STATE.purse.toLocaleString()}</span></div>
-      <ul class="roster">${rosterHtml}</ul>`;
+      <ul class="roster captain-section">${captainHtml}</ul>
+      <ul class="roster">${rosterHtml}</ul>
+      ${cardFemaleWarn}`;
     grid.appendChild(card);
   });
   grid.querySelectorAll('input[data-field]').forEach(inp=>{
@@ -175,11 +228,26 @@ function renderTeams(){
   });
 }
 
-function renderAll(){ populateTeamSelect(); populatePlayerSelect(); renderTeams(); renderTicker(); renderSummary(); renderNowBidding(); renderPoolList(); applyTheme(); }
+function renderAll(){ populateTeamSelect(); populatePlayerSelect(); renderTeams(); renderTicker(); renderSummary(); renderNowBidding(); renderPoolList(); applyTheme(); renderViewerCount(); }
+
+function renderViewerCount(){
+  const n = STATE.viewer_count || 0;
+  const el = document.getElementById('viewerCount');
+  const num = document.getElementById('viewerNum');
+  const lanEl = document.getElementById('lanIp');
+  if(!el || !num) return;
+  num.textContent = n;
+  el.className = 'viewer-count' + (n === 0 ? ' none' : '');
+  if(lanEl){
+    const ip = STATE.lan_ip;
+    lanEl.textContent = (ip && ip !== '127.0.0.1') ? `📡 ${ip}:8080` : '';
+  }
+}
 
 function applyTheme(){
   const theme = STATE.theme || 'court';
   document.body.classList.toggle('theme-bosch', theme === 'bosch');
+  document.body.classList.toggle('theme-stage', theme === 'stage');
   document.querySelectorAll('#themeToggle .tt-btn').forEach(btn=>{
     btn.classList.toggle('active', btn.dataset.theme === theme);
   });
@@ -222,16 +290,39 @@ async function resetAuction(){
   if(!confirm('This clears every sale, budget and name. Are you sure?')) return;
   if(!confirm('Really sure? This cannot be undone.')) return;
   STATE = await api('/api/reset', {method:'POST'});
-  renderAll(); showMsg('Auction reset.','ok');
+  renderAll();
+  showMsg(STATE.backup_file ? `Auction reset. Previous data backed up to backups/${STATE.backup_file}` : 'Auction reset.', 'ok');
 }
 
 document.getElementById('confirmBtn').addEventListener('click', confirmSale);
 document.getElementById('undoBtn').addEventListener('click', undoLast);
 document.getElementById('resetBtn').addEventListener('click', resetAuction);
+document.getElementById('teamSelect').addEventListener('change', ()=>{ populatePlayerSelect(); });
 document.getElementById('playerSelect').addEventListener('change', ()=>{ updateBaseHint(); announceCurrentBid(); });
 document.getElementById('playerCost').addEventListener('keydown', e=>{ if(e.key==='Enter') confirmSale(); });
 
 (async function init(){
   STATE = await api('/api/state');
   renderAll();
+  connectConsoleStream();
 })();
+
+function connectConsoleStream(){
+  const es = new EventSource('/api/console-stream');
+  es.onmessage = (e)=>{
+    const incoming = JSON.parse(e.data);
+    // Only update STATE if it came from an external action (viewer connecting,
+    // another tab doing a sale, etc.) — don't clobber a pending input.
+    STATE = incoming;
+    renderViewerCount();
+    // Re-render only the parts that change from external pushes;
+    // avoid re-rendering dropdowns mid-input by checking focus.
+    const focused = document.activeElement;
+    const inputFocused = focused && (focused.tagName === 'INPUT' || focused.tagName === 'SELECT');
+    if(!inputFocused){ renderAll(); } else { renderViewerCount(); renderTicker(); renderSummary(); }
+  };
+  es.onerror = ()=>{
+    // Browser will auto-reconnect; do a one-off fetch to stay in sync.
+    api('/api/state').then(s=>{ STATE=s; renderViewerCount(); }).catch(()=>{});
+  };
+}
