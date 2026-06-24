@@ -137,7 +137,7 @@ function renderNowBidding(){
       <div class="nb-meta">Base ${p.base_price.toLocaleString()}${p.skill ? ' · '+esc(p.skill) : ''}${p.gender ? ' · '+(p.gender==='F'?'She/Her':'He/Him') : ''}</div>`;
   } else {
     box.classList.add('empty');
-    box.innerHTML = `<div class="nb-label">Now bidding</div><div class="nb-name">—</div>`;
+    box.innerHTML = `<div class="nb-label">Now bidding</div><div class="nb-name">—</div><div class="nb-meta">&nbsp;</div>`;
   }
 }
 
