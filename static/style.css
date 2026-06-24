@@ -9,6 +9,11 @@
   --court:#0E2A2B; --court-deep:#0A1F20; --panel:#133C3D; --line:#2B5E5C;
   --shuttle:#F4F1E6; --gold:#E8B23C; --gold-dim:#8a6c2e; --glow:#143F40;
   --ok:#6FCF97; --warn:#F2994A; --danger:#EB5757; --text-dim:#9FC1BC;
+  --header-safe:96px;
+  --footer-safe:60px;
+  --sidebar-gap:14px;
+  --sidebar-w:280px;
+  --sidebar-right:20px;
 }
 body.theme-bosch{
   --court:#161616; --court-deep:#0A0A0A; --panel:#232323; --line:#3C3C3C;
@@ -38,9 +43,11 @@ header{
   background:var(--court);
   display:flex;align-items:center;justify-content:space-between;flex-wrap:nowrap;gap:16px;
   border-bottom:2px dashed var(--line);
-  padding-bottom:14px;
+  padding-bottom:16px;
   margin-bottom:22px;
   padding-top:4px;
+  padding-left:10px;
+  padding-right:10px;
   /* subtle shadow so cards slide cleanly under it when scrolling */
   box-shadow:0 4px 24px rgba(0,0,0,.35);
 }
@@ -50,6 +57,10 @@ header{
   text-align:center;
   padding:0 12px;
   min-width:0;
+  min-height:82px;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
 }
 .header-now-bidding .nb-label{
   font-family:'Space Mono',monospace;font-size:14px;letter-spacing:.16em;
@@ -63,7 +74,7 @@ header{
   font-family:'Space Mono',monospace;font-size:14px;color:var(--text-dim);margin-top:2px;
 }
 .header-now-bidding.empty .nb-name{
-  color:var(--text-dim);font-size:13px;text-transform:none;font-family:'Inter',sans-serif;
+  color:var(--text-dim);
 }
 footer{
   position:fixed;
@@ -83,19 +94,33 @@ footer{
   opacity:.85;
 }
 .wrap{padding-bottom:60px;}
+.title-branding{display:flex;align-items:center;gap:14px;min-width:0;}
+.title-branding > div{min-width:0;}
+.header-logo-console{height:90px;max-height:100px;width:auto;display:block;align-self:center;}
+.header-logo-viewer{height:100px;max-height:110px;width:auto;display:block;align-self:center;}
 .eyebrow{font-family:'Space Mono',monospace;font-size:14px;letter-spacing:.18em;color:var(--gold);text-transform:uppercase;}
 h1{font-family:'Oswald',sans-serif;font-weight:700;font-size:36px;margin:4px 0 0;text-transform:uppercase;}
 .ticker{font-family:'Space Mono',monospace;font-size:13px;color:var(--text-dim);background:var(--court-deep);
-  border:1px solid var(--line);border-radius:6px;padding:10px 14px;min-width:200px;max-width:300px;}
+  border:1px solid var(--line);border-radius:6px;padding:10px 14px;min-width:200px;width:max-content;max-width:45vw;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .ticker b{color:var(--gold);font-weight:700;}
 .summary-bar{display:flex;gap:22px;flex-wrap:wrap;margin-bottom:18px;font-family:'Space Mono',monospace;font-size:13px;color:var(--text-dim);}
 .summary-bar b{color:var(--shuttle);font-size:15px;}
 
-/* Sidebar is a fixed 280px; the main column takes everything else.
-   On screens narrower than 900px the sidebar drops below the cards. */
-.layout{display:grid;grid-template-columns:1fr 280px;gap:22px;align-items:start;}
-@media (max-width:900px){.layout{grid-template-columns:1fr;}}
-.sidebar{display:flex;flex-direction:column;gap:16px;position:sticky;top:20px;}
+/* Sidebar is fixed, so the page content itself is a single flow column.
+  The main area reserves just enough space on the right for that panel. */
+.layout{display:block;}
+.sidebar{
+  position:fixed;
+  right:var(--sidebar-right);
+  top:calc(var(--header-safe) + var(--sidebar-gap));
+  width:var(--sidebar-w);
+  max-height:calc(100dvh - var(--header-safe) - var(--footer-safe) - (2 * var(--sidebar-gap)));
+  display:flex;
+  flex-direction:column;
+}
+
+.main{padding-right:calc(var(--sidebar-w) + var(--sidebar-right) + var(--sidebar-gap));}
 
 /* auto-fill with a 270px minimum — slightly wider so longer names don't overflow */
 .teams{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:14px;}
@@ -133,9 +158,27 @@ h1{font-family:'Oswald',sans-serif;font-weight:700;font-size:36px;margin:4px 0 0
 .roster .captain-entry .c-name{font-size:14px;font-family:'Inter',sans-serif;color:var(--shuttle);font-weight:500;}
 .roster .captain-entry .c-meta{font-size:11px;color:var(--text-dim);font-family:'Space Mono',monospace;}
 
-.pool-panel{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px 16px;}
+.pool-panel{
+  background:var(--panel);
+  border:1px solid var(--line);
+  border-radius:10px;
+  padding:14px 16px;
+  max-height:100%;
+  display:flex;
+  flex-direction:column;
+  overflow:hidden;
+}
 .pool-panel h2{font-family:'Oswald',sans-serif;font-size:14px;text-transform:uppercase;letter-spacing:.05em;margin:0 0 10px;color:var(--text-dim);}
-.pool-list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px;max-height:calc(100vh - 280px);overflow-y:auto;}
+.pool-list{
+  list-style:none;
+  margin:0;
+  padding:0;
+  display:flex;
+  flex-direction:column;
+  gap:6px;
+  max-height:calc(100dvh - var(--header-safe) - var(--footer-safe) - 96px);
+  overflow-y:auto;
+}
 .pool-list li{background:var(--court-deep);border-radius:6px;padding:8px 10px;font-size:13px;display:flex;justify-content:space-between;gap:8px;align-items:center;}
 .pool-list li.sold{opacity:.5;}
 .pool-list li.current{outline:1px solid var(--gold);}
@@ -173,4 +216,4 @@ footer{
   opacity:.85;
 }
 /* Push page content up so the last card never sits behind the sticky footer */
-.wrap{padding-bottom:60px;}
+.wrap{padding-bottom:var(--footer-safe);}

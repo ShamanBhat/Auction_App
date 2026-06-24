@@ -11,27 +11,24 @@
 <body>
 <div class="wrap">
   <header>
-    <div>
-      <div class="eyebrow">High Performance Team · Live Auction</div>
-      <h1>EPT Badminton League 2026</h1>
-      <div class="readonly-tag">VIEW ONLY — updates live</div>
+    <div class="title-branding">
+      <img src="/static/HighPerformanceTeam.png" alt="High Performance Team logo" class="header-logo-viewer">
+      <div>
+        <div class="eyebrow">High Performance Team · Live Auction</div>
+        <h1>EPT Badminton League 2026</h1>
+        <div class="readonly-tag">VIEW ONLY — updates live</div>
+      </div>
     </div>
     <div class="header-now-bidding empty" id="nowBidding">
       <div class="nb-label">Now bidding</div>
       <div class="nb-name">—</div>
+      <div class="nb-meta">&nbsp;</div>
     </div>
     <div class="ticker" id="ticker"><span>No sales yet — first lot is on the table.</span></div>
   </header>
 
   <div class="layout">
     <div class="main">
-      <div class="summary-bar">
-        <div>Teams filled: <b id="sumFilled">0/10</b></div>
-        <div>Players sold: <b id="sumSold">0/30</b></div>
-        <div>Tokens spent: <b id="sumSpent">0</b></div>
-        <div>Tokens unspent: <b id="sumLeft">250000</b></div>
-      </div>
-
       <div class="teams" id="teamGrid"></div>
     </div>
 

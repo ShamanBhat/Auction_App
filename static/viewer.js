@@ -6,23 +6,24 @@
 function esc(s){ const d=document.createElement('div'); d.textContent = s==null?'':s; return d.innerHTML; }
 function genderBadge(g){ return `<span class="gender-badge ${g}">${g==='F'?'She/Her':'He/Him'}</span>`; }
 
+function syncViewportChrome(){
+  const header = document.querySelector('header');
+  const footer = document.querySelector('footer');
+  const root = document.documentElement;
+  if(header){ root.style.setProperty('--header-safe', `${Math.ceil(header.offsetHeight)}px`); }
+  if(footer){ root.style.setProperty('--footer-safe', `${Math.ceil(footer.offsetHeight)}px`); }
+}
+
+window.addEventListener('resize', syncViewportChrome);
+
 function renderTicker(state){
   const el = document.getElementById('ticker');
   if(!state.log.length){ el.innerHTML = '<span>No sales yet — first lot is on the table.</span>'; return; }
   const last = state.log[state.log.length-1];
   const team = state.teams.find(t=>t.id===last.team_id);
-  el.innerHTML = `SOLD &nbsp;<b>${esc(last.player)}</b> &nbsp;→&nbsp; ${esc(team?team.name:'?')} &nbsp;for&nbsp; <b>${last.cost.toLocaleString()}</b> tokens`;
+  el.innerHTML = `SOLD &nbsp;<b>${esc(last.player)}</b> &nbsp;to&nbsp; <b>${esc(team?team.name:'?')}</b> &nbsp;for&nbsp; <b>${last.cost.toLocaleString()}</b> tokens`;
 }
 
-function renderSummary(state){
-  const filled = state.teams.filter(t=>t.players.length>=state.slots).length;
-  const sold = state.teams.reduce((s,t)=>s+t.players.length,0);
-  document.getElementById('sumFilled').textContent = `${filled}/${state.teams.length}`;
-  document.getElementById('sumSold').textContent = `${sold}/${state.players.length}`;
-  const spentTotal = state.teams.reduce((s,t)=>s+t.spent,0);
-  document.getElementById('sumSpent').textContent = spentTotal.toLocaleString();
-  document.getElementById('sumLeft').textContent = (state.teams.length*state.purse - spentTotal).toLocaleString();
-}
 
 function renderTeams(state){
   const grid = document.getElementById('teamGrid');
@@ -90,7 +91,7 @@ function renderNowBidding(state){
       <div class="nb-meta">Base ${p.base_price.toLocaleString()}${p.skill ? ' · '+esc(p.skill) : ''}${p.gender ? ' · '+(p.gender==='F'?'She/Her':'He/Him') : ''}</div>`;
   } else {
     box.classList.add('empty');
-    box.innerHTML = `<div class="nb-label">Now bidding</div><div class="nb-name">—</div>`;
+    box.innerHTML = `<div class="nb-label">Now bidding</div><div class="nb-name">—</div><div class="nb-meta">&nbsp;</div>`;
   }
 }
 
@@ -126,7 +127,7 @@ async function refresh(){
   try{
     const res = await fetch('/api/state');
     const state = await res.json();
-    renderTicker(state); renderSummary(state); renderTeams(state); renderNowBidding(state); renderPoolList(state); applyTheme(state);
+    renderTicker(state); renderTeams(state); renderNowBidding(state); renderPoolList(state); applyTheme(state);
   }catch(e){ /* ignore, the stream below will catch up once reconnected */ }
 }
 
@@ -136,7 +137,7 @@ function connectStream(){
   const es = new EventSource('/api/stream');
   es.onmessage = (e)=>{
     const state = JSON.parse(e.data);
-    renderTicker(state); renderSummary(state); renderTeams(state); renderNowBidding(state); renderPoolList(state); applyTheme(state);
+    renderTicker(state); renderTeams(state); renderNowBidding(state); renderPoolList(state); applyTheme(state);
   };
   es.onerror = ()=>{
     // EventSource retries automatically; do an extra one-off fetch so the
@@ -146,3 +147,4 @@ function connectStream(){
 }
 
 connectStream();
+syncViewportChrome();

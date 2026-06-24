@@ -32,8 +32,10 @@
 .field select,.field input{width:100%;background:var(--court-deep);border:1px solid var(--line);color:var(--shuttle);
   border-radius:6px;padding:9px 10px;font-size:14px;font-family:'Inter',sans-serif;height:38px;}
 .field select:focus,.field input:focus{outline:none;border-color:var(--gold);}
-/* Sub-text row under each field — hint under Player, warnings under Team */
-.field-sub{font-family:'Space Mono',monospace;font-size:10px;margin-top:5px;min-height:14px;line-height:1.4;}
+/* Sub-text row under each field — fixed height so the console panel never resizes */
+.field-sub{font-family:'Space Mono',monospace;font-size:10px;margin-top:5px;height:20px;line-height:20px;overflow:hidden;white-space:nowrap;}
+
+#baseHint{font-size:12px;}
 
 /* Confirm + secondary action buttons grouped at the right end of the row */
 .console-actions-inline{display:flex;align-items:center;gap:6px;flex-shrink:0;
@@ -50,7 +52,7 @@
 .btn.secondary.danger:hover{color:var(--danger);border-color:var(--danger);}
 .btn.sm{padding:0 12px;height:34px;font-size:11px;}
 
-.console-msg{margin-top:10px;font-family:'Space Mono',monospace;font-size:12px;min-height:16px;}
+.console-msg{margin-top:10px;font-family:'Space Mono',monospace;font-size:12px;height:18px;line-height:18px;overflow:hidden;white-space:nowrap;}
 .console-msg.error{color:var(--danger);}
 .console-msg.ok{color:var(--ok);}
 

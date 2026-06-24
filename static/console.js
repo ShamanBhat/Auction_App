@@ -4,6 +4,16 @@
 
 let STATE = null;
 
+function syncViewportChrome(){
+  const header = document.querySelector('header');
+  const footer = document.querySelector('footer');
+  const root = document.documentElement;
+  if(header){ root.style.setProperty('--header-safe', `${Math.ceil(header.offsetHeight)}px`); }
+  if(footer){ root.style.setProperty('--footer-safe', `${Math.ceil(footer.offsetHeight)}px`); }
+}
+
+window.addEventListener('resize', syncViewportChrome);
+
 function esc(s){ const d=document.createElement('div'); d.textContent = s==null?'':s; return d.innerHTML; }
 
 async function api(path, opts){
@@ -51,6 +61,12 @@ function populatePlayerSelect(){
     opt.textContent = 'No players left in the pool';
     sel.appendChild(opt);
   } else {
+    const ph = document.createElement('option');
+    ph.value = '';
+    ph.textContent = 'Select a player';
+    ph.selected = true;
+    sel.appendChild(ph);
+
     available.forEach(p=>{
       const opt = document.createElement('option');
       opt.value = p.id;
@@ -60,7 +76,9 @@ function populatePlayerSelect(){
       sel.appendChild(opt);
     });
   }
-  if(prev) sel.value = prev;
+  if(prev && Array.from(sel.options).some(o=>o.value===prev && !o.disabled)){
+    sel.value = prev;
+  }
   updateBaseHint();
 }
 
@@ -119,7 +137,7 @@ function renderNowBidding(){
       <div class="nb-meta">Base ${p.base_price.toLocaleString()}${p.skill ? ' · '+esc(p.skill) : ''}${p.gender ? ' · '+(p.gender==='F'?'She/Her':'He/Him') : ''}</div>`;
   } else {
     box.classList.add('empty');
-    box.innerHTML = `<div class="nb-label">Now bidding</div><div class="nb-name">—</div>`;
+    box.innerHTML = `<div class="nb-label">Now bidding</div><div class="nb-name">—</div><div class="nb-meta">&nbsp;</div>`;
   }
 }
 
@@ -146,7 +164,7 @@ function renderTicker(){
   if(!STATE.log.length){ el.innerHTML = '<span>No sales yet — first lot is on the table.</span>'; return; }
   const last = STATE.log[STATE.log.length-1];
   const team = STATE.teams.find(t=>t.id===last.team_id);
-  el.innerHTML = `SOLD &nbsp;<b>${esc(last.player)}</b> &nbsp;→&nbsp; ${esc(team?team.name:'?')} &nbsp;for&nbsp; <b>${last.cost.toLocaleString()}</b> tokens`;
+  el.innerHTML = `SOLD &nbsp;<b>${esc(last.player)}</b> &nbsp;to&nbsp; <b>${esc(team?team.name:'?')}</b> &nbsp;for&nbsp; <b>${last.cost.toLocaleString()}</b> tokens`;
 }
 
 function renderSummary(){
@@ -269,12 +287,13 @@ async function confirmSale(){
   const costInput = document.getElementById('playerCost');
   const playerId = parseInt(playerSelect.value,10);
   const cost = parseInt(costInput.value,10);
+  const selectedPlayer = STATE.players.find(p=>p.id===playerId);
+  const soldName = selectedPlayer ? selectedPlayer.name : 'Player';
   if(!playerId){ showMsg('Pick a player from the list.','error'); playerSelect.focus(); return; }
   if(isNaN(cost) || cost<=0){ showMsg('Enter a valid cost greater than 0.','error'); costInput.focus(); return; }
   try{
     STATE = await api('/api/sale', {method:'POST',headers:{'Content-Type':'application/json'},
       body: JSON.stringify({team_id:teamId, player_id:playerId, cost:cost})});
-    const soldName = playerSelect.options[playerSelect.selectedIndex]?.textContent.split(' — ')[0] || 'Player';
     costInput.value='';
     showMsg(`✓ ${soldName} sold for ${cost.toLocaleString()} tokens.`,'ok');
     renderAll();
@@ -303,6 +322,7 @@ document.getElementById('playerCost').addEventListener('keydown', e=>{ if(e.key=
 
 (async function init(){
   STATE = await api('/api/state');
+  syncViewportChrome();
   renderAll();
   connectConsoleStream();
 })();
