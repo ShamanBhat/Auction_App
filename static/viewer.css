@@ -8,9 +8,3 @@
 
 
 /* Big banner version of "now bidding" — console.css has a compact version */
-.now-bidding{background:var(--panel);border:2px solid var(--gold);border-radius:10px;padding:18px 18px;text-align:center;}
-.now-bidding .nb-label{font-family:'Space Mono',monospace;font-size:11px;letter-spacing:.16em;color:var(--gold);text-transform:uppercase;}
-.now-bidding .nb-name{font-family:'Oswald',sans-serif;font-size:28px;margin-top:6px;text-transform:uppercase;}
-.now-bidding .nb-meta{font-family:'Space Mono',monospace;font-size:13px;color:var(--text-dim);margin-top:4px;}
-.now-bidding.empty{border-color:var(--line);}
-.now-bidding.empty .nb-name{color:var(--text-dim);font-size:15px;text-transform:none;font-family:'Inter',sans-serif;}

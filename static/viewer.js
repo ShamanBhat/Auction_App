@@ -81,15 +81,16 @@ function renderTeams(state){
 
 function renderNowBidding(state){
   const box = document.getElementById('nowBidding');
+  if(!box) return;
   const p = state.current_bid_player;
   if(p){
     box.classList.remove('empty');
     box.innerHTML = `<div class="nb-label">Now bidding</div>
       <div class="nb-name">${esc(p.name)}</div>
-      <div class="nb-meta">Base ${p.base_price.toLocaleString()}${p.skill ? ' · Skill '+esc(p.skill) : ''}</div>`;
+      <div class="nb-meta">Base ${p.base_price.toLocaleString()}${p.skill ? ' · '+esc(p.skill) : ''}${p.gender ? ' · '+(p.gender==='F'?'She/Her':'He/Him') : ''}</div>`;
   } else {
     box.classList.add('empty');
-    box.innerHTML = `<div class="nb-label">Now bidding</div><div class="nb-name">Waiting for the next player</div>`;
+    box.innerHTML = `<div class="nb-label">Now bidding</div><div class="nb-name">—</div>`;
   }
 }
 

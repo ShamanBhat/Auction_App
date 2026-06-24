@@ -110,15 +110,16 @@ async function announceCurrentBid(){
 
 function renderNowBidding(){
   const box = document.getElementById('nowBidding');
+  if(!box) return;
   const p = STATE.current_bid_player;
   if(p){
     box.classList.remove('empty');
     box.innerHTML = `<div class="nb-label">Now bidding</div>
       <div class="nb-name">${esc(p.name)}</div>
-      <div class="nb-meta">Base ${p.base_price.toLocaleString()}${p.skill ? ' · Skill '+esc(p.skill) : ''}</div>`;
+      <div class="nb-meta">Base ${p.base_price.toLocaleString()}${p.skill ? ' · '+esc(p.skill) : ''}${p.gender ? ' · '+(p.gender==='F'?'She/Her':'He/Him') : ''}</div>`;
   } else {
     box.classList.add('empty');
-    box.innerHTML = `<div class="nb-label">Now bidding</div><div class="nb-name">Select a player to show it here</div>`;
+    box.innerHTML = `<div class="nb-label">Now bidding</div><div class="nb-name">—</div>`;
   }
 }
 

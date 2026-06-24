@@ -61,12 +61,6 @@
 }
 
 /* Compact "now bidding" card — viewer.css has a bigger banner version */
-.now-bidding{background:var(--panel);border:2px solid var(--gold);border-radius:10px;padding:14px 16px;}
-.now-bidding .nb-label{font-family:'Space Mono',monospace;font-size:10px;letter-spacing:.14em;color:var(--gold);text-transform:uppercase;}
-.now-bidding .nb-name{font-family:'Oswald',sans-serif;font-size:20px;margin-top:4px;text-transform:uppercase;}
-.now-bidding .nb-meta{font-family:'Space Mono',monospace;font-size:12px;color:var(--text-dim);margin-top:2px;}
-.now-bidding.empty{border-color:var(--line);}
-.now-bidding.empty .nb-name{color:var(--text-dim);font-size:14px;text-transform:none;font-family:'Inter',sans-serif;}
 
 /* Editable fields on each team card — captain/name can be changed inline */
 .team-name input{background:transparent;border:none;color:var(--shuttle);font-family:'Oswald',sans-serif;font-size:18px;
