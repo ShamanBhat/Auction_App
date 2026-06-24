@@ -14,15 +14,6 @@ function renderTicker(state){
   el.innerHTML = `SOLD &nbsp;<b>${esc(last.player)}</b> &nbsp;→&nbsp; ${esc(team?team.name:'?')} &nbsp;for&nbsp; <b>${last.cost.toLocaleString()}</b> tokens`;
 }
 
-function renderSummary(state){
-  const filled = state.teams.filter(t=>t.players.length>=state.slots).length;
-  const sold = state.teams.reduce((s,t)=>s+t.players.length,0);
-  document.getElementById('sumFilled').textContent = `${filled}/${state.teams.length}`;
-  document.getElementById('sumSold').textContent = `${sold}/${state.players.length}`;
-  const spentTotal = state.teams.reduce((s,t)=>s+t.spent,0);
-  document.getElementById('sumSpent').textContent = spentTotal.toLocaleString();
-  document.getElementById('sumLeft').textContent = (state.teams.length*state.purse - spentTotal).toLocaleString();
-}
 
 function renderTeams(state){
   const grid = document.getElementById('teamGrid');
@@ -126,7 +117,7 @@ async function refresh(){
   try{
     const res = await fetch('/api/state');
     const state = await res.json();
-    renderTicker(state); renderSummary(state); renderTeams(state); renderNowBidding(state); renderPoolList(state); applyTheme(state);
+    renderTicker(state); renderTeams(state); renderNowBidding(state); renderPoolList(state); applyTheme(state);
   }catch(e){ /* ignore, the stream below will catch up once reconnected */ }
 }
 
@@ -136,7 +127,7 @@ function connectStream(){
   const es = new EventSource('/api/stream');
   es.onmessage = (e)=>{
     const state = JSON.parse(e.data);
-    renderTicker(state); renderSummary(state); renderTeams(state); renderNowBidding(state); renderPoolList(state); applyTheme(state);
+    renderTicker(state); renderTeams(state); renderNowBidding(state); renderPoolList(state); applyTheme(state);
   };
   es.onerror = ()=>{
     // EventSource retries automatically; do an extra one-off fetch so the
