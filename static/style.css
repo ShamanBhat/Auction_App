@@ -25,7 +25,7 @@ body.theme-stage{
 }
 *{box-sizing:border-box;}
 body{margin:0;background:radial-gradient(circle at 50% 0%, var(--glow) 0%, var(--court) 45%, var(--court-deep) 100%);
-  color:var(--shuttle);font-family:'Inter',sans-serif;min-height:100vh;padding:28px 20px 60px;
+  color:var(--shuttle);font-family:'Inter',sans-serif;min-height:100vh;padding:0px 20px 60px;
   transition:background .25s ease,color .25s ease;}
 /* No max-width — the layout fills the full screen so wide displays get
    more columns of team cards automatically. */
