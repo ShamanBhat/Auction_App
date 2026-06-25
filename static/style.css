@@ -43,6 +43,7 @@ header{
   background:var(--court);
   display:flex;align-items:center;justify-content:space-between;flex-wrap:nowrap;gap:16px;
   border-bottom:2px dashed var(--line);
+  border-radius:10px;
   padding-bottom:16px;
   margin-bottom:22px;
   padding-top:4px;
