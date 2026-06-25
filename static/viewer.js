@@ -24,7 +24,6 @@ function renderTicker(state){
   el.innerHTML = `SOLD &nbsp;<b>${esc(last.player)}</b> &nbsp;to&nbsp; <b>${esc(team?team.name:'?')}</b> &nbsp;for&nbsp; <b>${last.cost.toLocaleString()}</b> tokens`;
 }
 
-
 function renderTeams(state){
   const grid = document.getElementById('teamGrid');
   grid.innerHTML = '';

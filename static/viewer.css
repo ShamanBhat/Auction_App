@@ -5,6 +5,3 @@
 
 .readonly-tag{font-family:'Space Mono',monospace;font-size:11px;letter-spacing:.08em;color:var(--text-dim);
   border:1px dashed var(--line);border-radius:5px;padding:3px 9px;display:inline-block;margin-top:6px;}
-
-
-/* Big banner version of "now bidding" — console.css has a compact version */
