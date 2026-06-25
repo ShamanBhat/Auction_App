@@ -62,8 +62,6 @@
   .console-actions-inline{flex-wrap:wrap;}
 }
 
-/* Compact "now bidding" card — viewer.css has a bigger banner version */
-
 /* Editable fields on each team card — captain/name can be changed inline */
 .team-name input{background:transparent;border:none;color:var(--shuttle);font-family:'Oswald',sans-serif;font-size:18px;
   text-transform:uppercase;width:100%;padding:0;letter-spacing:.02em;}
