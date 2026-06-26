@@ -29,9 +29,20 @@ body.theme-stage{
   --ok:#3DD68C; --warn:#F0A030; --danger:#F05060; --text-dim:#8EA8CC;
 }
 *{box-sizing:border-box;}
-body{margin:0;background:radial-gradient(circle at 50% 0%, var(--glow) 0%, var(--court) 45%, var(--court-deep) 100%);
+/* Animatable custom properties for the drifting background glow */
+@property --glow-x{syntax:'<percentage>';initial-value:50%;inherits:false;}
+@property --glow-y{syntax:'<percentage>';initial-value:0%;inherits:false;}
+@keyframes glow-drift{
+  0%  {--glow-x:50%;--glow-y:0%;}
+  25% {--glow-x:55%;--glow-y:7%;}
+  50% {--glow-x:50%;--glow-y:12%;}
+  75% {--glow-x:45%;--glow-y:7%;}
+  100%{--glow-x:50%;--glow-y:0%;}
+}
+body{margin:0;background:radial-gradient(circle at var(--glow-x) var(--glow-y),var(--glow) 0%,var(--court) 45%,var(--court-deep) 100%);
   color:var(--shuttle);font-family:'Inter',sans-serif;min-height:100vh;padding:0px 20px 60px;
-  transition:background .25s ease,color .25s ease;}
+  transition:color .25s ease;
+  animation:glow-drift 16s ease-in-out infinite;}
 /* No max-width — the layout fills the full screen so wide displays get
    more columns of team cards automatically. */
 .wrap{width:100%;}
@@ -46,7 +57,7 @@ header{
   border-radius:10px;
   padding-bottom:16px;
   margin-bottom:22px;
-  padding-top:4px;
+  padding-top:16px;
   padding-left:10px;
   padding-right:10px;
   /* subtle shadow so cards slide cleanly under it when scrolling */
@@ -83,6 +94,14 @@ header{
   border-color:var(--line);
   box-shadow:none;
   background:none;
+}
+/* Pulsing glow ring on the now-bidding box when a player is active */
+@keyframes gold-pulse{
+  0%,100%{box-shadow:0 0 4px color-mix(in srgb,var(--gold) 20%,transparent),  0 0  0px color-mix(in srgb,var(--gold) 0%,transparent);}
+  50%    {box-shadow:0 0 16px color-mix(in srgb,var(--gold) 55%,transparent), 0 0 32px color-mix(in srgb,var(--gold) 15%,transparent);}
+}
+.header-now-bidding:not(.empty){
+  animation:gold-pulse 2.5s ease-in-out infinite;
 }
 footer{
   position:fixed;
