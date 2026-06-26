@@ -84,6 +84,17 @@ header{
   font-family:'Oswald',sans-serif;font-size:30px;text-transform:uppercase;
   white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:2px;
 }
+@keyframes nb-enter{
+  from{opacity:0;transform:translateY(10px);}
+  to  {opacity:1;transform:translateY(0);}
+}
+.header-now-bidding.nb-animate .nb-name,
+.header-now-bidding.nb-animate .nb-meta{
+  animation:nb-enter .4s cubic-bezier(.22,.68,0,1.15) both;
+}
+.header-now-bidding.nb-animate .nb-meta{
+  animation-delay:.06s;
+}
 .header-now-bidding .nb-meta{
   font-family:'Space Mono',monospace;font-size:14px;color:var(--text-dim);margin-top:2px;
 }

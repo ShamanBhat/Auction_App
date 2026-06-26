@@ -126,17 +126,29 @@ async function announceCurrentBid(){
   }catch(err){ showMsg(err.message,'error'); }
 }
 
+let _lastBidPlayerId = null;
+
 function renderNowBidding(){
   const box = document.getElementById('nowBidding');
   if(!box) return;
   const p = STATE.current_bid_player;
   if(p){
+    const changed = p.id !== _lastBidPlayerId;
+    _lastBidPlayerId = p.id;
     box.classList.remove('empty');
     box.innerHTML = `<div class="nb-label">Now bidding</div>
       <div class="nb-name">${esc(p.name)}</div>
       <div class="nb-meta">Base ${p.base_price.toLocaleString()}${p.skill ? ' · '+esc(p.skill) : ''}${p.gender ? ' · '+(p.gender==='F'?'She/Her':'He/Him') : ''}</div>`;
+    if(changed){
+      box.classList.remove('nb-animate');
+      void box.offsetWidth;
+      box.classList.add('nb-animate');
+      box.addEventListener('animationend',()=>box.classList.remove('nb-animate'),{once:true});
+    }
   } else {
+    _lastBidPlayerId = null;
     box.classList.add('empty');
+    box.classList.remove('nb-animate');
     box.innerHTML = `<div class="nb-label">Now bidding</div><div class="nb-name">—</div><div class="nb-meta">&nbsp;</div>`;
   }
 }
