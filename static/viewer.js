@@ -16,13 +16,25 @@ function syncViewportChrome(){
 
 window.addEventListener('resize', syncViewportChrome);
 
+let _lastTickerKey = null;
+
 function renderTicker(state){
   const el = document.getElementById('ticker');
   if(!state.log.length){ el.innerHTML = '<span>No sales yet — first lot is on the table.</span>'; return; }
   const last = state.log[state.log.length-1];
   const team = state.teams.find(t=>t.id===last.team_id);
-  el.innerHTML = `SOLD &nbsp;<b>${esc(last.player)}</b> &nbsp;to&nbsp; <b>${esc(team?team.name:'?')}</b> &nbsp;for&nbsp; <b>${last.cost.toLocaleString()}</b> tokens`;
+  const key = `${last.player}|${last.team_id}|${last.cost}`;
+  if(key !== _lastTickerKey){
+    _lastTickerKey = key;
+    el.classList.remove('ticker-animate');
+    void el.offsetWidth; // force reflow to restart animation
+    el.innerHTML = `SOLD &nbsp;<b>${esc(last.player)}</b> &nbsp;to&nbsp; <b>${esc(team?team.name:'?')}</b> &nbsp;for&nbsp; <b>${last.cost.toLocaleString()}</b> tokens`;
+    el.classList.add('ticker-animate');
+    el.addEventListener('animationend',()=>el.classList.remove('ticker-animate'),{once:true});
+  }
 }
+
+let _prevTeamCounts = {};
 
 function renderTeams(state){
   const grid = document.getElementById('teamGrid');
@@ -76,21 +88,45 @@ function renderTeams(state){
       <ul class="roster">${rosterHtml}</ul>
       ${femaleWarnHtml}`;
     grid.appendChild(card);
+    if(_prevTeamCounts[team.id] !== undefined && team.players.length > _prevTeamCounts[team.id]){
+      card.classList.add('sold-flash');
+      card.addEventListener('animationend',()=>card.classList.remove('sold-flash'),{once:true});
+    }
   });
+  _prevTeamCounts = {};
+  state.teams.forEach(t=>{ _prevTeamCounts[t.id] = t.players.length; });
 }
+
+let _lastBidPlayerId = null;
+let _nbExiting = false;
 
 function renderNowBidding(state){
   const box = document.getElementById('nowBidding');
   if(!box) return;
   const p = state.current_bid_player;
-  if(p){
-    box.classList.remove('empty');
-    box.innerHTML = `<div class="nb-label">Now bidding</div>
+  const hadPlayer = _lastBidPlayerId !== null;
+  const changed = p ? p.id !== _lastBidPlayerId : hadPlayer;
+  function applyContent(){
+    if(p){
+      box.classList.remove('empty');
+      box.innerHTML = `<div class="nb-label">Now bidding</div>
       <div class="nb-name">${esc(p.name)}</div>
       <div class="nb-meta">Base ${p.base_price.toLocaleString()}${p.skill ? ' · '+esc(p.skill) : ''}${p.gender ? ' · '+(p.gender==='F'?'She/Her':'He/Him') : ''}</div>`;
-  } else {
-    box.classList.add('empty');
-    box.innerHTML = `<div class="nb-label">Now bidding</div><div class="nb-name">—</div><div class="nb-meta">&nbsp;</div>`;
+      box.classList.remove('nb-animate'); void box.offsetWidth; box.classList.add('nb-animate');
+      box.addEventListener('animationend',()=>box.classList.remove('nb-animate'),{once:true});
+    } else {
+      box.classList.add('empty'); box.classList.remove('nb-animate');
+      box.innerHTML = `<div class="nb-label">Now bidding</div><div class="nb-name">—</div><div class="nb-meta">&nbsp;</div>`;
+    }
+  }
+  if(changed && hadPlayer && !_nbExiting){
+    _nbExiting = true;
+    _lastBidPlayerId = p ? p.id : null;
+    box.classList.add('nb-exit');
+    setTimeout(()=>{ box.classList.remove('nb-exit'); _nbExiting = false; applyContent(); }, 260);
+  } else if(!_nbExiting){
+    _lastBidPlayerId = p ? p.id : null;
+    if(changed) applyContent();
   }
 }
 

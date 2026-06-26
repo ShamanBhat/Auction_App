@@ -13,5 +13,6 @@
   {"name": "Kabir Singh", "base_price": 5000, "skill": "Professional", "gender": "M"},
   {"name": "Meera Nair", "base_price": 1500, "skill": "Beginner", "gender": "F"},
   {"name": "Rohan Das", "base_price": 1000, "skill": "Intermediate", "gender": "M"},
-  {"name": "Anjali Menon", "base_price": 2000, "skill": "Intermediate", "gender": "F"}
+  {"name": "Anjali Menon", "base_price": 2000, "skill": "Intermediate", "gender": "F"},
+  {"name": "Divya Krishna Sharma", "base_price": 2000, "skill": "Intermediate", "gender": "F"}
 ]

@@ -29,9 +29,20 @@ body.theme-stage{
   --ok:#3DD68C; --warn:#F0A030; --danger:#F05060; --text-dim:#8EA8CC;
 }
 *{box-sizing:border-box;}
-body{margin:0;background:radial-gradient(circle at 50% 0%, var(--glow) 0%, var(--court) 45%, var(--court-deep) 100%);
+/* Animatable custom properties for the drifting background glow */
+@property --glow-x{syntax:'<percentage>';initial-value:50%;inherits:false;}
+@property --glow-y{syntax:'<percentage>';initial-value:0%;inherits:false;}
+@keyframes glow-drift{
+  0%  {--glow-x:50%;--glow-y:0%;}
+  25% {--glow-x:55%;--glow-y:7%;}
+  50% {--glow-x:50%;--glow-y:12%;}
+  75% {--glow-x:45%;--glow-y:7%;}
+  100%{--glow-x:50%;--glow-y:0%;}
+}
+body{margin:0;background:radial-gradient(circle at var(--glow-x) var(--glow-y),var(--glow) 0%,var(--court) 45%,var(--court-deep) 100%);
   color:var(--shuttle);font-family:'Inter',sans-serif;min-height:100vh;padding:0px 20px 60px;
-  transition:background .25s ease,color .25s ease;}
+  transition:color .25s ease;
+  animation:glow-drift 16s ease-in-out infinite;}
 /* No max-width — the layout fills the full screen so wide displays get
    more columns of team cards automatically. */
 .wrap{width:100%;}
@@ -46,7 +57,7 @@ header{
   border-radius:10px;
   padding-bottom:16px;
   margin-bottom:22px;
-  padding-top:4px;
+  padding-top:16px;
   padding-left:10px;
   padding-right:10px;
   /* subtle shadow so cards slide cleanly under it when scrolling */
@@ -54,14 +65,16 @@ header{
 }
 /* Centre slot in the header for "Now Bidding" */
 .header-now-bidding{
-  flex:1;
+  flex:0 1 clamp(200px, 30%, 420px);
   text-align:center;
-  padding:0 12px;
+  padding:8px clamp(8px, 2%, 20px);
   min-width:0;
   min-height:82px;
   display:flex;
   flex-direction:column;
   justify-content:center;
+  border:2px solid var(--gold);
+  border-radius:10px;
 }
 .header-now-bidding .nb-label{
   font-family:'Space Mono',monospace;font-size:14px;letter-spacing:.16em;
@@ -71,11 +84,43 @@ header{
   font-family:'Oswald',sans-serif;font-size:30px;text-transform:uppercase;
   white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:2px;
 }
+@keyframes nb-enter{
+  from{opacity:0;transform:translateY(10px);}
+  to  {opacity:1;transform:translateY(0);}
+}
+.header-now-bidding.nb-animate .nb-name,
+.header-now-bidding.nb-animate .nb-meta{
+  animation:nb-enter .4s cubic-bezier(.22,.68,0,1.15) both;
+}
+.header-now-bidding.nb-animate .nb-meta{
+  animation-delay:.06s;
+}
+@keyframes nb-exit{
+  from{opacity:1;transform:translateY(0);}
+  to  {opacity:0;transform:translateY(10px);}
+}
+.header-now-bidding.nb-exit .nb-name,
+.header-now-bidding.nb-exit .nb-meta{
+  animation:nb-exit .25s ease-in both;
+}
 .header-now-bidding .nb-meta{
   font-family:'Space Mono',monospace;font-size:14px;color:var(--text-dim);margin-top:2px;
 }
 .header-now-bidding.empty .nb-name{
   color:var(--text-dim);
+}
+.header-now-bidding.empty{
+  border-color:var(--line);
+  box-shadow:none;
+  background:none;
+}
+/* Pulsing glow ring on the now-bidding box when a player is active */
+@keyframes gold-pulse{
+  0%,100%{box-shadow:0 0 4px color-mix(in srgb,var(--gold) 20%,transparent),  0 0  0px color-mix(in srgb,var(--gold) 0%,transparent);}
+  50%    {box-shadow:0 0 16px color-mix(in srgb,var(--gold) 55%,transparent), 0 0 32px color-mix(in srgb,var(--gold) 15%,transparent);}
+}
+.header-now-bidding:not(.empty){
+  animation:gold-pulse 2.5s ease-in-out infinite;
 }
 footer{
   position:fixed;
@@ -103,8 +148,15 @@ footer{
 h1{font-family:'Oswald',sans-serif;font-weight:700;font-size:36px;margin:4px 0 0;text-transform:uppercase;}
 .ticker{font-family:'Space Mono',monospace;font-size:13px;color:var(--text-dim);background:var(--court-deep);
   border:1px solid var(--line);border-radius:6px;padding:10px 14px;min-width:200px;width:max-content;max-width:45vw;
-  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;position:relative;}
 .ticker b{color:var(--gold);font-weight:700;}
+@keyframes ticker-slide-in{
+  from{opacity:0;transform:translateX(32px);}
+  to  {opacity:1;transform:translateX(0);}
+}
+.ticker.ticker-animate{
+  animation:ticker-slide-in .35s cubic-bezier(.22,.68,0,1.2) forwards;
+}
 .summary-bar{display:flex;gap:22px;flex-wrap:wrap;margin-bottom:18px;font-family:'Space Mono',monospace;font-size:13px;color:var(--text-dim);}
 .summary-bar b{color:var(--shuttle);font-size:15px;}
 
@@ -128,6 +180,12 @@ h1{font-family:'Oswald',sans-serif;font-weight:700;font-size:36px;margin:4px 0 0
 .team-card{background:var(--panel);border:2px solid var(--line);border-radius:10px;padding:16px 16px 14px;display:flex;flex-direction:column;gap:10px;}
 .team-card.full{border-color:var(--gold-dim);}
 .team-card.over{border-color:var(--danger);}
+@keyframes sold-flash{
+  0%  {border-color:var(--ok);box-shadow:0 0 0 2px color-mix(in srgb,var(--ok) 40%,transparent),0 0 24px color-mix(in srgb,var(--ok) 30%,transparent);}
+  60% {border-color:var(--ok);box-shadow:0 0 0 3px color-mix(in srgb,var(--ok) 20%,transparent),0 0 12px color-mix(in srgb,var(--ok) 15%,transparent);}
+  100%{border-color:var(--line);box-shadow:none;}
+}
+.team-card.sold-flash{animation:sold-flash 1.6s ease-out forwards;}
 .team-head{display:flex;justify-content:space-between;align-items:baseline;}
 .team-name{font-family:'Oswald',sans-serif;font-size:20px;text-transform:uppercase;letter-spacing:.02em;}
 .slot-count{font-family:'Space Mono',monospace;font-size:13px;color:var(--text-dim);}
@@ -135,6 +193,16 @@ h1{font-family:'Oswald',sans-serif;font-weight:700;font-size:36px;margin:4px 0 0
 .purse-fill{height:100%;background:var(--gold);transition:width .3s ease;}
 .purse-fill.low{background:var(--warn);}
 .purse-fill.crit{background:var(--danger);}
+@keyframes purse-crit-pulse{
+  0%,100%{opacity:1;}
+  50%     {opacity:.45;}
+}
+.purse-fill.crit{animation:purse-crit-pulse 1.2s ease-in-out infinite;}
+@keyframes purse-low-pulse{
+  0%,100%{opacity:1;}
+  50%     {opacity:.6;}
+}
+.purse-fill.low{animation:purse-low-pulse 2.4s ease-in-out infinite;}
 .purse-nums{display:flex;justify-content:space-between;font-family:'Space Mono',monospace;font-size:13px;color:var(--text-dim);}
 .purse-nums .left{color:var(--ok);font-weight:700;}
 .roster{list-style:none;margin:4px 0 0;padding:0;display:flex;flex-direction:column;gap:4px;}
@@ -146,8 +214,9 @@ h1{font-family:'Oswald',sans-serif;font-weight:700;font-size:36px;margin:4px 0 0
 .ri-name{font-size:14px;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;min-width:0;}
 .ri-sub{display:flex;align-items:center;gap:5px;flex-wrap:wrap;}
 .ri-skill{font-size:11px;color:var(--text-dim);}
-.roster li .rm{position:absolute;top:6px;right:6px;cursor:pointer;color:var(--danger);
-  font-family:'Space Mono',monospace;font-size:11px;opacity:.6;}
+.roster li{position:relative;}
+.roster li .rm{position:absolute;bottom:6px;right:6px;cursor:pointer;color:var(--danger);
+  font-family:'Space Mono',monospace;font-size:17px;line-height:1;opacity:.7;}
 .roster li .rm:hover{opacity:1;}
 .roster.captain-section{margin-top:0;padding-top:8px;border-top:1px dashed var(--line);}
 .roster .captain-entry{background:rgba(255,255,255,.04);border:2px solid var(--line);
