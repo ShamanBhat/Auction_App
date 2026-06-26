@@ -159,12 +159,22 @@ function renderPoolList(){
   });
 }
 
+let _lastTickerKey = null;
+
 function renderTicker(){
   const el = document.getElementById('ticker');
   if(!STATE.log.length){ el.innerHTML = '<span>No sales yet — first lot is on the table.</span>'; return; }
   const last = STATE.log[STATE.log.length-1];
   const team = STATE.teams.find(t=>t.id===last.team_id);
-  el.innerHTML = `SOLD &nbsp;<b>${esc(last.player)}</b> &nbsp;to&nbsp; <b>${esc(team?team.name:'?')}</b> &nbsp;for&nbsp; <b>${last.cost.toLocaleString()}</b> tokens`;
+  const key = `${last.player}|${last.team_id}|${last.cost}`;
+  if(key !== _lastTickerKey){
+    _lastTickerKey = key;
+    el.classList.remove('ticker-animate');
+    void el.offsetWidth; // force reflow to restart animation
+    el.innerHTML = `SOLD &nbsp;<b>${esc(last.player)}</b> &nbsp;to&nbsp; <b>${esc(team?team.name:'?')}</b> &nbsp;for&nbsp; <b>${last.cost.toLocaleString()}</b> tokens`;
+    el.classList.add('ticker-animate');
+    el.addEventListener('animationend',()=>el.classList.remove('ticker-animate'),{once:true});
+  }
 }
 
 function renderSummary(){
@@ -176,6 +186,8 @@ function renderSummary(){
   document.getElementById('sumSpent').textContent = spentTotal.toLocaleString();
   document.getElementById('sumLeft').textContent = (STATE.teams.length*STATE.purse - spentTotal).toLocaleString();
 }
+
+const _pendingFlash = new Set();
 
 function renderTeams(){
   const grid = document.getElementById('teamGrid');
@@ -229,6 +241,11 @@ function renderTeams(){
       <ul class="roster">${rosterHtml}</ul>
       ${cardFemaleWarn}`;
     grid.appendChild(card);
+    if(_pendingFlash.has(team.id)){
+      _pendingFlash.delete(team.id);
+      card.classList.add('sold-flash');
+      card.addEventListener('animationend',()=>card.classList.remove('sold-flash'),{once:true});
+    }
   });
   grid.querySelectorAll('input[data-field]').forEach(inp=>{
     inp.addEventListener('change', async e=>{
@@ -294,6 +311,7 @@ async function confirmSale(){
   try{
     STATE = await api('/api/sale', {method:'POST',headers:{'Content-Type':'application/json'},
       body: JSON.stringify({team_id:teamId, player_id:playerId, cost:cost})});
+    _pendingFlash.add(teamId);
     costInput.value='';
     showMsg(`✓ ${soldName} sold for ${cost.toLocaleString()} tokens.`,'ok');
     renderAll();

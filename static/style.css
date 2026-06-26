@@ -129,8 +129,15 @@ footer{
 h1{font-family:'Oswald',sans-serif;font-weight:700;font-size:36px;margin:4px 0 0;text-transform:uppercase;}
 .ticker{font-family:'Space Mono',monospace;font-size:13px;color:var(--text-dim);background:var(--court-deep);
   border:1px solid var(--line);border-radius:6px;padding:10px 14px;min-width:200px;width:max-content;max-width:45vw;
-  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;position:relative;}
 .ticker b{color:var(--gold);font-weight:700;}
+@keyframes ticker-slide-in{
+  from{opacity:0;transform:translateX(32px);}
+  to  {opacity:1;transform:translateX(0);}
+}
+.ticker.ticker-animate{
+  animation:ticker-slide-in .35s cubic-bezier(.22,.68,0,1.2) forwards;
+}
 .summary-bar{display:flex;gap:22px;flex-wrap:wrap;margin-bottom:18px;font-family:'Space Mono',monospace;font-size:13px;color:var(--text-dim);}
 .summary-bar b{color:var(--shuttle);font-size:15px;}
 
@@ -154,6 +161,12 @@ h1{font-family:'Oswald',sans-serif;font-weight:700;font-size:36px;margin:4px 0 0
 .team-card{background:var(--panel);border:2px solid var(--line);border-radius:10px;padding:16px 16px 14px;display:flex;flex-direction:column;gap:10px;}
 .team-card.full{border-color:var(--gold-dim);}
 .team-card.over{border-color:var(--danger);}
+@keyframes sold-flash{
+  0%  {border-color:var(--ok);box-shadow:0 0 0 2px color-mix(in srgb,var(--ok) 40%,transparent),0 0 24px color-mix(in srgb,var(--ok) 30%,transparent);}
+  60% {border-color:var(--ok);box-shadow:0 0 0 3px color-mix(in srgb,var(--ok) 20%,transparent),0 0 12px color-mix(in srgb,var(--ok) 15%,transparent);}
+  100%{border-color:var(--line);box-shadow:none;}
+}
+.team-card.sold-flash{animation:sold-flash 1.6s ease-out forwards;}
 .team-head{display:flex;justify-content:space-between;align-items:baseline;}
 .team-name{font-family:'Oswald',sans-serif;font-size:20px;text-transform:uppercase;letter-spacing:.02em;}
 .slot-count{font-family:'Space Mono',monospace;font-size:13px;color:var(--text-dim);}
