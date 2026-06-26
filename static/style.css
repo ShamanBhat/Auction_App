@@ -185,6 +185,16 @@ h1{font-family:'Oswald',sans-serif;font-weight:700;font-size:36px;margin:4px 0 0
 .purse-fill{height:100%;background:var(--gold);transition:width .3s ease;}
 .purse-fill.low{background:var(--warn);}
 .purse-fill.crit{background:var(--danger);}
+@keyframes purse-crit-pulse{
+  0%,100%{opacity:1;}
+  50%     {opacity:.45;}
+}
+.purse-fill.crit{animation:purse-crit-pulse 1.2s ease-in-out infinite;}
+@keyframes purse-low-pulse{
+  0%,100%{opacity:1;}
+  50%     {opacity:.6;}
+}
+.purse-fill.low{animation:purse-low-pulse 2.4s ease-in-out infinite;}
 .purse-nums{display:flex;justify-content:space-between;font-family:'Space Mono',monospace;font-size:13px;color:var(--text-dim);}
 .purse-nums .left{color:var(--ok);font-weight:700;}
 .roster{list-style:none;margin:4px 0 0;padding:0;display:flex;flex-direction:column;gap:4px;}
