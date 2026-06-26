@@ -54,14 +54,16 @@ header{
 }
 /* Centre slot in the header for "Now Bidding" */
 .header-now-bidding{
-  flex:1;
+  flex:0 1 clamp(200px, 30%, 420px);
   text-align:center;
-  padding:0 12px;
+  padding:8px clamp(8px, 2%, 20px);
   min-width:0;
   min-height:82px;
   display:flex;
   flex-direction:column;
   justify-content:center;
+  border:2px solid var(--gold);
+  border-radius:10px;
 }
 .header-now-bidding .nb-label{
   font-family:'Space Mono',monospace;font-size:14px;letter-spacing:.16em;
@@ -76,6 +78,11 @@ header{
 }
 .header-now-bidding.empty .nb-name{
   color:var(--text-dim);
+}
+.header-now-bidding.empty{
+  border-color:var(--line);
+  box-shadow:none;
+  background:none;
 }
 footer{
   position:fixed;
