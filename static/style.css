@@ -95,6 +95,14 @@ header{
 .header-now-bidding.nb-animate .nb-meta{
   animation-delay:.06s;
 }
+@keyframes nb-exit{
+  from{opacity:1;transform:translateY(0);}
+  to  {opacity:0;transform:translateY(10px);}
+}
+.header-now-bidding.nb-exit .nb-name,
+.header-now-bidding.nb-exit .nb-meta{
+  animation:nb-exit .25s ease-in both;
+}
 .header-now-bidding .nb-meta{
   font-family:'Space Mono',monospace;font-size:14px;color:var(--text-dim);margin-top:2px;
 }
