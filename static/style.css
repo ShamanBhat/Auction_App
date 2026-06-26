@@ -214,8 +214,9 @@ h1{font-family:'Oswald',sans-serif;font-weight:700;font-size:36px;margin:4px 0 0
 .ri-name{font-size:14px;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;min-width:0;}
 .ri-sub{display:flex;align-items:center;gap:5px;flex-wrap:wrap;}
 .ri-skill{font-size:11px;color:var(--text-dim);}
-.roster li .rm{position:absolute;top:6px;right:6px;cursor:pointer;color:var(--danger);
-  font-family:'Space Mono',monospace;font-size:11px;opacity:.6;}
+.roster li{position:relative;}
+.roster li .rm{position:absolute;bottom:6px;right:6px;cursor:pointer;color:var(--danger);
+  font-family:'Space Mono',monospace;font-size:17px;line-height:1;opacity:.7;}
 .roster li .rm:hover{opacity:1;}
 .roster.captain-section{margin-top:0;padding-top:8px;border-top:1px dashed var(--line);}
 .roster .captain-entry{background:rgba(255,255,255,.04);border:2px solid var(--line);
