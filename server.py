@@ -36,6 +36,7 @@ SAVE_FILE = os.path.join(SCRIPT_DIR, "auction_data.json")
 BACKUPS_DIR = os.path.join(SCRIPT_DIR, "backups")
 PLAYERS_FILE = os.path.join(SCRIPT_DIR, "players.json")
 TEAMS_FILE = os.path.join(SCRIPT_DIR, "teams.json")
+RULES_FILE = os.path.join(SCRIPT_DIR, "rules.json")
 
 # template_folder/static_folder default to "templates"/"static" next to this
 # file, which is exactly where they live — nothing extra to configure.
@@ -138,6 +139,7 @@ def default_state():
         "log": [],
         "current_bid_player_id": None,
         "theme": "court",
+        "show_rules": False,
     }
 
 
@@ -161,6 +163,8 @@ def load_state():
             state["current_bid_player_id"] = None
         if "theme" not in state:
             state["theme"] = "court"
+        if "show_rules" not in state:
+            state["show_rules"] = False
 
         # Migrate: backfill missing 'gender' field on any player entry (both
         # in the pool and already bought into teams). Read the current
@@ -503,6 +507,24 @@ def api_theme():
         return jsonify(state_with_budgets(state))
 
 
+@app.route("/api/rules", methods=["POST"])
+@require_host
+def api_rules():
+    """Show or hide the auction rules overlay for everyone — console and every
+    connected viewer pick it up immediately over the same live update channel
+    as a sale or theme change. Pass show: true/false, or omit to toggle."""
+    data = request.get_json(force=True)
+    with _lock:
+        state = load_state()
+        if "show" in data:
+            state["show_rules"] = bool(data["show"])
+        else:
+            state["show_rules"] = not state.get("show_rules", False)
+        save_state(state)
+        broadcast_update()
+        return jsonify(state_with_budgets(state))
+
+
 @app.route("/api/undo", methods=["POST"])
 @require_host
 def api_undo():
@@ -602,9 +624,22 @@ def api_export():
 # Both live in templates/, with their CSS/JS in static/.
 # ---------------------------------------------------------------------------
 
+def load_rules():
+    """Load the auction rules from rules.json so the console and viewer pages
+    share a single source of truth. Returns a list of {title, text} dicts, or
+    an empty list if the file is missing or unreadable."""
+    try:
+        with open(RULES_FILE, "r", encoding="utf-8") as f:
+            return json.load(f)
+    except (OSError, ValueError):
+        return []
+
+
 @app.route("/")
 def index():
-    return render_template("console.html") if is_host() else render_template("viewer.html")
+    rules = load_rules()
+    return (render_template("console.html", rules=rules) if is_host()
+            else render_template("viewer.html", rules=rules))
 
 
 def get_lan_ip():

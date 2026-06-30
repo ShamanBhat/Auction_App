@@ -293,7 +293,32 @@ function renderTeams(){
   });
 }
 
-function renderAll(){ populateTeamSelect(); populatePlayerSelect(); renderTeams(); renderTicker(); renderSummary(); renderNowBidding(); renderPoolList(); applyTheme(); renderViewerCount(); }
+function renderAll(){ populateTeamSelect(); populatePlayerSelect(); renderTeams(); renderTicker(); renderSummary(); renderNowBidding(); renderPoolList(); applyTheme(); renderViewerCount(); renderRules(); }
+
+function renderRules(){
+  const overlay = document.getElementById('rulesOverlay');
+  const btn = document.getElementById('rulesBtn');
+  if(!overlay) return;
+  const show = !!STATE.show_rules;
+  overlay.classList.toggle('open', show);
+  overlay.setAttribute('aria-hidden', show ? 'false' : 'true');
+  if(btn) btn.textContent = show ? 'Hide Rules' : 'Show Rules';
+}
+
+async function toggleRules(){
+  try{ STATE = await api('/api/rules', {method:'POST',headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({})}); renderRules(); }
+  catch(err){ showMsg(err.message,'error'); }
+}
+
+async function setRules(show){
+  try{ STATE = await api('/api/rules', {method:'POST',headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({show})}); renderRules(); }
+  catch(err){ showMsg(err.message,'error'); }
+}
+
+document.getElementById('rulesBtn').addEventListener('click', toggleRules);
+document.getElementById('rulesCloseBtn').addEventListener('click', ()=>setRules(false));
 
 function renderViewerCount(){
   const n = STATE.viewer_count || 0;

@@ -162,11 +162,19 @@ function applyTheme(state){
   document.body.classList.toggle('theme-stage', theme === 'stage');
 }
 
+function renderRules(state){
+  const overlay = document.getElementById('rulesOverlay');
+  if(!overlay) return;
+  const show = !!state.show_rules;
+  overlay.classList.toggle('open', show);
+  overlay.setAttribute('aria-hidden', show ? 'false' : 'true');
+}
+
 async function refresh(){
   try{
     const res = await fetch('/api/state');
     const state = await res.json();
-    renderTicker(state); renderTeams(state); renderNowBidding(state); renderPoolList(state); applyTheme(state);
+    renderTicker(state); renderTeams(state); renderNowBidding(state); renderPoolList(state); applyTheme(state); renderRules(state);
   }catch(e){ /* ignore, the stream below will catch up once reconnected */ }
 }
 
@@ -176,7 +184,7 @@ function connectStream(){
   const es = new EventSource('/api/stream');
   es.onmessage = (e)=>{
     const state = JSON.parse(e.data);
-    renderTicker(state); renderTeams(state); renderNowBidding(state); renderPoolList(state); applyTheme(state);
+    renderTicker(state); renderTeams(state); renderNowBidding(state); renderPoolList(state); applyTheme(state); renderRules(state);
   };
   es.onerror = ()=>{
     // EventSource retries automatically; do an extra one-off fetch so the
