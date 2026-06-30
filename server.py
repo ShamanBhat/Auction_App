@@ -28,7 +28,7 @@ from datetime import datetime
 
 from flask import Flask, jsonify, request, send_file, Response, render_template
 
-PURSE = 25000
+PURSE = 20000
 SLOTS = 3   # players each team bids for — fixed, not derived from players.json
 DEFAULT_TEAMS_IF_MISSING = 10
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
