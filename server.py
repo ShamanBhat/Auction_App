@@ -426,6 +426,16 @@ def api_sale():
                       f"({len(available_females)} female player{'s' if len(available_females) != 1 else ''} still available)"
             ), 400
 
+        # Enforce: each team may have at most 2 female members overall
+        # (captain counts toward the total, same as the minimum rule).
+        female_count = (1 if captain_is_female else 0) + sum(
+            1 for p in team["players"] if p.get("gender") == "F"
+        )
+        if player.get("gender") == "F" and female_count >= 2:
+            return jsonify(
+                error=f"{team['name']} already has the maximum of 2 female members."
+            ), 400
+
         player["sold"] = True
         player["team_id"] = team_id
         team["players"].append({

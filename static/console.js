@@ -53,6 +53,8 @@ function populatePlayerSelect(){
   const captainIsFemale = team && team.captain_gender === 'F';
   const teamHasFemale = team && team.players.some(p=>p.gender==='F');
   const needsFemale = isLastSlot && !teamHasFemale && !captainIsFemale;
+  const femaleCount = team ? (captainIsFemale ? 1 : 0) + team.players.filter(p=>p.gender==='F').length : 0;
+  const femaleFull = femaleCount >= 2;
   const available = STATE.players.filter(p=>!p.sold);
   sel.innerHTML = '';
   if(available.length === 0){
@@ -73,6 +75,8 @@ function populatePlayerSelect(){
       opt.textContent = p.name;
       // Grey out males when last slot requires a female
       if(needsFemale && p.gender !== 'F') opt.disabled = true;
+      // Grey out females when the team already has the max of 2
+      if(femaleFull && p.gender === 'F') opt.disabled = true;
       sel.appendChild(opt);
     });
   }
@@ -106,9 +110,13 @@ function updateBaseHint(){
       const isLastSlot = team.players.length === STATE.slots - 1;
       const captainIsFemale = team.captain_gender === 'F';
       const teamHasFemale = team.players.some(p=>p.gender==='F');
+      const femaleCount = (captainIsFemale ? 1 : 0) + team.players.filter(p=>p.gender==='F').length;
       if(isLastSlot && !teamHasFemale && !captainIsFemale){
         warn.style.color = '#f77ec0';
         warn.textContent = '⚠ Last slot must be female';
+      } else if(femaleCount >= 2 && player && player.gender === 'F'){
+        warn.style.color = '#f77ec0';
+        warn.textContent = '⚠ Max 2 females reached';
       } else {
         warn.textContent = '';
       }
@@ -245,9 +253,13 @@ function renderTeams(){
     const isLastSlotCard = !full && team.players.length === STATE.slots - 1;
     const captainIsFemaleCard = team.captain_gender === 'F';
     const teamHasFemaleCard = team.players.some(p => p.gender === 'F');
+    const femaleCountCard = (captainIsFemaleCard ? 1 : 0) + team.players.filter(p => p.gender === 'F').length;
+    const femaleFullCard = !full && femaleCountCard >= 2;
     const cardFemaleWarn = (isLastSlotCard && !teamHasFemaleCard && !captainIsFemaleCard)
       ? `<div class="card-female-warn">⚠ Next player must be female</div>`
-      : '';
+      : (femaleFullCard
+        ? `<div class="card-female-warn">⚠ Max 2 females reached — next player must be male</div>`
+        : '');
     card.innerHTML = `
       <div class="team-head">
         <div class="team-name"><input type="text" value="${esc(team.name)}" data-team="${team.id}" data-field="name"/></div>

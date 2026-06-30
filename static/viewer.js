@@ -74,9 +74,13 @@ function renderTeams(state){
     const captainIsFemale = team.captain_gender === 'F';
     const teamHasFemale = team.players.some(p => p.gender === 'F');
     const needsFemale = isLastSlot && !teamHasFemale && !captainIsFemale;
+    const femaleCount = (captainIsFemale ? 1 : 0) + team.players.filter(p => p.gender === 'F').length;
+    const femaleFull = !full && femaleCount >= 2;
     const femaleWarnHtml = needsFemale
       ? `<div class="card-female-warn">⚠ Next player must be female</div>`
-      : '';
+      : (femaleFull
+        ? `<div class="card-female-warn">⚠ Max 2 females reached</div>`
+        : '');
     card.innerHTML = `
       <div class="team-head">
         <div class="team-name">${esc(team.name)}</div>
