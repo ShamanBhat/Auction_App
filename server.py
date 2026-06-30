@@ -28,7 +28,7 @@ from datetime import datetime
 
 from flask import Flask, jsonify, request, send_file, Response, render_template
 
-PURSE = 25000
+PURSE = 20000
 SLOTS = 3   # players each team bids for — fixed, not derived from players.json
 DEFAULT_TEAMS_IF_MISSING = 10
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -424,6 +424,16 @@ def api_sale():
             return jsonify(
                 error=f"{team['name']} has no female players yet — the last slot must be filled by a female player. "
                       f"({len(available_females)} female player{'s' if len(available_females) != 1 else ''} still available)"
+            ), 400
+
+        # Enforce: each team may have at most 2 female members overall
+        # (captain counts toward the total, same as the minimum rule).
+        female_count = (1 if captain_is_female else 0) + sum(
+            1 for p in team["players"] if p.get("gender") == "F"
+        )
+        if player.get("gender") == "F" and female_count >= 2:
+            return jsonify(
+                error=f"{team['name']} already has the maximum of 2 female members."
             ), 400
 
         player["sold"] = True
