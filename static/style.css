@@ -287,3 +287,83 @@ footer{
 }
 /* Push page content up so the last card never sits behind the sticky footer */
 .wrap{padding-bottom:var(--footer-safe);}
+
+/* ---------------------------------------------------------------------------
+   Rules overlay — full-screen modal shown on every screen (console + viewers)
+   the instant the auctioneer toggles it. Hidden by default; .open fades it in.
+--------------------------------------------------------------------------- */
+.rules-overlay{
+  position:fixed;inset:0;z-index:200;
+  display:flex;align-items:center;justify-content:center;
+  padding:32px;
+  background:rgba(0,0,0,.78);
+  backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);
+  opacity:0;visibility:hidden;pointer-events:none;
+  transition:opacity .28s ease,visibility .28s ease;
+}
+.rules-overlay.open{opacity:1;visibility:visible;pointer-events:auto;}
+.rules-card{
+  position:relative;
+  width:min(1100px,95vw);
+  max-height:92vh;overflow-y:auto;
+  background:var(--panel);
+  border:2px solid var(--gold);
+  border-radius:14px;
+  padding:30px 40px 32px;
+  box-shadow:0 20px 60px rgba(0,0,0,.55),0 0 0 1px var(--line) inset;
+  transform:translateY(16px) scale(.98);
+  transition:transform .28s cubic-bezier(.22,.68,0,1.15);
+}
+.rules-overlay.open .rules-card{transform:translateY(0) scale(1);}
+.rules-overlay.open .rules-card{
+  animation:rules-glow 2.5s ease-in-out infinite,
+            rules-card-in .28s cubic-bezier(.22,.68,0,1.15);
+}
+@keyframes rules-card-in{
+  from{transform:translateY(16px) scale(.98);}
+  to  {transform:translateY(0) scale(1);}
+}
+@keyframes rules-glow{
+  0%,100%{box-shadow:0 20px 60px rgba(0,0,0,.55),0 0 0 1px var(--line) inset,
+           0 0 6px color-mix(in srgb,var(--gold) 25%,transparent),
+           0 0 0px color-mix(in srgb,var(--gold) 0%,transparent);}
+  50%    {box-shadow:0 20px 60px rgba(0,0,0,.55),0 0 0 1px var(--line) inset,
+           0 0 22px color-mix(in srgb,var(--gold) 60%,transparent),
+           0 0 44px color-mix(in srgb,var(--gold) 22%,transparent);}
+}
+.rules-close{
+  position:absolute;top:14px;right:16px;
+  background:var(--court-deep);color:var(--text-dim);
+  border:1px solid var(--line);border-radius:6px;
+  width:34px;height:34px;font-size:16px;line-height:1;cursor:pointer;
+  transition:color .2s ease,border-color .2s ease;
+}
+.rules-close:hover{color:var(--danger);border-color:var(--danger);}
+.rules-branding{
+  display:flex;align-items:center;gap:16px;
+  padding-bottom:18px;margin-bottom:20px;
+  border-bottom:2px dashed var(--line);
+}
+.rules-branding > div{min-width:0;}
+.rules-logo{height:54px;width:auto;display:block;flex-shrink:0;}
+.rules-branding .eyebrow{
+  font-family:'Space Mono',monospace;font-size:13px;letter-spacing:.18em;
+  color:var(--gold);text-transform:uppercase;
+}
+.rules-title{
+  font-family:'Oswald',sans-serif;font-weight:700;font-size:30px;
+  text-transform:uppercase;margin:4px 0 0;letter-spacing:.02em;
+}
+.rules-heading{
+  font-family:'Oswald',sans-serif;font-weight:700;font-size:22px;
+  text-transform:uppercase;margin:0 0 14px;letter-spacing:.04em;color:var(--text-dim);
+}
+.rules-list{
+  list-style:none;margin:0;padding:0;
+  display:flex;flex-direction:column;gap:10px;
+}
+.rules-list li{
+  background:var(--court-deep);border:1px solid var(--line);border-radius:8px;
+  padding:11px 16px;font-size:15px;line-height:1.45;color:var(--shuttle);
+}
+.rules-list li b{color:var(--gold);font-weight:700;}

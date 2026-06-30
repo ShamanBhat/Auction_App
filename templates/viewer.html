@@ -43,6 +43,24 @@
   <footer><span class="footer-credit">Made with care, passion and love by Shaman Bhat BU</span></footer>
 </div>
 
+<div class="rules-overlay" id="rulesOverlay" aria-hidden="true">
+  <div class="rules-card">
+    <div class="rules-branding">
+      <img src="/static/HighPerformanceTeam.png" alt="High Performance Team logo" class="rules-logo">
+      <div>
+        <div class="eyebrow">High Performance Team · Live Auction</div>
+        <h1 class="rules-title">EPT Badminton League 2026</h1>
+      </div>
+    </div>
+    <div class="rules-heading">Auction Rules</div>
+    <ul class="rules-list">
+      {% for rule in rules %}
+      <li><b>{{ rule.title }}</b> — {{ rule.text }}</li>
+      {% endfor %}
+    </ul>
+  </div>
+</div>
+
 <script src="/static/viewer.js"></script>
 </body>
 </html>

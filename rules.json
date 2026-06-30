@@ -1,0 +1,34 @@
+[
+  {
+    "title": "Team Composition",
+    "text": "Each team will comprise 4 players — 1 captain and 3 players acquired through the auction. All four members are required to play in the matches."
+  },
+  {
+    "title": "Gender Requirement",
+    "text": "Every team must include a minimum of 1 and a maximum of 2 female players, with the captain counted toward this quota."
+  },
+  {
+    "title": "Purse",
+    "text": "Each team will be allocated a starting purse of 20,000 tokens."
+  },
+  {
+    "title": "Base Price",
+    "text": "The base price for beginner players is 2,000 tokens, and for intermediate players, 5,000 tokens."
+  },
+  {
+    "title": "Budget Discipline",
+    "text": "Teams must manage their purse responsibly, ensuring sufficient funds remain to bid on all remaining players throughout the auction."
+  },
+  {
+    "title": "Bid Increment",
+    "text": "All bids will increase in increments of 500 tokens."
+  },
+  {
+    "title": "Re-auction round",
+    "text": "Players who go unsold in the first round get a second chance later in the auction."
+  },
+  {
+    "title": "Auctioneer's Authority",
+    "text": "The auctioneer's decision is final. Once a player is declared sold, the sale is binding and cannot be reversed."
+  }  
+]
