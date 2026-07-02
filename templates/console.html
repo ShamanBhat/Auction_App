@@ -28,6 +28,7 @@
       <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;justify-content:flex-end;">
         <div class="lan-ip" id="lanIp"></div>
         <div class="viewer-count none" id="viewerCount"><span class="vc-dot"></span><span id="viewerNum">0</span> viewing</div>
+        <button class="btn secondary sm" id="splashBtn">Show Welcome</button>
         <button class="btn secondary sm" id="rulesBtn">Show Rules</button>
         <div class="theme-toggle" id="themeToggle">
           <span class="tt-label">Theme</span>
@@ -105,6 +106,17 @@
       <li><b>{{ rule.title }}</b> — {{ rule.text }}</li>
       {% endfor %}
     </ul>
+  </div>
+</div>
+
+<div class="splash-overlay" id="splashOverlay" aria-hidden="true">
+  <div class="splash-card splash-card-console">
+    <div class="splash-line splash-line-small">Welcome to</div>
+    <div class="splash-line splash-line-title">EPT BADMINTON LEAGUE 2026</div>
+    <div class="splash-line splash-line-subtitle">LIVE AUCTION</div>
+    <div class="splash-actions">
+      <button class="btn" id="splashStartBtn">Start Auction</button>
+    </div>
   </div>
 </div>
 

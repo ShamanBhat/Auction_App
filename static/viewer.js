@@ -170,11 +170,19 @@ function renderRules(state){
   overlay.setAttribute('aria-hidden', show ? 'false' : 'true');
 }
 
+function renderSplash(state){
+  const overlay = document.getElementById('splashOverlay');
+  if(!overlay) return;
+  const show = !!state.show_splash;
+  overlay.classList.toggle('open', show);
+  overlay.setAttribute('aria-hidden', show ? 'false' : 'true');
+}
+
 async function refresh(){
   try{
     const res = await fetch('/api/state');
     const state = await res.json();
-    renderTicker(state); renderTeams(state); renderNowBidding(state); renderPoolList(state); applyTheme(state); renderRules(state);
+    renderTicker(state); renderTeams(state); renderNowBidding(state); renderPoolList(state); applyTheme(state); renderRules(state); renderSplash(state);
   }catch(e){ /* ignore, the stream below will catch up once reconnected */ }
 }
 
@@ -184,7 +192,7 @@ function connectStream(){
   const es = new EventSource('/api/stream');
   es.onmessage = (e)=>{
     const state = JSON.parse(e.data);
-    renderTicker(state); renderTeams(state); renderNowBidding(state); renderPoolList(state); applyTheme(state); renderRules(state);
+    renderTicker(state); renderTeams(state); renderNowBidding(state); renderPoolList(state); applyTheme(state); renderRules(state); renderSplash(state);
   };
   es.onerror = ()=>{
     // EventSource retries automatically; do an extra one-off fetch so the

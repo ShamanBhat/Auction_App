@@ -140,6 +140,7 @@ def default_state():
         "current_bid_player_id": None,
         "theme": "court",
         "show_rules": False,
+        "show_splash": True,
     }
 
 
@@ -165,6 +166,8 @@ def load_state():
             state["theme"] = "court"
         if "show_rules" not in state:
             state["show_rules"] = False
+        if "show_splash" not in state:
+            state["show_splash"] = True
 
         # Migrate: backfill missing 'gender' field on any player entry (both
         # in the pool and already bought into teams). Read the current
@@ -520,6 +523,23 @@ def api_rules():
             state["show_rules"] = bool(data["show"])
         else:
             state["show_rules"] = not state.get("show_rules", False)
+        save_state(state)
+        broadcast_update()
+        return jsonify(state_with_budgets(state))
+
+
+@app.route("/api/splash", methods=["POST"])
+@require_host
+def api_splash():
+    """Show or hide the auction welcome splash for everyone. Pass
+    show: true/false, or omit to toggle it."""
+    data = request.get_json(force=True)
+    with _lock:
+        state = load_state()
+        if "show" in data:
+            state["show_splash"] = bool(data["show"])
+        else:
+            state["show_splash"] = not state.get("show_splash", True)
         save_state(state)
         broadcast_update()
         return jsonify(state_with_budgets(state))

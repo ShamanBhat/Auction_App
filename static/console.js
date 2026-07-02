@@ -293,7 +293,7 @@ function renderTeams(){
   });
 }
 
-function renderAll(){ populateTeamSelect(); populatePlayerSelect(); renderTeams(); renderTicker(); renderSummary(); renderNowBidding(); renderPoolList(); applyTheme(); renderViewerCount(); renderRules(); }
+function renderAll(){ populateTeamSelect(); populatePlayerSelect(); renderTeams(); renderTicker(); renderSummary(); renderNowBidding(); renderPoolList(); applyTheme(); renderViewerCount(); renderRules(); renderSplash(); }
 
 function renderRules(){
   const overlay = document.getElementById('rulesOverlay');
@@ -303,6 +303,16 @@ function renderRules(){
   overlay.classList.toggle('open', show);
   overlay.setAttribute('aria-hidden', show ? 'false' : 'true');
   if(btn) btn.textContent = show ? 'Hide Rules' : 'Show Rules';
+}
+
+function renderSplash(){
+  const overlay = document.getElementById('splashOverlay');
+  const btn = document.getElementById('splashBtn');
+  if(!overlay) return;
+  const show = !!STATE.show_splash;
+  overlay.classList.toggle('open', show);
+  overlay.setAttribute('aria-hidden', show ? 'false' : 'true');
+  if(btn) btn.textContent = show ? 'Hide Welcome' : 'Show Welcome';
 }
 
 async function toggleRules(){
@@ -317,8 +327,22 @@ async function setRules(show){
   catch(err){ showMsg(err.message,'error'); }
 }
 
+async function toggleSplash(){
+  try{ STATE = await api('/api/splash', {method:'POST',headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({})}); renderSplash(); }
+  catch(err){ showMsg(err.message,'error'); }
+}
+
+async function setSplash(show){
+  try{ STATE = await api('/api/splash', {method:'POST',headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({show})}); renderSplash(); }
+  catch(err){ showMsg(err.message,'error'); }
+}
+
 document.getElementById('rulesBtn').addEventListener('click', toggleRules);
 document.getElementById('rulesCloseBtn').addEventListener('click', ()=>setRules(false));
+document.getElementById('splashBtn').addEventListener('click', toggleSplash);
+document.getElementById('splashStartBtn').addEventListener('click', ()=>setSplash(false));
 
 function renderViewerCount(){
   const n = STATE.viewer_count || 0;
@@ -412,7 +436,7 @@ function connectConsoleStream(){
     // avoid re-rendering dropdowns mid-input by checking focus.
     const focused = document.activeElement;
     const inputFocused = focused && (focused.tagName === 'INPUT' || focused.tagName === 'SELECT');
-    if(!inputFocused){ renderAll(); } else { renderViewerCount(); renderTicker(); renderSummary(); }
+    if(!inputFocused){ renderAll(); } else { renderViewerCount(); renderTicker(); renderSummary(); renderRules(); renderSplash(); }
   };
   es.onerror = ()=>{
     // Browser will auto-reconnect; do a one-off fetch to stay in sync.
