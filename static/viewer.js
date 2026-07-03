@@ -6,6 +6,7 @@
 function esc(s){ const d=document.createElement('div'); d.textContent = s==null?'':s; return d.innerHTML; }
 function genderBadge(g){ return `<span class="gender-badge ${g}">${g==='F'?'She/Her':'He/Him'}</span>`; }
 
+// Keep CSS viewport offsets in sync with dynamic header/footer heights.
 function syncViewportChrome(){
   const header = document.querySelector('header');
   const footer = document.querySelector('footer');
@@ -19,6 +20,7 @@ window.addEventListener('resize', syncViewportChrome);
 let _lastTickerKey = null;
 let _prevSplashVisible = null;
 
+// Animate ticker when a new sale event appears in the log.
 function renderTicker(state){
   const el = document.getElementById('ticker');
   if(!state.log.length){ el.innerHTML = '<span>No sales yet — first lot is on the table.</span>'; return; }
@@ -37,6 +39,7 @@ function renderTicker(state){
 
 let _prevTeamCounts = {};
 
+// Render the full read-only team board with stagger metadata for unlock animation.
 function renderTeams(state){
   const grid = document.getElementById('teamGrid');
   grid.innerHTML = '';
@@ -103,6 +106,7 @@ function renderTeams(state){
   state.teams.forEach(t=>{ _prevTeamCounts[t.id] = t.players.length; });
 }
 
+// Replay the viewer-only unlock entrance sequence when splash closes.
 function triggerUnlockAnimation(){
   document.body.classList.remove('auction-unlock');
   void document.body.offsetWidth;
@@ -113,6 +117,7 @@ function triggerUnlockAnimation(){
 let _lastBidPlayerId = null;
 let _nbExiting = false;
 
+// Animate and render the header "Now bidding" spotlight panel.
 function renderNowBidding(state){
   const box = document.getElementById('nowBidding');
   if(!box) return;
@@ -143,6 +148,7 @@ function renderNowBidding(state){
   }
 }
 
+// Render player pool sidebar with sold/current player badges.
 function renderPoolList(state){
   const list = document.getElementById('poolList');
   list.innerHTML = '';
@@ -165,12 +171,14 @@ function renderPoolList(state){
   });
 }
 
+// Apply active theme to viewer root classes.
 function applyTheme(state){
   const theme = state.theme || 'court';
   document.body.classList.toggle('theme-bosch', theme === 'bosch');
   document.body.classList.toggle('theme-stage', theme === 'stage');
 }
 
+// Toggle rules overlay based on synchronized host state.
 function renderRules(state){
   const overlay = document.getElementById('rulesOverlay');
   if(!overlay) return;
@@ -179,6 +187,7 @@ function renderRules(state){
   overlay.setAttribute('aria-hidden', show ? 'false' : 'true');
 }
 
+// Toggle splash overlay and trigger unlock animation on close transition.
 function renderSplash(state){
   const overlay = document.getElementById('splashOverlay');
   if(!overlay) return;
@@ -191,6 +200,7 @@ function renderSplash(state){
   _prevSplashVisible = show;
 }
 
+// One-shot fetch for reconnect recovery and initial hydration fallback.
 async function refresh(){
   try{
     const res = await fetch('/api/state');
@@ -202,6 +212,7 @@ async function refresh(){
 // Live push connection — the page updates the instant the auctioneer
 // records a sale, undo, or edit, instead of polling on a timer.
 function connectStream(){
+  // Subscribe to server push updates so viewer stays live without polling.
   const es = new EventSource('/api/stream');
   es.onmessage = (e)=>{
     const state = JSON.parse(e.data);

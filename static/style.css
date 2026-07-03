@@ -368,6 +368,7 @@ footer{
 }
 .rules-list li b{color:var(--gold);font-weight:700;}
 
+/* Unlock sequence keyframes used when splash closes on viewer. */
 @keyframes unlock-header-in{
   from{opacity:0;transform:translateY(-56px) scale(.92);filter:blur(10px);}
   to{opacity:1;transform:translateY(0) scale(1);filter:blur(0);}
@@ -420,6 +421,7 @@ footer{
 .splash-overlay.open{opacity:1;visibility:visible;pointer-events:auto;}
 .splash-overlay::before,
 .splash-overlay::after{
+  /* Floating orb layers that drift behind splash copy. */
   content:"";
   position:absolute;
   border-radius:50%;
@@ -450,6 +452,7 @@ footer{
   100%{transform:translate(-24vw,16vh) scale(1.12);}
 }
 
+/* Shared splash card shell for both console popup and viewer fullscreen. */
 .splash-card{
   position:relative;
   z-index:1;
@@ -505,6 +508,7 @@ footer{
 }
 .splash-overlay-viewer::before,
 .splash-overlay-viewer::after{
+  /* Stronger orb treatment for projection-friendly viewer screens. */
   filter:blur(18px);
   opacity:.78;
 }
@@ -531,6 +535,8 @@ footer{
 .splash-card-viewer .splash-line-title{font-size:clamp(56px,9vw,150px);}
 .splash-card-viewer .splash-line-subtitle{font-size:clamp(34px,5vw,72px);}
 .splash-card-viewer .splash-line-small{font-size:clamp(20px,2.2vw,32px);}
+
+/* Bottom-centered logo lockup for the fullscreen viewer splash. */
 .splash-viewer-logo{
   position:absolute;
   left:50%;

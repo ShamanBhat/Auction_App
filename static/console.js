@@ -4,6 +4,7 @@
 
 let STATE = null;
 
+// Keep CSS viewport offsets in sync with dynamic header/footer heights.
 function syncViewportChrome(){
   const header = document.querySelector('header');
   const footer = document.querySelector('footer');
@@ -16,6 +17,7 @@ window.addEventListener('resize', syncViewportChrome);
 
 function esc(s){ const d=document.createElement('div'); d.textContent = s==null?'':s; return d.innerHTML; }
 
+// Unified JSON API helper for host-side mutations and reads.
 async function api(path, opts){
   const res = await fetch(path, opts);
   const data = await res.json();
@@ -29,6 +31,7 @@ function showMsg(text, type){
   el.className = 'console-msg' + (type ? ' '+type : '');
 }
 
+// Rebuild team selector with live slot availability state.
 function populateTeamSelect(){
   const sel = document.getElementById('teamSelect');
   const prev = sel.value;
@@ -44,6 +47,7 @@ function populateTeamSelect(){
   if(prev) sel.value = prev;
 }
 
+// Rebuild player selector and enforce female-slot constraints in UI.
 function populatePlayerSelect(){
   const sel = document.getElementById('playerSelect');
   const prev = sel.value;
@@ -88,6 +92,7 @@ function populatePlayerSelect(){
 
 function genderBadge(g){ return `<span class="gender-badge ${g}">${g==='F'?'She/Her':'He/Him'}</span>`; }
 
+// Show contextual hints/warnings for selected player and team constraints.
 function updateBaseHint(){
   const sel = document.getElementById('playerSelect');
   const hint = document.getElementById('baseHint');
@@ -124,6 +129,7 @@ function updateBaseHint(){
   }
 }
 
+// Push current "now bidding" player to viewers before a sale is confirmed.
 async function announceCurrentBid(){
   const sel = document.getElementById('playerSelect');
   const playerId = sel.value ? parseInt(sel.value,10) : null;
@@ -137,6 +143,7 @@ async function announceCurrentBid(){
 let _lastBidPlayerId = null;
 let _nbExiting = false;
 
+// Animate and render the header "Now bidding" spotlight panel.
 function renderNowBidding(){
   const box = document.getElementById('nowBidding');
   if(!box) return;
@@ -167,6 +174,7 @@ function renderNowBidding(){
   }
 }
 
+// Render complete player pool list including sold/available status chips.
 function renderPoolList(){
   const list = document.getElementById('poolList');
   list.innerHTML = '';
@@ -187,6 +195,7 @@ function renderPoolList(){
 
 let _lastTickerKey = null;
 
+// Animate ticker when a new sale lands in the auction log.
 function renderTicker(){
   const el = document.getElementById('ticker');
   if(!STATE.log.length){ el.innerHTML = '<span>No sales yet — first lot is on the table.</span>'; return; }
@@ -203,6 +212,7 @@ function renderTicker(){
   }
 }
 
+// Update summary counters for teams, sales, and total token usage.
 function renderSummary(){
   const filled = STATE.teams.filter(t=>t.players.length>=STATE.slots).length;
   const sold = STATE.teams.reduce((s,t)=>s+t.players.length,0);
@@ -215,6 +225,7 @@ function renderSummary(){
 
 const _pendingFlash = new Set();
 
+// Render editable team cards and wire inline edit/remove controls.
 function renderTeams(){
   const grid = document.getElementById('teamGrid');
   grid.innerHTML = '';
@@ -295,6 +306,7 @@ function renderTeams(){
 
 function renderAll(){ populateTeamSelect(); populatePlayerSelect(); renderTeams(); renderTicker(); renderSummary(); renderNowBidding(); renderPoolList(); applyTheme(); renderViewerCount(); renderRules(); renderSplash(); }
 
+// Toggle rules overlay visibility in the host console.
 function renderRules(){
   const overlay = document.getElementById('rulesOverlay');
   const btn = document.getElementById('rulesBtn');
@@ -305,6 +317,7 @@ function renderRules(){
   if(btn) btn.textContent = show ? 'Hide Rules' : 'Show Rules';
 }
 
+// Toggle welcome splash overlay visibility in the host console.
 function renderSplash(){
   const overlay = document.getElementById('splashOverlay');
   const btn = document.getElementById('splashBtn');
@@ -315,24 +328,28 @@ function renderSplash(){
   if(btn) btn.textContent = show ? 'Hide Welcome' : 'Show Welcome';
 }
 
+// Host action: toggle rules state for every connected screen.
 async function toggleRules(){
   try{ STATE = await api('/api/rules', {method:'POST',headers:{'Content-Type':'application/json'},
     body: JSON.stringify({})}); renderRules(); }
   catch(err){ showMsg(err.message,'error'); }
 }
 
+// Host action: set explicit rules visibility state.
 async function setRules(show){
   try{ STATE = await api('/api/rules', {method:'POST',headers:{'Content-Type':'application/json'},
     body: JSON.stringify({show})}); renderRules(); }
   catch(err){ showMsg(err.message,'error'); }
 }
 
+// Host action: toggle welcome splash for every connected screen.
 async function toggleSplash(){
   try{ STATE = await api('/api/splash', {method:'POST',headers:{'Content-Type':'application/json'},
     body: JSON.stringify({})}); renderSplash(); }
   catch(err){ showMsg(err.message,'error'); }
 }
 
+// Host action: set explicit splash visibility state.
 async function setSplash(show){
   try{ STATE = await api('/api/splash', {method:'POST',headers:{'Content-Type':'application/json'},
     body: JSON.stringify({show})}); renderSplash(); }
@@ -344,6 +361,7 @@ document.getElementById('rulesCloseBtn').addEventListener('click', ()=>setRules(
 document.getElementById('splashBtn').addEventListener('click', toggleSplash);
 document.getElementById('splashStartBtn').addEventListener('click', ()=>setSplash(false));
 
+// Show live viewer count and detected LAN address for room devices.
 function renderViewerCount(){
   const n = STATE.viewer_count || 0;
   const el = document.getElementById('viewerCount');
@@ -358,6 +376,7 @@ function renderViewerCount(){
   }
 }
 
+// Apply selected visual theme and update theme toggle button states.
 function applyTheme(){
   const theme = STATE.theme || 'court';
   document.body.classList.toggle('theme-bosch', theme === 'bosch');
@@ -367,6 +386,7 @@ function applyTheme(){
   });
 }
 
+// Persist theme choice through backend so all clients stay in sync.
 async function setTheme(theme){
   try{ STATE = await api('/api/theme', {method:'POST',headers:{'Content-Type':'application/json'},
     body: JSON.stringify({theme})}); applyTheme(); }
@@ -377,6 +397,7 @@ document.querySelectorAll('#themeToggle .tt-btn').forEach(btn=>{
   btn.addEventListener('click', ()=>setTheme(btn.dataset.theme));
 });
 
+// Validate and submit a confirmed sale from current form selection.
 async function confirmSale(){
   const teamId = parseInt(document.getElementById('teamSelect').value,10);
   const playerSelect = document.getElementById('playerSelect');
@@ -397,11 +418,13 @@ async function confirmSale(){
   }catch(err){ showMsg(err.message,'error'); }
 }
 
+// Revert the most recent sale operation.
 async function undoLast(){
   try{ STATE = await api('/api/undo', {method:'POST'}); renderAll(); showMsg('Last sale undone.','ok'); }
   catch(err){ showMsg(err.message,'error'); }
 }
 
+// Hard reset auction after confirmation prompts.
 async function resetAuction(){
   if(!confirm('This clears every sale, budget and name. Are you sure?')) return;
   if(!confirm('Really sure? This cannot be undone.')) return;
@@ -418,6 +441,7 @@ document.getElementById('playerSelect').addEventListener('change', ()=>{ updateB
 document.getElementById('playerCost').addEventListener('keydown', e=>{ if(e.key==='Enter') confirmSale(); });
 
 (async function init(){
+  // Initial state fetch and first render of host console.
   STATE = await api('/api/state');
   syncViewportChrome();
   renderAll();
@@ -425,6 +449,7 @@ document.getElementById('playerCost').addEventListener('keydown', e=>{ if(e.key=
 })();
 
 function connectConsoleStream(){
+  // Subscribe host console to live updates (viewer count/state sync).
   const es = new EventSource('/api/console-stream');
   es.onmessage = (e)=>{
     const incoming = JSON.parse(e.data);

@@ -10,6 +10,7 @@
 </head>
 <body>
 <div class="wrap">
+  <!-- Read-only header with branding, now-bidding panel and ticker. -->
   <header>
     <div class="title-branding">
       <img src="/static/HighPerformanceTeam.png" alt="High Performance Team logo" class="header-logo-viewer">
@@ -27,6 +28,7 @@
     <div class="ticker" id="ticker"><span>No sales yet — first lot is on the table.</span></div>
   </header>
 
+  <!-- Viewer layout: team board on the left and player pool on the right. -->
   <div class="layout">
     <div class="main">
       <div class="teams" id="teamGrid"></div>
@@ -43,6 +45,7 @@
   <footer><span class="footer-credit">Made with care, passion and love by Shaman Bhat BU</span></footer>
 </div>
 
+<!-- Full-screen rules modal, synchronized from host actions. -->
 <div class="rules-overlay" id="rulesOverlay" aria-hidden="true">
   <div class="rules-card">
     <div class="rules-branding">
@@ -61,6 +64,7 @@
   </div>
 </div>
 
+<!-- Full-screen auction intro splash shown at the start of the session. -->
 <div class="splash-overlay splash-overlay-viewer" id="splashOverlay" aria-hidden="true">
   <div class="splash-card splash-card-viewer">
     <div class="splash-line splash-line-small">Welcome to</div>
