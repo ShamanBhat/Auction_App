@@ -17,6 +17,7 @@ function syncViewportChrome(){
 window.addEventListener('resize', syncViewportChrome);
 
 let _lastTickerKey = null;
+let _prevSplashVisible = null;
 
 function renderTicker(state){
   const el = document.getElementById('ticker');
@@ -39,12 +40,13 @@ let _prevTeamCounts = {};
 function renderTeams(state){
   const grid = document.getElementById('teamGrid');
   grid.innerHTML = '';
-  state.teams.forEach(team=>{
+  state.teams.forEach((team, index)=>{
     const rem = team.remaining;
     const pct = Math.max(0, Math.min(100, (rem/state.purse)*100));
     const full = team.players.length >= state.slots;
     const card = document.createElement('div');
     card.className = 'team-card' + (full?' full':'') + (rem<0?' over':'');
+    card.style.setProperty('--fly-delay', `${120 + (index * 55)}ms`);
     const fillClass = pct<=15?'crit':(pct<=35?'low':'');
     const captainHtml = `
       <li class="captain-entry">
@@ -99,6 +101,13 @@ function renderTeams(state){
   });
   _prevTeamCounts = {};
   state.teams.forEach(t=>{ _prevTeamCounts[t.id] = t.players.length; });
+}
+
+function triggerUnlockAnimation(){
+  document.body.classList.remove('auction-unlock');
+  void document.body.offsetWidth;
+  document.body.classList.add('auction-unlock');
+  window.setTimeout(()=>document.body.classList.remove('auction-unlock'), 2200);
 }
 
 let _lastBidPlayerId = null;
@@ -174,8 +183,12 @@ function renderSplash(state){
   const overlay = document.getElementById('splashOverlay');
   if(!overlay) return;
   const show = !!state.show_splash;
+  if(_prevSplashVisible === true && !show){
+    triggerUnlockAnimation();
+  }
   overlay.classList.toggle('open', show);
   overlay.setAttribute('aria-hidden', show ? 'false' : 'true');
+  _prevSplashVisible = show;
 }
 
 async function refresh(){

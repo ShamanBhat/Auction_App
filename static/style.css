@@ -368,6 +368,43 @@ footer{
 }
 .rules-list li b{color:var(--gold);font-weight:700;}
 
+@keyframes unlock-header-in{
+  from{opacity:0;transform:translateY(-56px) scale(.92);filter:blur(10px);}
+  to{opacity:1;transform:translateY(0) scale(1);filter:blur(0);}
+}
+@keyframes unlock-main-in{
+  from{opacity:0;transform:translateY(72px) scale(.95);filter:blur(12px);}
+  to{opacity:1;transform:translateY(0) scale(1);filter:blur(0);}
+}
+@keyframes unlock-sidebar-in{
+  from{opacity:0;transform:translateX(68px) scale(.94);filter:blur(12px);}
+  to{opacity:1;transform:translateX(0) scale(1);filter:blur(0);}
+}
+@keyframes unlock-card-in{
+  from{opacity:0;transform:translateY(96px) scale(.88);filter:blur(14px);}
+  72%{opacity:1;transform:translateY(-8px) scale(1.025);filter:blur(0);}
+  to{opacity:1;transform:translateY(0) scale(1);filter:blur(0);}
+}
+@keyframes unlock-footer-in{
+  from{opacity:0;transform:translateY(34px);filter:blur(8px);}
+  to{opacity:1;transform:translateY(0);filter:blur(0);}
+}
+.auction-unlock header{
+  animation:unlock-header-in .9s cubic-bezier(.18,.84,.16,1) both;
+}
+.auction-unlock .main{
+  animation:unlock-main-in 1.12s cubic-bezier(.16,.88,.16,1) .12s both;
+}
+.auction-unlock .sidebar{
+  animation:unlock-sidebar-in 1.18s cubic-bezier(.16,.88,.16,1) .22s both;
+}
+.auction-unlock footer{
+  animation:unlock-footer-in .82s cubic-bezier(.2,.78,.2,1) .42s both;
+}
+.auction-unlock .team-card{
+  animation:unlock-card-in 1.18s cubic-bezier(.16,.9,.16,1) var(--fly-delay, 0ms) both;
+}
+
 /* ---------------------------------------------------------------------------
    Welcome splash overlay — compact card on console, full-screen lock on viewer.
 --------------------------------------------------------------------------- */
