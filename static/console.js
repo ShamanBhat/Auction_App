@@ -3,6 +3,7 @@
 // served to requests from 127.0.0.1).
 
 let STATE = null;
+let _lastAppliedTheme = null;
 
 // Keep CSS viewport offsets in sync with dynamic header/footer heights.
 function syncViewportChrome(){
@@ -376,14 +377,26 @@ function renderViewerCount(){
   }
 }
 
+// Play a short cinematic wipe whenever the active theme changes.
+function triggerSceneTransition(){
+  document.body.classList.remove('scene-transition');
+  void document.body.offsetWidth;
+  document.body.classList.add('scene-transition');
+  window.setTimeout(()=>document.body.classList.remove('scene-transition'), 760);
+}
+
 // Apply selected visual theme and update theme toggle button states.
 function applyTheme(){
   const theme = STATE.theme || 'court';
+  if(_lastAppliedTheme !== null && _lastAppliedTheme !== theme){
+    triggerSceneTransition();
+  }
   document.body.classList.toggle('theme-bosch', theme === 'bosch');
   document.body.classList.toggle('theme-stage', theme === 'stage');
   document.querySelectorAll('#themeToggle .tt-btn').forEach(btn=>{
     btn.classList.toggle('active', btn.dataset.theme === theme);
   });
+  _lastAppliedTheme = theme;
 }
 
 // Persist theme choice through backend so all clients stay in sync.

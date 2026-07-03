@@ -19,6 +19,7 @@ window.addEventListener('resize', syncViewportChrome);
 
 let _lastTickerKey = null;
 let _prevSplashVisible = null;
+let _lastAppliedTheme = null;
 
 // Animate ticker when a new sale event appears in the log.
 function renderTicker(state){
@@ -171,11 +172,23 @@ function renderPoolList(state){
   });
 }
 
+// Play a short cinematic wipe whenever the synchronized theme changes.
+function triggerSceneTransition(){
+  document.body.classList.remove('scene-transition');
+  void document.body.offsetWidth;
+  document.body.classList.add('scene-transition');
+  window.setTimeout(()=>document.body.classList.remove('scene-transition'), 760);
+}
+
 // Apply active theme to viewer root classes.
 function applyTheme(state){
   const theme = state.theme || 'court';
+  if(_lastAppliedTheme !== null && _lastAppliedTheme !== theme){
+    triggerSceneTransition();
+  }
   document.body.classList.toggle('theme-bosch', theme === 'bosch');
   document.body.classList.toggle('theme-stage', theme === 'stage');
+  _lastAppliedTheme = theme;
 }
 
 // Toggle rules overlay based on synchronized host state.

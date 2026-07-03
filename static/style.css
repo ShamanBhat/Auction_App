@@ -42,7 +42,46 @@ body.theme-stage{
 body{margin:0;background:radial-gradient(circle at var(--glow-x) var(--glow-y),var(--glow) 0%,var(--court) 45%,var(--court-deep) 100%);
   color:var(--shuttle);font-family:'Inter',sans-serif;min-height:100vh;padding:0px 20px 60px;
   transition:color .25s ease;
-  animation:glow-drift 16s ease-in-out infinite;}
+  animation:glow-drift 16s ease-in-out infinite;
+  position:relative;}
+
+/* Cinematic theme transition: quick color grade plus diagonal light wipe. */
+body::after{
+  content:"";
+  position:fixed;
+  inset:-18%;
+  z-index:180;
+  pointer-events:none;
+  opacity:0;
+  background:
+    linear-gradient(110deg,
+      rgba(255,255,255,0) 38%,
+      rgba(255,248,228,.34) 50%,
+      rgba(255,255,255,0) 62%),
+    radial-gradient(circle at 50% 50%, rgba(232,178,60,.12) 0%, rgba(232,178,60,0) 62%);
+  transform:translateX(120%) skewX(-12deg);
+}
+
+body.scene-transition{
+  animation:glow-drift 16s ease-in-out infinite, scene-grade .72s cubic-bezier(.2,.75,.2,1);
+}
+
+body.scene-transition::after{
+  animation:scene-wipe .72s cubic-bezier(.2,.75,.2,1);
+}
+
+@keyframes scene-grade{
+  0%{filter:saturate(1) brightness(1);}
+  36%{filter:saturate(1.16) brightness(1.07);}
+  100%{filter:saturate(1) brightness(1);}
+}
+
+@keyframes scene-wipe{
+  0%{opacity:0;transform:translateX(120%) skewX(-12deg);}
+  24%{opacity:.92;}
+  68%{opacity:.34;}
+  100%{opacity:0;transform:translateX(-120%) skewX(-12deg);}
+}
 /* No max-width — the layout fills the full screen so wide displays get
    more columns of team cards automatically. */
 .wrap{width:100%;}
