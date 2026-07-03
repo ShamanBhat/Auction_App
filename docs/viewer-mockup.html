@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Viewer Screen — Guided Tour</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+/* ── Theme ── */
+:root{
+  --court:#0E2A2B; --court-deep:#0A1F20; --panel:#133C3D; --line:#2B5E5C;
+  --shuttle:#F4F1E6; --gold:#E8B23C; --gold-dim:#8a6c2e; --glow:#143F40;
+  --ok:#6FCF97; --warn:#F2994A; --danger:#EB5757; --text-dim:#9FC1BC;
+  --header-safe:110px; --footer-safe:52px;
+  --sidebar-gap:14px; --sidebar-w:260px; --sidebar-right:20px;
+}
+@property --glow-x{syntax:'<percentage>';initial-value:50%;inherits:false;}
+@property --glow-y{syntax:'<percentage>';initial-value:0%;inherits:false;}
+@keyframes glow-drift{0%{--glow-x:50%;--glow-y:0%;}25%{--glow-x:55%;--glow-y:7%;}50%{--glow-x:50%;--glow-y:12%;}75%{--glow-x:45%;--glow-y:7%;}100%{--glow-x:50%;--glow-y:0%;}}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{
+  font-family:'Inter',sans-serif;
+  background:radial-gradient(circle at var(--glow-x) var(--glow-y),var(--glow) 0%,var(--court) 45%,var(--court-deep) 100%);
+  color:var(--shuttle); min-height:100vh; padding:0 20px 60px;
+  animation:glow-drift 16s ease-in-out infinite;
+}
+
+/* ── Header ── */
+header{
+  position:sticky; top:0; z-index:50;
+  background:var(--court);
+  display:flex; align-items:center; justify-content:space-between; flex-wrap:nowrap; gap:16px;
+  border-bottom:2px dashed var(--line); border-radius:10px;
+  padding:14px 16px; margin-bottom:22px;
+  box-shadow:0 4px 24px rgba(0,0,0,.35);
+}
+.title-branding{display:flex;align-items:center;gap:14px;}
+.logo-placeholder{
+  width:72px;height:72px; background:var(--panel);
+  border:2px solid var(--gold-dim); border-radius:10px;
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Space Mono',monospace;font-size:9px;color:var(--gold-dim);
+  letter-spacing:.06em;text-align:center;flex-shrink:0;
+}
+.eyebrow{font-family:'Space Mono',monospace;font-size:13px;letter-spacing:.18em;color:var(--gold);text-transform:uppercase;}
+h1{font-family:'Oswald',sans-serif;font-weight:700;font-size:32px;margin:4px 0 0;text-transform:uppercase;}
+.readonly-tag{font-family:'Space Mono',monospace;font-size:11px;letter-spacing:.08em;color:var(--text-dim);
+  border:1px dashed var(--line);border-radius:5px;padding:3px 9px;display:inline-block;margin-top:6px;}
+.header-now-bidding{
+  flex:0 1 clamp(200px,30%,420px); text-align:center; padding:8px 20px;
+  min-height:82px;display:flex;flex-direction:column;justify-content:center;
+  border:2px solid var(--gold);border-radius:10px;
+}
+@keyframes gold-pulse{0%,100%{box-shadow:0 0 4px color-mix(in srgb,var(--gold) 20%,transparent);}50%{box-shadow:0 0 16px color-mix(in srgb,var(--gold) 55%,transparent),0 0 32px color-mix(in srgb,var(--gold) 15%,transparent);}}
+.header-now-bidding{animation:gold-pulse 2.5s ease-in-out infinite;}
+.nb-label{font-family:'Space Mono',monospace;font-size:13px;letter-spacing:.16em;color:var(--gold);text-transform:uppercase;}
+.nb-name{font-family:'Oswald',sans-serif;font-size:28px;text-transform:uppercase;margin-top:2px;}
+.nb-meta{font-family:'Space Mono',monospace;font-size:13px;color:var(--text-dim);margin-top:2px;}
+.ticker{
+  font-family:'Space Mono',monospace;font-size:12px;color:var(--text-dim);
+  background:var(--court-deep);border:1px solid var(--line);border-radius:6px;
+  padding:10px 14px;width:max-content;max-width:44vw;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.ticker b{color:var(--gold);font-weight:700;}
+
+/* ── Layout ── */
+.layout{display:block;}
+.main{padding-right:calc(var(--sidebar-w) + var(--sidebar-right) + var(--sidebar-gap));}
+.teams{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:14px;}
+
+/* ── Team cards ── */
+.team-card{background:var(--panel);border:2px solid var(--line);border-radius:10px;padding:16px 16px 14px;display:flex;flex-direction:column;gap:10px;}
+.team-card.full{border-color:var(--gold-dim);}
+.team-head{display:flex;justify-content:space-between;align-items:baseline;}
+.team-name{font-family:'Oswald',sans-serif;font-size:20px;text-transform:uppercase;letter-spacing:.02em;}
+.slot-count{font-family:'Space Mono',monospace;font-size:13px;color:var(--text-dim);}
+.purse-meter{background:var(--court-deep);border-radius:5px;height:10px;overflow:hidden;}
+.purse-fill{height:100%;background:var(--gold);}
+.purse-fill.low{background:var(--warn);animation:purse-low 2.4s ease-in-out infinite;}
+.purse-fill.crit{background:var(--danger);animation:purse-crit 1.2s ease-in-out infinite;}
+@keyframes purse-crit{0%,100%{opacity:1;}50%{opacity:.45;}}
+@keyframes purse-low{0%,100%{opacity:1;}50%{opacity:.6;}}
+.purse-nums{display:flex;justify-content:space-between;font-family:'Space Mono',monospace;font-size:13px;color:var(--text-dim);}
+.purse-nums .left{color:var(--ok);font-weight:700;}
+.roster{list-style:none;padding:0;display:flex;flex-direction:column;gap:4px;}
+.roster li{background:var(--court-deep);border-radius:4px;padding:7px 10px;}
+.roster-item{display:flex;flex-direction:column;gap:3px;}
+.ri-top{display:flex;justify-content:space-between;align-items:baseline;gap:6px;}
+.ri-name{font-size:14px;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;min-width:0;}
+.ri-sub{display:flex;align-items:center;gap:5px;}
+.ri-skill{font-size:11px;color:var(--text-dim);}
+.pcost{color:var(--gold);font-family:'Space Mono',monospace;white-space:nowrap;}
+.roster.captain-section{padding-top:8px;border-top:1px dashed var(--line);}
+.captain-entry{background:rgba(255,255,255,.04);border:2px solid var(--line);border-radius:4px;padding:7px 10px;display:flex;flex-direction:column;gap:4px;}
+.cap-top{display:flex;align-items:center;gap:6px;}
+.cap-sub{display:flex;align-items:center;gap:5px;padding-left:2px;}
+.c-badge{font-family:'Space Mono',monospace;font-size:10px;font-weight:700;background:var(--gold);color:var(--court-deep);padding:1px 6px;border-radius:3px;flex-shrink:0;}
+.c-name{font-size:14px;font-family:'Inter',sans-serif;color:var(--shuttle);font-weight:500;}
+.c-meta{font-size:11px;color:var(--text-dim);font-family:'Space Mono',monospace;}
+.gender-badge{display:inline-block;font-family:'Space Mono',monospace;font-size:10px;font-weight:700;padding:1px 5px;border-radius:3px;margin-left:4px;}
+.gender-badge.M{background:rgba(100,160,220,.18);color:#7eb8f7;}
+.gender-badge.F{background:rgba(255,120,180,.18);color:#f77ec0;}
+.placeholder{font-size:12px;color:var(--text-dim);font-style:italic;padding:7px 10px !important;background:none !important;}
+.card-female-warn{font-family:'Space Mono',monospace;font-size:11px;color:#f77ec0;border-top:1px dashed rgba(247,126,192,.3);padding-top:7px;margin-top:2px;}
+
+/* ── Sidebar ── */
+.sidebar{
+  position:fixed; right:var(--sidebar-right);
+  top:calc(var(--header-safe) + var(--sidebar-gap));
+  width:var(--sidebar-w);
+  max-height:calc(100dvh - var(--header-safe) - var(--footer-safe) - 28px);
+  display:flex;flex-direction:column;
+}
+.pool-panel{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px 16px;display:flex;flex-direction:column;overflow:hidden;max-height:100%;}
+.pool-panel h2{font-family:'Oswald',sans-serif;font-size:14px;text-transform:uppercase;letter-spacing:.05em;margin:0 0 10px;color:var(--text-dim);}
+.pool-list{list-style:none;padding:0;display:flex;flex-direction:column;gap:6px;overflow-y:auto;}
+.pool-list li{background:var(--court-deep);border-radius:6px;padding:8px 10px;font-size:13px;display:flex;justify-content:space-between;gap:8px;align-items:center;}
+.pool-list li.sold{opacity:.5;}
+.pool-list li.current{outline:1px solid var(--gold);}
+.pool-list .pn{display:flex;flex-direction:column;}
+.pool-list .pn .sk{font-size:11px;color:var(--text-dim);}
+.pool-list .ps{font-family:'Space Mono',monospace;font-size:11px;text-align:right;white-space:nowrap;}
+.pool-list .ps.available{color:var(--ok);}
+.pool-list .ps.sold-lbl{color:var(--gold);}
+
+/* ── Footer ── */
+footer{
+  position:fixed;bottom:0;left:0;right:0;z-index:50;
+  padding:10px 28px;text-align:center;
+  backdrop-filter:blur(5px);-webkit-backdrop-filter:blur(5px);
+  background:linear-gradient(to bottom,transparent 0%,rgba(0,0,0,.4) 40%,rgba(0,0,0,.65) 100%);
+  pointer-events:none;
+}
+.footer-credit{color:var(--gold);font-family:'Space Mono',monospace;font-size:12px;letter-spacing:.06em;opacity:.85;}
+
+/* ════════════════════════════════════════════
+   TOUR SYSTEM
+════════════════════════════════════════════ */
+
+#tourBackdrop{
+  position:fixed;inset:0;z-index:800;
+  background:rgba(0,0,0,0);
+  pointer-events:none;
+  transition:background .35s ease;
+}
+#tourBackdrop.active{
+  background:rgba(0,0,0,.75);
+  pointer-events:all;
+}
+
+/* Animated gold ring that frames the target element */
+#tourRing{
+  position:fixed;z-index:900;
+  border:2.5px solid var(--gold);
+  border-radius:10px;
+  box-shadow:0 0 0 4px rgba(232,178,60,.15), 0 0 28px rgba(232,178,60,.4);
+  pointer-events:none;
+  opacity:0;
+  transition:
+    opacity .3s ease,
+    top    .38s cubic-bezier(.22,.68,0,1.15),
+    left   .38s cubic-bezier(.22,.68,0,1.15),
+    width  .38s cubic-bezier(.22,.68,0,1.15),
+    height .38s cubic-bezier(.22,.68,0,1.15);
+}
+#tourRing.visible{opacity:1;}
+
+/* Callout bubble */
+#tourCallout{
+  position:fixed;z-index:1000;
+  background:var(--panel);
+  border:1.5px solid var(--gold);
+  border-radius:14px;
+  padding:20px 22px 16px;
+  width:300px;
+  box-shadow:0 16px 48px rgba(0,0,0,.65);
+  transition:opacity .3s ease, top .38s cubic-bezier(.22,.68,0,1.15), left .38s cubic-bezier(.22,.68,0,1.15);
+  pointer-events:all;
+}
+#tourCallout.hidden{opacity:0;pointer-events:none;}
+
+/* Arrow tails — one per direction */
+#tourCallout::before{
+  content:'';position:absolute;
+  border:10px solid transparent;
+}
+#tourCallout.arrow-top::before{
+  top:-20px;left:50%;transform:translateX(-50%);
+  border-bottom-color:var(--gold);
+}
+#tourCallout.arrow-bottom::before{
+  bottom:-20px;left:50%;transform:translateX(-50%);
+  border-top-color:var(--gold);
+}
+#tourCallout.arrow-left::before{
+  left:-20px;top:32px;
+  border-right-color:var(--gold);
+}
+#tourCallout.arrow-right::before{
+  right:-20px;top:32px;
+  border-left-color:var(--gold);
+}
+
+.c-step-label{
+  font-family:'Space Mono',monospace;font-size:10px;letter-spacing:.14em;
+  color:var(--gold);text-transform:uppercase;margin-bottom:5px;
+}
+.c-title{
+  font-family:'Oswald',sans-serif;font-size:21px;text-transform:uppercase;
+  color:var(--shuttle);margin-bottom:8px;line-height:1.2;
+}
+.c-desc{
+  font-size:13px;color:var(--text-dim);line-height:1.65;
+}
+.c-dots{
+  display:flex;gap:5px;justify-content:center;margin-top:12px;
+}
+.c-dots span{
+  width:6px;height:6px;border-radius:50%;
+  background:var(--line);border:1px solid rgba(255,255,255,.1);
+  transition:background .2s,transform .2s;
+}
+.c-dots span.on{background:var(--gold);transform:scale(1.3);}
+.c-nav{
+  display:flex;justify-content:space-between;align-items:center;
+  margin-top:14px;padding-top:12px;border-top:1px solid var(--line);gap:10px;
+}
+.c-nav button{
+  font-family:'Space Mono',monospace;font-size:11px;font-weight:700;
+  background:var(--court-deep);color:var(--shuttle);
+  border:1px solid var(--line);border-radius:7px;
+  padding:7px 14px;cursor:pointer;letter-spacing:.04em;
+  transition:border-color .15s,color .15s,background .15s;
+}
+.c-nav button:hover:not(:disabled){border-color:var(--gold);color:var(--gold);background:rgba(232,178,60,.06);}
+.c-nav button:disabled{opacity:.3;cursor:default;}
+.c-nav .c-count{font-family:'Space Mono',monospace;font-size:11px;color:var(--text-dim);}
+
+/* Launch button */
+#tourLaunch{
+  position:fixed;bottom:68px;left:50%;transform:translateX(-50%);
+  z-index:600;
+  font-family:'Space Mono',monospace;font-size:13px;font-weight:700;letter-spacing:.07em;
+  background:var(--gold);color:var(--court-deep);
+  border:none;border-radius:10px;padding:13px 30px;cursor:pointer;
+  box-shadow:0 4px 20px rgba(232,178,60,.45);
+  transition:transform .15s,box-shadow .15s;
+  white-space:nowrap;
+}
+#tourLaunch:hover{transform:translateX(-50%) translateY(-2px);box-shadow:0 8px 28px rgba(232,178,60,.55);}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <!-- ── HEADER ── -->
+  <header>
+    <div class="title-branding" id="el-branding">
+      <div class="logo-placeholder">LOGO</div>
+      <div>
+        <div class="eyebrow">High Performance Team · Live Auction</div>
+        <h1>EPT Badminton League 2026</h1>
+        <div class="readonly-tag" id="el-readonly">VIEW ONLY — updates live</div>
+      </div>
+    </div>
+
+    <div class="header-now-bidding" id="el-nowbidding">
+      <div class="nb-label">Now bidding</div>
+      <div class="nb-name">Alex Rivera</div>
+      <div class="nb-meta">Base 2,000 · Beginner · He/Him</div>
+    </div>
+
+    <div class="ticker" id="el-ticker">
+      SOLD &nbsp;<b>Jordan Lee</b> &nbsp;to&nbsp; <b>Team Phoenix</b> &nbsp;for&nbsp; <b>6,500</b> tokens
+    </div>
+  </header>
+
+  <!-- ── MAIN ── -->
+  <div class="layout">
+    <div class="main">
+      <div class="teams" id="teamGrid"></div>
+    </div>
+
+    <aside class="sidebar" id="el-sidebar">
+      <div class="pool-panel">
+        <h2>All Players</h2>
+        <ul class="pool-list" id="poolList"></ul>
+      </div>
+    </aside>
+  </div>
+
+  <footer><span class="footer-credit">Made with care, passion and love by Shaman Bhat BU</span></footer>
+</div>
+
+<!-- ── TOUR ELEMENTS ── -->
+<div id="tourBackdrop"></div>
+<div id="tourRing"></div>
+
+<div id="tourCallout" class="hidden">
+  <div class="c-step-label" id="cStepLabel"></div>
+  <div class="c-title"      id="cTitle"></div>
+  <div class="c-desc"       id="cDesc"></div>
+  <div class="c-dots"       id="cDots"></div>
+  <div class="c-nav">
+    <button id="cPrev">← Back</button>
+    <span   class="c-count" id="cCount"></span>
+    <button id="cNext">Next →</button>
+  </div>
+</div>
+
+<button id="tourLaunch">▶ Start Guided Tour</button>
+
+<script>
+/* ── Mock data ── */
+const PURSE = 20000, SLOTS = 3;
+const teams = [
+  { id:1, name:"Team Phoenix",  captain:"Sam Carter",   captain_gender:"M", captain_skill:"Professional",
+    players:[{name:"Jordan Lee",cost:6500,skill:"Intermediate",gender:"M"},{name:"Priya Nair",cost:4000,skill:"Beginner",gender:"F"}]},
+  { id:2, name:"Team Falcon",   captain:"Riya Sharma",  captain_gender:"F", captain_skill:"Intermediate",
+    players:[{name:"Tom Walker",cost:5000,skill:"Intermediate",gender:"M"}]},
+  { id:3, name:"Team Storm",    captain:"Kiran Mehta",  captain_gender:"M", captain_skill:"Professional",
+    players:[]},
+  { id:4, name:"Team Blaze",    captain:"Ananya Das",   captain_gender:"F", captain_skill:"Intermediate",
+    players:[{name:"Chris Patel",cost:3000,skill:"Beginner",gender:"M"},{name:"Sara Singh",cost:5500,skill:"Intermediate",gender:"F"},{name:"Dev Kumar",cost:2000,skill:"Beginner",gender:"M"}]},
+  { id:5, name:"Team Titan",    captain:"Rohit Verma",  captain_gender:"M", captain_skill:"Professional",
+    players:[{name:"Leela Rao",cost:7000,skill:"Intermediate",gender:"F"}]},
+  { id:6, name:"Team Arrow",    captain:"Nina Thomas",  captain_gender:"F", captain_skill:"Beginner",
+    players:[]},
+];
+const players = [
+  {id:1, name:"Alex Rivera",  base_price:2000,skill:"Beginner",    gender:"M",sold:false},
+  {id:2, name:"Jordan Lee",   base_price:5000,skill:"Intermediate",gender:"M",sold:true, team_id:1},
+  {id:3, name:"Priya Nair",   base_price:2000,skill:"Beginner",    gender:"F",sold:true, team_id:1},
+  {id:4, name:"Tom Walker",   base_price:5000,skill:"Intermediate",gender:"M",sold:true, team_id:2},
+  {id:5, name:"Maya Iyer",    base_price:2000,skill:"Beginner",    gender:"F",sold:false},
+  {id:6, name:"Chris Patel",  base_price:2000,skill:"Beginner",    gender:"M",sold:true, team_id:4},
+  {id:7, name:"Sara Singh",   base_price:5000,skill:"Intermediate",gender:"F",sold:true, team_id:4},
+  {id:8, name:"Dev Kumar",    base_price:2000,skill:"Beginner",    gender:"M",sold:true, team_id:4},
+  {id:9, name:"Leela Rao",    base_price:5000,skill:"Intermediate",gender:"F",sold:true, team_id:5},
+  {id:10,name:"Raj Pillai",   base_price:2000,skill:"Beginner",    gender:"M",sold:false},
+  {id:11,name:"Aisha Khan",   base_price:5000,skill:"Intermediate",gender:"F",sold:false},
+  {id:12,name:"Vikram Nair",  base_price:2000,skill:"Beginner",    gender:"M",sold:false},
+  {id:13,name:"Pooja Misra",  base_price:2000,skill:"Beginner",    gender:"F",sold:false},
+  {id:14,name:"Arjun Bhat",   base_price:5000,skill:"Intermediate",gender:"M",sold:false},
+  {id:15,name:"Sneha Raman",  base_price:2000,skill:"Beginner",    gender:"F",sold:false},
+];
+
+function esc(s){const d=document.createElement('div');d.textContent=s??'';return d.innerHTML;}
+function badge(g){return `<span class="gender-badge ${g}">${g==='F'?'She/Her':'He/Him'}</span>`;}
+
+/* ── Render teams ── */
+(()=>{
+  const grid=document.getElementById('teamGrid');
+  teams.forEach(team=>{
+    const s=team.players.reduce((a,p)=>a+p.cost,0), rem=PURSE-s;
+    const pct=Math.max(0,Math.min(100,(rem/PURSE)*100));
+    const full=team.players.length>=SLOTS;
+    const fillClass=pct<=15?'crit':(pct<=35?'low':'');
+    const capF=team.captain_gender==='F';
+    const isLast=!full&&team.players.length===SLOTS-1;
+    const hasF=team.players.some(p=>p.gender==='F');
+    const femCount=(capF?1:0)+team.players.filter(p=>p.gender==='F').length;
+    let warn='';
+    if(isLast&&!hasF&&!capF) warn=`<div class="card-female-warn">⚠ Next player must be female</div>`;
+    else if(!full&&femCount>=2) warn=`<div class="card-female-warn">⚠ Max 2 females reached</div>`;
+    const roster=team.players.length===0
+      ?'<li class="placeholder">No players bought yet</li>'
+      :team.players.map(p=>`<li class="roster-item"><div class="ri-top"><span class="ri-name">${esc(p.name)}</span><span class="pcost">${p.cost.toLocaleString()}</span></div><div class="ri-sub"><span class="ri-skill">(${esc(p.skill)})</span>${badge(p.gender)}</div></li>`).join('');
+    const card=document.createElement('div');
+    card.className='team-card'+(full?' full':'');
+    card.innerHTML=`
+      <div class="team-head"><div class="team-name">${esc(team.name)}</div><div class="slot-count">${team.players.length}/${SLOTS}</div></div>
+      <div class="purse-meter" id="${team.id===1?'el-budget':''}"><div class="purse-fill ${fillClass}" style="width:${pct}%"></div></div>
+      <div class="purse-nums"><span class="left">${rem.toLocaleString()} left</span><span>of ${PURSE.toLocaleString()}</span></div>
+      <ul class="roster captain-section" id="${team.id===1?'el-captain-section':''}">
+        <li class="captain-entry">
+          <div class="cap-top"><span class="c-badge">C</span><span class="c-name">${esc(team.captain)}</span></div>
+          <div class="cap-sub"><span class="c-meta">${esc(team.captain_skill)}</span>${badge(team.captain_gender)}</div>
+        </li>
+      </ul>
+      <ul class="roster">${roster}</ul>${warn}`;
+    if(team.id===1) card.id='el-card-1';
+    grid.appendChild(card);
+  });
+})();
+
+/* ── Render pool ── */
+(()=>{
+  const list=document.getElementById('poolList');
+  players.forEach(p=>{
+    const li=document.createElement('li');
+    li.className=(p.sold?'sold ':'')+(p.id===1?'current':'');
+    if(p.sold){
+      const team=teams.find(t=>t.id===p.team_id);
+      li.innerHTML=`<div class="pn"><span>${esc(p.name)}</span><span class="sk">${esc(p.skill)}</span></div><span class="ps sold-lbl">${team?esc(team.name):'Sold'}</span>`;
+    } else {
+      li.innerHTML=`<div class="pn"><span>${esc(p.name)}</span><span class="sk">${esc(p.skill)}</span></div><span class="ps available">${p.base_price.toLocaleString()}</span>`;
+    }
+    list.appendChild(li);
+  });
+})();
+
+/* Sync safe areas */
+(()=>{
+  const h=document.querySelector('header'),f=document.querySelector('footer'),r=document.documentElement;
+  if(h) r.style.setProperty('--header-safe',Math.ceil(h.offsetHeight+22)+'px');
+  if(f) r.style.setProperty('--footer-safe',Math.ceil(f.offsetHeight)+'px');
+})();
+
+/* ════════════════════════════════════════════
+   TOUR ENGINE
+════════════════════════════════════════════ */
+const STEPS = [
+  { selector: null,
+    title: "The Viewer Screen",
+    desc: "This is what every participant sees on their phone or laptop during the live auction — no app needed, just a browser link.\n\nClick Next to explore each part of the screen." },
+  { selector: '#el-branding',
+    title: "① League Branding",
+    desc: "The event name and logo sit in the top-left corner. The same identity appears on both the auctioneer's console and all viewer boards in the room." },
+  { selector: '#el-readonly',
+    title: "② View-Only Badge",
+    desc: "This badge confirms the screen is read-only. Viewers can see everything but cannot make any changes — only the auctioneer's laptop has write access." },
+  { selector: '#el-nowbidding',
+    title: "③ Now Bidding",
+    desc: "Shows the player currently on the auction table. Updates the instant the auctioneer selects a new player. The gold border pulses to draw attention during an active bid." },
+  { selector: '#el-ticker',
+    title: "④ Sale Ticker",
+    desc: "Announces the most recent sale — player name, the team they went to, and the winning price. A fresh entry slides in each time the auctioneer confirms a sale." },
+  { selector: '#el-card-1',
+    title: "⑤ Team Card",
+    desc: "One card per team. Shows the team name, how many of the 3 auction slots have been filled, the captain, all bought players with their costs, and the token budget bar." },
+  { selector: '#el-captain-section',
+    title: "⑥ Captain",
+    desc: "The captain is pre-assigned before the auction — not bought at auction. They're shown with a gold 'C' badge and count toward the team's gender quota (min 1, max 2 female members per team)." },
+  { selector: '#el-budget',
+    title: "⑦ Token Budget Bar",
+    desc: "Each team starts with 20,000 tokens. The bar shows how much remains. It turns orange when running low and pulses red when critically low — a warning for both the team and audience." },
+  { selector: '#el-sidebar',
+    title: "⑧ Player Pool",
+    desc: "The complete list of players up for auction. Sold players fade out. The player being bid on right now is highlighted with a gold outline. Available players show their base price in green." },
+  { selector: null,
+    title: "All Live, All Automatic",
+    desc: "Every part of this screen — team cards, the bidding box, the ticker, the player pool — refreshes automatically as the auction progresses.\n\nViewers just open the link and watch. No refresh needed." },
+];
+
+let cur = 0;
+const backdrop = document.getElementById('tourBackdrop');
+const ring     = document.getElementById('tourRing');
+const callout  = document.getElementById('tourCallout');
+const launch   = document.getElementById('tourLaunch');
+
+/* Build progress dots */
+const dotsEl = document.getElementById('cDots');
+STEPS.forEach(()=>{ const s=document.createElement('span'); dotsEl.appendChild(s); });
+
+function updateDots(i){ Array.from(dotsEl.children).forEach((d,j)=>d.classList.toggle('on',j===i)); }
+
+const PAD = 10;
+
+function placeRing(rect){
+  ring.style.top    = (rect.top    - PAD) + 'px';
+  ring.style.left   = (rect.left   - PAD) + 'px';
+  ring.style.width  = (rect.width  + PAD*2) + 'px';
+  ring.style.height = (rect.height + PAD*2) + 'px';
+}
+
+function placeCallout(rect){
+  const vw=window.innerWidth, vh=window.innerHeight;
+  const cw=300, ch=250, gap=22;
+
+  const spaceBelow  = vh - rect.bottom;
+  const spaceAbove  = rect.top;
+  const spaceRight  = vw - rect.right;
+  const spaceLeft   = rect.left;
+
+  callout.classList.remove('arrow-top','arrow-bottom','arrow-left','arrow-right');
+
+  let side = 'below';
+  if     (spaceBelow  >= ch + gap) side = 'below';
+  else if(spaceAbove  >= ch + gap) side = 'above';
+  else if(spaceRight  >= cw + gap) side = 'right';
+  else if(spaceLeft   >= cw + gap) side = 'left';
+
+  const cx = rect.left + rect.width  / 2;
+  const cy = rect.top  + rect.height / 2;
+  let top, left;
+
+  if(side==='below'){
+    top  = rect.bottom + gap;
+    left = Math.max(8, Math.min(vw-cw-8, cx - cw/2));
+    callout.classList.add('arrow-top');
+  } else if(side==='above'){
+    top  = rect.top - ch - gap;
+    left = Math.max(8, Math.min(vw-cw-8, cx - cw/2));
+    callout.classList.add('arrow-bottom');
+  } else if(side==='right'){
+    left = rect.right + gap;
+    top  = Math.max(8, Math.min(vh-ch-8, cy - 40));
+    callout.classList.add('arrow-left');
+  } else {
+    left = rect.left - cw - gap;
+    top  = Math.max(8, Math.min(vh-ch-8, cy - 40));
+    callout.classList.add('arrow-right');
+  }
+
+  callout.style.top  = Math.max(8, top)  + 'px';
+  callout.style.left = Math.max(8, left) + 'px';
+}
+
+function showStep(i){
+  const step = STEPS[i];
+  cur = i;
+
+  document.getElementById('cStepLabel').textContent = `Step ${i+1} of ${STEPS.length}`;
+  document.getElementById('cTitle').textContent = step.title;
+  document.getElementById('cDesc').innerHTML = step.desc.replace(/\n/g,'<br>');
+  document.getElementById('cCount').textContent = `${i+1} / ${STEPS.length}`;
+  updateDots(i);
+
+  document.getElementById('cPrev').disabled = (i === 0);
+  document.getElementById('cNext').textContent = (i === STEPS.length-1) ? '✓ Done' : 'Next →';
+
+  callout.classList.remove('hidden');
+  backdrop.classList.add('active');
+
+  if(step.selector){
+    const el = document.querySelector(step.selector);
+    if(el){
+      el.scrollIntoView({behavior:'smooth', block:'center'});
+      setTimeout(()=>{
+        const rect = el.getBoundingClientRect();
+        ring.classList.add('visible');
+        placeRing(rect);
+        placeCallout(rect);
+      }, 160);
+    }
+  } else {
+    ring.classList.remove('visible');
+    callout.classList.remove('arrow-top','arrow-bottom','arrow-left','arrow-right');
+    const vw=window.innerWidth, vh=window.innerHeight;
+    callout.style.top  = Math.max(80, vh/2 - 130) + 'px';
+    callout.style.left = (vw/2 - 150) + 'px';
+  }
+}
+
+function endTour(){
+  backdrop.classList.remove('active');
+  ring.classList.remove('visible');
+  callout.classList.add('hidden');
+  launch.style.display = 'block';
+  cur = 0;
+}
+
+document.getElementById('cNext').addEventListener('click',()=>{
+  cur < STEPS.length-1 ? showStep(cur+1) : endTour();
+});
+document.getElementById('cPrev').addEventListener('click',()=>{
+  if(cur > 0) showStep(cur-1);
+});
+
+/* Click outside callout = advance */
+backdrop.addEventListener('click', e=>{
+  if(!callout.contains(e.target))
+    cur < STEPS.length-1 ? showStep(cur+1) : endTour();
+});
+
+launch.addEventListener('click',()=>{
+  launch.style.display = 'none';
+  showStep(0);
+});
+
+window.addEventListener('keydown', e=>{
+  if(!backdrop.classList.contains('active')) return;
+  if(e.key==='ArrowRight'||e.key==='ArrowDown'||e.key===' '){
+    e.preventDefault();
+    cur < STEPS.length-1 ? showStep(cur+1) : endTour();
+  }
+  if(e.key==='ArrowLeft'||e.key==='ArrowUp'){
+    e.preventDefault();
+    if(cur>0) showStep(cur-1);
+  }
+  if(e.key==='Escape') endTour();
+});
+</script>
+</body>
+</html>

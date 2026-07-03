@@ -6,6 +6,7 @@
 function esc(s){ const d=document.createElement('div'); d.textContent = s==null?'':s; return d.innerHTML; }
 function genderBadge(g){ return `<span class="gender-badge ${g}">${g==='F'?'She/Her':'He/Him'}</span>`; }
 
+// Keep CSS viewport offsets in sync with dynamic header/footer heights.
 function syncViewportChrome(){
   const header = document.querySelector('header');
   const footer = document.querySelector('footer');
@@ -17,7 +18,10 @@ function syncViewportChrome(){
 window.addEventListener('resize', syncViewportChrome);
 
 let _lastTickerKey = null;
+let _prevSplashVisible = null;
+let _lastAppliedTheme = null;
 
+// Animate ticker when a new sale event appears in the log.
 function renderTicker(state){
   const el = document.getElementById('ticker');
   if(!state.log.length){ el.innerHTML = '<span>No sales yet — first lot is on the table.</span>'; return; }
@@ -36,15 +40,17 @@ function renderTicker(state){
 
 let _prevTeamCounts = {};
 
+// Render the full read-only team board with stagger metadata for unlock animation.
 function renderTeams(state){
   const grid = document.getElementById('teamGrid');
   grid.innerHTML = '';
-  state.teams.forEach(team=>{
+  state.teams.forEach((team, index)=>{
     const rem = team.remaining;
     const pct = Math.max(0, Math.min(100, (rem/state.purse)*100));
     const full = team.players.length >= state.slots;
     const card = document.createElement('div');
     card.className = 'team-card' + (full?' full':'') + (rem<0?' over':'');
+    card.style.setProperty('--fly-delay', `${120 + (index * 55)}ms`);
     const fillClass = pct<=15?'crit':(pct<=35?'low':'');
     const captainHtml = `
       <li class="captain-entry">
@@ -101,9 +107,18 @@ function renderTeams(state){
   state.teams.forEach(t=>{ _prevTeamCounts[t.id] = t.players.length; });
 }
 
+// Replay the viewer-only unlock entrance sequence when splash closes.
+function triggerUnlockAnimation(){
+  document.body.classList.remove('auction-unlock');
+  void document.body.offsetWidth;
+  document.body.classList.add('auction-unlock');
+  window.setTimeout(()=>document.body.classList.remove('auction-unlock'), 2200);
+}
+
 let _lastBidPlayerId = null;
 let _nbExiting = false;
 
+// Animate and render the header "Now bidding" spotlight panel.
 function renderNowBidding(state){
   const box = document.getElementById('nowBidding');
   if(!box) return;
@@ -134,6 +149,7 @@ function renderNowBidding(state){
   }
 }
 
+// Render player pool sidebar with sold/current player badges.
 function renderPoolList(state){
   const list = document.getElementById('poolList');
   list.innerHTML = '';
@@ -156,12 +172,26 @@ function renderPoolList(state){
   });
 }
 
-function applyTheme(state){
-  const theme = state.theme || 'court';
-  document.body.classList.toggle('theme-bosch', theme === 'bosch');
-  document.body.classList.toggle('theme-stage', theme === 'stage');
+// Play a short cinematic wipe whenever the synchronized theme changes.
+function triggerSceneTransition(){
+  document.body.classList.remove('scene-transition');
+  void document.body.offsetWidth;
+  document.body.classList.add('scene-transition');
+  window.setTimeout(()=>document.body.classList.remove('scene-transition'), 760);
 }
 
+// Apply active theme to viewer root classes.
+function applyTheme(state){
+  const theme = state.theme || 'court';
+  if(_lastAppliedTheme !== null && _lastAppliedTheme !== theme){
+    triggerSceneTransition();
+  }
+  document.body.classList.toggle('theme-bosch', theme === 'bosch');
+  document.body.classList.toggle('theme-stage', theme === 'stage');
+  _lastAppliedTheme = theme;
+}
+
+// Toggle rules overlay based on synchronized host state.
 function renderRules(state){
   const overlay = document.getElementById('rulesOverlay');
   if(!overlay) return;
@@ -170,21 +200,36 @@ function renderRules(state){
   overlay.setAttribute('aria-hidden', show ? 'false' : 'true');
 }
 
+// Toggle splash overlay and trigger unlock animation on close transition.
+function renderSplash(state){
+  const overlay = document.getElementById('splashOverlay');
+  if(!overlay) return;
+  const show = !!state.show_splash;
+  if(_prevSplashVisible === true && !show){
+    triggerUnlockAnimation();
+  }
+  overlay.classList.toggle('open', show);
+  overlay.setAttribute('aria-hidden', show ? 'false' : 'true');
+  _prevSplashVisible = show;
+}
+
+// One-shot fetch for reconnect recovery and initial hydration fallback.
 async function refresh(){
   try{
     const res = await fetch('/api/state');
     const state = await res.json();
-    renderTicker(state); renderTeams(state); renderNowBidding(state); renderPoolList(state); applyTheme(state); renderRules(state);
+    renderTicker(state); renderTeams(state); renderNowBidding(state); renderPoolList(state); applyTheme(state); renderRules(state); renderSplash(state);
   }catch(e){ /* ignore, the stream below will catch up once reconnected */ }
 }
 
 // Live push connection — the page updates the instant the auctioneer
 // records a sale, undo, or edit, instead of polling on a timer.
 function connectStream(){
+  // Subscribe to server push updates so viewer stays live without polling.
   const es = new EventSource('/api/stream');
   es.onmessage = (e)=>{
     const state = JSON.parse(e.data);
-    renderTicker(state); renderTeams(state); renderNowBidding(state); renderPoolList(state); applyTheme(state); renderRules(state);
+    renderTicker(state); renderTeams(state); renderNowBidding(state); renderPoolList(state); applyTheme(state); renderRules(state); renderSplash(state);
   };
   es.onerror = ()=>{
     // EventSource retries automatically; do an extra one-off fetch so the

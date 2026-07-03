@@ -140,6 +140,7 @@ def default_state():
         "current_bid_player_id": None,
         "theme": "court",
         "show_rules": False,
+        "show_splash": True,
     }
 
 
@@ -165,6 +166,8 @@ def load_state():
             state["theme"] = "court"
         if "show_rules" not in state:
             state["show_rules"] = False
+        if "show_splash" not in state:
+            state["show_splash"] = True
 
         # Migrate: backfill missing 'gender' field on any player entry (both
         # in the pool and already bought into teams). Read the current
@@ -232,10 +235,12 @@ def backup_current_data():
 
 
 def spent(team):
+    # Sum all purchased player costs for one team.
     return sum(p["cost"] for p in team["players"])
 
 
 def remaining(team, state):
+    # Calculate budget left for a team from the global purse.
     return state["config"]["purse"] - spent(team)
 
 
@@ -308,6 +313,7 @@ def broadcast_update():
 
 @app.route("/api/state")
 def api_state():
+    # Lightweight read endpoint used by initial page loads and reconnects.
     with _lock:
         state = load_state()
         return jsonify(state_with_budgets(state))
@@ -525,9 +531,27 @@ def api_rules():
         return jsonify(state_with_budgets(state))
 
 
+@app.route("/api/splash", methods=["POST"])
+@require_host
+def api_splash():
+    """Show or hide the auction welcome splash for everyone. Pass
+    show: true/false, or omit to toggle it."""
+    data = request.get_json(force=True)
+    with _lock:
+        state = load_state()
+        if "show" in data:
+            state["show_splash"] = bool(data["show"])
+        else:
+            state["show_splash"] = not state.get("show_splash", True)
+        save_state(state)
+        broadcast_update()
+        return jsonify(state_with_budgets(state))
+
+
 @app.route("/api/undo", methods=["POST"])
 @require_host
 def api_undo():
+    # Revert the last sale and return the affected player back to the pool.
     with _lock:
         state = load_state()
         if not state["log"]:
@@ -551,6 +575,7 @@ def api_undo():
 @app.route("/api/remove", methods=["POST"])
 @require_host
 def api_remove():
+    # Remove a specific roster entry from a team by index.
     data = request.get_json(force=True)
     team_id = data.get("team_id")
     index = data.get("index")
@@ -576,6 +601,7 @@ def api_remove():
 @app.route("/api/team", methods=["POST"])
 @require_host
 def api_team():
+    # Update editable team metadata (name/captain/captain attributes).
     data = request.get_json(force=True)
     team_id = data.get("team_id")
     with _lock:
@@ -600,6 +626,7 @@ def api_team():
 @app.route("/api/reset", methods=["POST"])
 @require_host
 def api_reset():
+    # Archive current results, then rebuild state from players/teams files.
     with _lock:
         backup_path = backup_current_data()
         state = default_state()
@@ -613,6 +640,7 @@ def api_reset():
 @app.route("/api/export")
 @require_host
 def api_export():
+    # Download current saved auction data as a JSON snapshot.
     with _lock:
         if not os.path.exists(SAVE_FILE):
             save_state(default_state())
@@ -637,6 +665,7 @@ def load_rules():
 
 @app.route("/")
 def index():
+    # Serve console on host machine, viewer page on all other devices.
     rules = load_rules()
     return (render_template("console.html", rules=rules) if is_host()
             else render_template("viewer.html", rules=rules))
@@ -659,6 +688,7 @@ def get_lan_ip():
 
 
 def main():
+    # Print connection info, open host console, and start Flask server.
     local_url = "http://127.0.0.1:8080"
     lan_ip = get_lan_ip()
     print("Starting auction board...")

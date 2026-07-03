@@ -42,7 +42,46 @@ body.theme-stage{
 body{margin:0;background:radial-gradient(circle at var(--glow-x) var(--glow-y),var(--glow) 0%,var(--court) 45%,var(--court-deep) 100%);
   color:var(--shuttle);font-family:'Inter',sans-serif;min-height:100vh;padding:0px 20px 60px;
   transition:color .25s ease;
-  animation:glow-drift 16s ease-in-out infinite;}
+  animation:glow-drift 16s ease-in-out infinite;
+  position:relative;}
+
+/* Cinematic theme transition: quick color grade plus diagonal light wipe. */
+body::after{
+  content:"";
+  position:fixed;
+  inset:-18%;
+  z-index:180;
+  pointer-events:none;
+  opacity:0;
+  background:
+    linear-gradient(110deg,
+      rgba(255,255,255,0) 38%,
+      rgba(255,248,228,.34) 50%,
+      rgba(255,255,255,0) 62%),
+    radial-gradient(circle at 50% 50%, rgba(232,178,60,.12) 0%, rgba(232,178,60,0) 62%);
+  transform:translateX(120%) skewX(-12deg);
+}
+
+body.scene-transition{
+  animation:glow-drift 16s ease-in-out infinite, scene-grade .72s cubic-bezier(.2,.75,.2,1);
+}
+
+body.scene-transition::after{
+  animation:scene-wipe .72s cubic-bezier(.2,.75,.2,1);
+}
+
+@keyframes scene-grade{
+  0%{filter:saturate(1) brightness(1);}
+  36%{filter:saturate(1.16) brightness(1.07);}
+  100%{filter:saturate(1) brightness(1);}
+}
+
+@keyframes scene-wipe{
+  0%{opacity:0;transform:translateX(120%) skewX(-12deg);}
+  24%{opacity:.92;}
+  68%{opacity:.34;}
+  100%{opacity:0;transform:translateX(-120%) skewX(-12deg);}
+}
 /* No max-width — the layout fills the full screen so wide displays get
    more columns of team cards automatically. */
 .wrap{width:100%;}
@@ -367,3 +406,183 @@ footer{
   padding:11px 16px;font-size:15px;line-height:1.45;color:var(--shuttle);
 }
 .rules-list li b{color:var(--gold);font-weight:700;}
+
+/* Unlock sequence keyframes used when splash closes on viewer. */
+@keyframes unlock-header-in{
+  from{opacity:0;transform:translateY(-56px) scale(.92);filter:blur(10px);}
+  to{opacity:1;transform:translateY(0) scale(1);filter:blur(0);}
+}
+@keyframes unlock-main-in{
+  from{opacity:0;transform:translateY(72px) scale(.95);filter:blur(12px);}
+  to{opacity:1;transform:translateY(0) scale(1);filter:blur(0);}
+}
+@keyframes unlock-sidebar-in{
+  from{opacity:0;transform:translateX(68px) scale(.94);filter:blur(12px);}
+  to{opacity:1;transform:translateX(0) scale(1);filter:blur(0);}
+}
+@keyframes unlock-card-in{
+  from{opacity:0;transform:translateY(96px) scale(.88);filter:blur(14px);}
+  72%{opacity:1;transform:translateY(-8px) scale(1.025);filter:blur(0);}
+  to{opacity:1;transform:translateY(0) scale(1);filter:blur(0);}
+}
+@keyframes unlock-footer-in{
+  from{opacity:0;transform:translateY(34px);filter:blur(8px);}
+  to{opacity:1;transform:translateY(0);filter:blur(0);}
+}
+.auction-unlock header{
+  animation:unlock-header-in .9s cubic-bezier(.18,.84,.16,1) both;
+}
+.auction-unlock .main{
+  animation:unlock-main-in 1.12s cubic-bezier(.16,.88,.16,1) .12s both;
+}
+.auction-unlock .sidebar{
+  animation:unlock-sidebar-in 1.18s cubic-bezier(.16,.88,.16,1) .22s both;
+}
+.auction-unlock footer{
+  animation:unlock-footer-in .82s cubic-bezier(.2,.78,.2,1) .42s both;
+}
+.auction-unlock .team-card{
+  animation:unlock-card-in 1.18s cubic-bezier(.16,.9,.16,1) var(--fly-delay, 0ms) both;
+}
+
+/* ---------------------------------------------------------------------------
+   Welcome splash overlay — compact card on console, full-screen lock on viewer.
+--------------------------------------------------------------------------- */
+.splash-overlay{
+  position:fixed;inset:0;z-index:230;
+  display:flex;align-items:center;justify-content:center;
+  background:rgba(0,0,0,.78);
+  backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);
+  opacity:0;visibility:hidden;pointer-events:none;
+  transition:opacity .24s ease,visibility .24s ease;
+  overflow:hidden;
+}
+.splash-overlay.open{opacity:1;visibility:visible;pointer-events:auto;}
+.splash-overlay::before,
+.splash-overlay::after{
+  /* Floating orb layers that drift behind splash copy. */
+  content:"";
+  position:absolute;
+  border-radius:50%;
+  filter:blur(12px);
+  opacity:.6;
+  pointer-events:none;
+}
+.splash-overlay::before{
+  width:260px;height:260px;
+  background:radial-gradient(circle, rgba(232,178,60,.95) 0%, rgba(232,178,60,.18) 58%, transparent 78%);
+  animation:splash-orb-one 16s ease-in-out infinite alternate;
+}
+.splash-overlay::after{
+  width:220px;height:220px;
+  background:radial-gradient(circle, rgba(111,207,151,.92) 0%, rgba(111,207,151,.16) 58%, transparent 78%);
+  animation:splash-orb-two 19s ease-in-out infinite alternate;
+}
+
+@keyframes splash-orb-one{
+  0%{transform:translate(-30vw,-20vh) scale(.9);}
+  50%{transform:translate(8vw,12vh) scale(1.08);}
+  100%{transform:translate(28vw,-8vh) scale(.95);}
+}
+
+@keyframes splash-orb-two{
+  0%{transform:translate(26vw,22vh) scale(1);}
+  50%{transform:translate(-4vw,-10vh) scale(.88);}
+  100%{transform:translate(-24vw,16vh) scale(1.12);}
+}
+
+/* Shared splash card shell for both console popup and viewer fullscreen. */
+.splash-card{
+  position:relative;
+  z-index:1;
+  border:2px solid var(--gold);
+  border-radius:14px;
+  background:var(--panel);
+  box-shadow:0 24px 64px rgba(0,0,0,.6);
+  text-align:center;
+}
+
+.splash-card-console{
+  width:min(620px,92vw);
+  padding:34px 34px 24px;
+}
+
+.splash-line-small{
+  font-family:'Space Mono',monospace;
+  color:var(--gold);
+  text-transform:uppercase;
+  letter-spacing:.16em;
+  font-size:16px;
+}
+
+.splash-line-title{
+  font-family:'Oswald',sans-serif;
+  margin-top:8px;
+  font-size:52px;
+  line-height:1.06;
+  letter-spacing:.02em;
+  text-transform:uppercase;
+}
+
+.splash-line-subtitle{
+  font-family:'Oswald',sans-serif;
+  margin-top:8px;
+  font-size:32px;
+  color:var(--gold);
+  letter-spacing:.08em;
+  text-transform:uppercase;
+}
+
+.splash-actions{
+  margin-top:24px;
+  padding-top:16px;
+  border-top:1px dashed var(--line);
+  display:flex;
+  justify-content:center;
+}
+
+.splash-overlay-viewer{
+  background:radial-gradient(circle at 50% 14%, color-mix(in srgb,var(--gold) 22%,var(--court)) 0%, var(--court) 38%, var(--court-deep) 100%);
+  backdrop-filter:none;-webkit-backdrop-filter:none;
+}
+.splash-overlay-viewer::before,
+.splash-overlay-viewer::after{
+  /* Stronger orb treatment for projection-friendly viewer screens. */
+  filter:blur(18px);
+  opacity:.78;
+}
+.splash-overlay-viewer::before{
+  width:32vw;height:32vw;min-width:260px;min-height:260px;
+  background:radial-gradient(circle, rgba(232,178,60,.92) 0%, rgba(232,178,60,.22) 52%, transparent 76%);
+}
+.splash-overlay-viewer::after{
+  width:26vw;height:26vw;min-width:220px;min-height:220px;
+  background:radial-gradient(circle, rgba(240,80,96,.92) 0%, rgba(240,80,96,.20) 54%, transparent 76%);
+}
+
+.splash-card-viewer{
+  width:100vw;height:100vh;border:none;border-radius:0;
+  background:transparent;box-shadow:none;
+  display:flex;flex-direction:column;justify-content:center;align-items:center;
+  padding:36px;
+}
+
+.splash-card-viewer .splash-line{
+  text-shadow:0 6px 28px rgba(0,0,0,.55);
+}
+
+.splash-card-viewer .splash-line-title{font-size:clamp(56px,9vw,150px);}
+.splash-card-viewer .splash-line-subtitle{font-size:clamp(34px,5vw,72px);}
+.splash-card-viewer .splash-line-small{font-size:clamp(20px,2.2vw,32px);}
+
+/* Bottom-centered logo lockup for the fullscreen viewer splash. */
+.splash-viewer-logo{
+  position:absolute;
+  left:50%;
+  bottom:36px;
+  transform:translateX(-50%);
+  width:clamp(120px,12vw,200px);
+  height:auto;
+  opacity:.95;
+  filter:drop-shadow(0 8px 24px rgba(0,0,0,.45));
+}

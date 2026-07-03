@@ -21,7 +21,7 @@
   },
   {
     "title": "Bid Increment",
-    "text": "All bids will increase in increments of 500 tokens."
+    "text": "All bids will increase in multiples of 500 tokens."
   },
   {
     "title": "Re-auction round",

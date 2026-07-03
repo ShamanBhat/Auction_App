@@ -6,6 +6,7 @@
 
 .header-right{display:flex;flex-direction:column;gap:8px;align-items:flex-end;}
 
+/* Theme chip controls in the console header. */
 .theme-toggle{display:flex;align-items:center;gap:6px;background:var(--court-deep);border:1px solid var(--line);
   border-radius:20px;padding:4px 6px;}
 .theme-toggle .tt-label{font-family:'Space Mono',monospace;font-size:10px;letter-spacing:.08em;color:var(--text-dim);
@@ -52,6 +53,7 @@
 .btn.secondary.danger:hover{color:var(--danger);border-color:var(--danger);}
 .btn.sm{padding:0 12px;height:34px;font-size:11px;}
 
+/* Inline status message under console controls (success/error). */
 .console-msg{margin-top:10px;font-family:'Space Mono',monospace;font-size:12px;height:18px;line-height:18px;overflow:hidden;white-space:nowrap;}
 .console-msg.error{color:var(--danger);}
 .console-msg.ok{color:var(--ok);}
@@ -71,6 +73,7 @@
 .captain-entry-input:focus{outline:none;border-bottom:1px dashed var(--gold);}
 
 
+/* Viewer telemetry chips shown only on host console. */
 .viewer-count{font-family:'Space Mono',monospace;font-size:12px;color:var(--text-dim);
   background:var(--court-deep);border:1px solid var(--line);border-radius:12px;
   padding:4px 10px;white-space:nowrap;}

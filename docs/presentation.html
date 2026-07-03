@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EPT Badminton League 2026 — Auction App</title>
+<style>
+  :root {
+    --green: #2ecc71;
+    --green-dark: #27ae60;
+    --teal: #1abc9c;
+    --blue: #2980b9;
+    --dark: #0d1117;
+    --darker: #090d12;
+    --card: #161b22;
+    --card2: #1e2530;
+    --border: rgba(255,255,255,0.08);
+    --text: #e6edf3;
+    --muted: #8b949e;
+    --accent: var(--green);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    background: var(--dark);
+    color: var(--text);
+    height: 100vh;
+    overflow: hidden;
+  }
+
+  /* ── Slide container ── */
+  .deck { width: 100vw; height: 100vh; position: relative; }
+
+  .slide {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 48px 64px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.45s ease;
+    text-align: center;
+  }
+  .slide.active {
+    opacity: 1;
+    pointer-events: all;
+  }
+
+  /* ── Typography ── */
+  .eyebrow {
+    font-size: 0.78rem;
+    font-weight: 600;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 12px;
+  }
+  h1 { font-size: clamp(2rem, 5vw, 3.4rem); font-weight: 700; line-height: 1.15; }
+  h2 { font-size: clamp(1.4rem, 3vw, 2.2rem); font-weight: 700; margin-bottom: 24px; }
+  p  { font-size: clamp(0.95rem, 1.6vw, 1.15rem); color: var(--muted); line-height: 1.7; max-width: 680px; }
+
+  .lead { font-size: clamp(1rem, 1.8vw, 1.3rem); color: var(--text); font-weight: 400; margin-top: 16px; max-width: 680px; line-height: 1.7; }
+
+  .accent { color: var(--accent); }
+  .accent-blue { color: #58a6ff; }
+
+  /* ── Cards / lists ── */
+  .card-row {
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin-top: 32px;
+    width: 100%;
+    max-width: 900px;
+  }
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 24px 28px;
+    flex: 1 1 220px;
+    max-width: 280px;
+    text-align: left;
+  }
+  .card .icon { font-size: 1.8rem; margin-bottom: 10px; }
+  .card h3 { font-size: 1rem; font-weight: 700; margin-bottom: 8px; }
+  .card p { font-size: 0.88rem; color: var(--muted); }
+
+  .feature-list {
+    list-style: none;
+    margin-top: 28px;
+    text-align: left;
+    max-width: 640px;
+    width: 100%;
+  }
+  .feature-list li {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 0.97rem;
+    line-height: 1.6;
+  }
+  .feature-list li:last-child { border-bottom: none; }
+  .feature-list .dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: var(--accent);
+    margin-top: 7px;
+    flex-shrink: 0;
+  }
+
+  /* ── Two-column layout slide ── */
+  .two-col {
+    display: flex;
+    gap: 40px;
+    width: 100%;
+    max-width: 960px;
+    text-align: left;
+    align-items: flex-start;
+    margin-top: 8px;
+  }
+  .two-col .col { flex: 1; }
+  .screen-box {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px 24px;
+  }
+  .screen-box h3 {
+    font-size: 0.88rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 14px;
+  }
+  .screen-box ul { list-style: none; }
+  .screen-box ul li {
+    font-size: 0.92rem;
+    color: var(--muted);
+    padding: 6px 0;
+    border-bottom: 1px solid var(--border);
+    line-height: 1.55;
+  }
+  .screen-box ul li:last-child { border-bottom: none; }
+  .screen-box ul li b { color: var(--text); }
+
+  /* ── Rules table ── */
+  .rules-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+    margin-top: 28px;
+    max-width: 820px;
+    width: 100%;
+    text-align: left;
+  }
+  .rule-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--accent);
+    border-radius: 10px;
+    padding: 16px 20px;
+  }
+  .rule-card h4 { font-size: 0.88rem; font-weight: 700; margin-bottom: 6px; }
+  .rule-card p  { font-size: 0.83rem; color: var(--muted); }
+
+  /* ── Flow diagram ── */
+  .flow {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    margin-top: 36px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  .flow-node {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px 22px;
+    font-size: 0.88rem;
+    font-weight: 600;
+    text-align: center;
+    min-width: 110px;
+  }
+  .flow-node small { display: block; font-weight: 400; color: var(--muted); margin-top: 4px; font-size: 0.75rem; }
+  .flow-arrow { font-size: 1.4rem; color: var(--muted); padding: 0 8px; }
+
+  /* ── Quick start code block ── */
+  .code-block {
+    background: var(--darker);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 20px 28px;
+    text-align: left;
+    font-family: 'Cascadia Code', 'Consolas', monospace;
+    font-size: 0.95rem;
+    line-height: 1.8;
+    margin-top: 24px;
+    max-width: 520px;
+    width: 100%;
+  }
+  .code-block .comment { color: #3c4f3c; }
+  .code-block .cmd { color: var(--green); }
+
+  /* ── Navigation ── */
+  .nav {
+    position: fixed;
+    bottom: 32px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    z-index: 100;
+  }
+  .nav button {
+    background: var(--card);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 10px 24px;
+    border-radius: 8px;
+    font-size: 0.88rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s, border-color 0.2s;
+  }
+  .nav button:hover { background: var(--card2); border-color: var(--accent); }
+  .nav button:disabled { opacity: 0.3; cursor: default; }
+
+  .progress {
+    display: flex;
+    gap: 6px;
+  }
+  .progress span {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--border);
+    border: 1px solid var(--muted);
+    transition: background 0.2s;
+  }
+  .progress span.on { background: var(--accent); border-color: var(--accent); }
+
+  /* ── Slide-specific backgrounds ── */
+  #slide-1 { background: radial-gradient(ellipse at 60% 40%, #0e2e1e 0%, var(--dark) 70%); }
+  #slide-2 { background: radial-gradient(ellipse at 30% 60%, #0d1f2d 0%, var(--dark) 70%); }
+  #slide-3 { background: var(--dark); }
+  #slide-4 { background: radial-gradient(ellipse at 70% 30%, #1a1000 0%, var(--dark) 70%); }
+  #slide-5 { background: var(--dark); }
+  #slide-6 { background: radial-gradient(ellipse at 40% 50%, #0d1a2d 0%, var(--dark) 70%); }
+  #slide-7 { background: var(--dark); }
+
+  .badge {
+    display: inline-block;
+    background: rgba(46,204,113,0.15);
+    border: 1px solid rgba(46,204,113,0.35);
+    color: var(--green);
+    border-radius: 6px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    padding: 2px 9px;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    margin-left: 8px;
+    vertical-align: middle;
+  }
+  .badge.blue {
+    background: rgba(41,128,185,0.15);
+    border-color: rgba(41,128,185,0.35);
+    color: #58a6ff;
+  }
+</style>
+</head>
+<body>
+
+<div class="deck">
+
+  <!-- ── Slide 1: Title ── -->
+  <section class="slide active" id="slide-1">
+    <div class="eyebrow">High Performance Team · EPT</div>
+    <h1>Badminton League 2026<br><span class="accent">Auction App</span></h1>
+    <p class="lead">A live, browser-based player auction system — auctioneer on one screen, the entire room watching in real time.</p>
+  </section>
+
+  <!-- ── Slide 2: What is it? ── -->
+  <section class="slide" id="slide-2">
+    <div class="eyebrow">What is it?</div>
+    <h2>One app, two views</h2>
+    <div class="card-row">
+      <div class="card">
+        <div class="icon">🖥️</div>
+        <h3>Console <span class="badge">Host only</span></h3>
+        <p>The auctioneer's control panel. Record sales, undo mistakes, change themes, export results — all from one screen.</p>
+      </div>
+      <div class="card">
+        <div class="icon">📺</div>
+        <h3>Viewer Board <span class="badge blue">Everyone</span></h3>
+        <p>A live, read-only scoreboard that updates instantly on every phone, laptop, or TV in the room. No app needed — just a browser.</p>
+      </div>
+      <div class="card">
+        <div class="icon">⚡</div>
+        <h3>Real-time sync</h3>
+        <p>Updates reach all viewers within milliseconds using Server-Sent Events. No refreshing required.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Slide 3: Console walkthrough ── -->
+  <section class="slide" id="slide-3">
+    <div class="eyebrow">Auctioneer Console</div>
+    <h2>Everything the auctioneer needs</h2>
+    <div class="two-col">
+      <div class="col">
+        <div class="screen-box">
+          <h3>Header</h3>
+          <ul>
+            <li><b>Now Bidding</b> — current player on the table</li>
+            <li><b>LAN IP</b> — address viewers open on their devices</li>
+            <li><b>Viewer count</b> — live number of connected screens</li>
+            <li><b>Show Rules</b> — toggles overlay on all screens</li>
+            <li><b>Theme</b> — Court / Bosch / Stage</li>
+          </ul>
+        </div>
+      </div>
+      <div class="col">
+        <div class="screen-box">
+          <h3>Sale Panel</h3>
+          <ul>
+            <li>Choose <b>Team</b> and <b>Player</b> from dropdowns</li>
+            <li>Enter winning <b>Tokens</b> amount</li>
+            <li>Hit <b>Confirm Sale</b> — validated instantly</li>
+            <li><b>Undo</b> reverts the last sale</li>
+            <li><b>Export</b> downloads a CSV of all results</li>
+            <li><b>Reset</b> clears all data (auto-backed up)</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <p style="margin-top:20px; font-size:0.88rem;">The console is only accessible from the auctioneer's machine (localhost). All other devices are automatically redirected to the read-only viewer.</p>
+  </section>
+
+  <!-- ── Slide 4: Viewer walkthrough ── -->
+  <section class="slide" id="slide-4">
+    <div class="eyebrow">Viewer Board</div>
+    <h2>What the audience sees</h2>
+    <div class="two-col">
+      <div class="col">
+        <div class="screen-box">
+          <h3>Main Board</h3>
+          <ul>
+            <li><b>Now Bidding</b> — updates the moment a player is selected</li>
+            <li><b>Sale Ticker</b> — scrolling log of recent sales</li>
+            <li><b>Team Cards</b> — roster, captain, budget bar per team</li>
+          </ul>
+        </div>
+      </div>
+      <div class="col">
+        <div class="screen-box">
+          <h3>Sidebar</h3>
+          <ul>
+            <li><b>All Players</b> — full pool; sold players crossed out</li>
+            <li><b>Rules Overlay</b> — full-screen pop-up triggered by auctioneer</li>
+            <li><b>Theme</b> — follows the auctioneer's theme choice live</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <p style="margin-top:20px; font-size:0.88rem;">Open <code style="color:var(--accent)">http://&lt;LAN-IP&gt;:8080</code> on any browser on the same Wi-Fi — no install, no login.</p>
+  </section>
+
+  <!-- ── Slide 5: Auction rules ── -->
+  <section class="slide" id="slide-5">
+    <div class="eyebrow">Auction Rules</div>
+    <h2>How the bidding works</h2>
+    <div class="rules-grid">
+      <div class="rule-card">
+        <h4>Team Size</h4>
+        <p>1 captain (pre-assigned) + 3 players via auction = 4 members total. All must play.</p>
+      </div>
+      <div class="rule-card">
+        <h4>Token Purse</h4>
+        <p>Each team starts with <strong>20,000 tokens</strong>. Unspent tokens have no value after the auction.</p>
+      </div>
+      <div class="rule-card">
+        <h4>Base Prices</h4>
+        <p>Beginner players start at <strong>2,000 tokens</strong>. Intermediate players start at <strong>5,000 tokens</strong>. No bids below base price.</p>
+      </div>
+      <div class="rule-card">
+        <h4>Gender Quota</h4>
+        <p>Every team must have <strong>min 1, max 2 female members</strong>. The captain counts toward this quota.</p>
+      </div>
+      <div class="rule-card">
+        <h4>Last-Slot Rule</h4>
+        <p>If a team (with a male captain) reaches their last auction slot with no female player yet, <strong>that slot must go to a female</strong>.</p>
+      </div>
+      <div class="rule-card">
+        <h4>Budget Discipline</h4>
+        <p>Teams must keep enough tokens to fill all remaining slots. The app enforces this automatically.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Slide 6: How it works (flow) ── -->
+  <section class="slide" id="slide-6">
+    <div class="eyebrow">Under the hood</div>
+    <h2>How it all connects</h2>
+    <div class="flow">
+      <div class="flow-node">players.json<br>teams.json<small>Config files</small></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-node">server.py<small>Flask backend</small></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-node">auction_data.json<small>Live state</small></div>
+    </div>
+    <div class="flow" style="margin-top: 20px;">
+      <div class="flow-node">Console<small>localhost only</small></div>
+      <div class="flow-arrow">⇄</div>
+      <div class="flow-node">POST /api/*<small>Sale, Undo, Reset…</small></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-node">SSE Broadcast<small>all viewers</small></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-node">Viewer Boards<small>live update</small></div>
+    </div>
+    <p style="margin-top: 28px; font-size:0.88rem;">All state is saved to <code style="color:var(--accent)">auction_data.json</code> after every action. Close the browser, restart the server — everything is still there.</p>
+  </section>
+
+  <!-- ── Slide 7: Quick start ── -->
+  <section class="slide" id="slide-7">
+    <div class="eyebrow">Getting started</div>
+    <h2>Up and running in 2 steps</h2>
+    <div class="code-block">
+      <span class="comment"># 1. Install the only dependency</span><br>
+      <span class="cmd">pip install flask</span><br><br>
+      <span class="comment"># 2. Start the auction server</span><br>
+      <span class="cmd">python server.py</span><br><br>
+      <span class="comment"># Browser opens automatically at localhost:8080</span><br>
+      <span class="comment"># Share the LAN IP shown on-screen with viewers</span>
+    </div>
+    <ul class="feature-list" style="margin-top:28px; max-width:520px;">
+      <li><div class="dot"></div><span>Edit <b>players.json</b> and <b>teams.json</b> before the auction to set your roster</span></li>
+      <li><div class="dot"></div><span>Hit <b>Reset</b> on the console to reload data files (current state is backed up)</span></li>
+      <li><div class="dot"></div><span>Export results as CSV anytime from the console</span></li>
+    </ul>
+  </section>
+
+</div><!-- /.deck -->
+
+<!-- ── Navigation ── -->
+<nav class="nav">
+  <button id="prevBtn" disabled>← Prev</button>
+  <div class="progress" id="progress"></div>
+  <button id="nextBtn">Next →</button>
+</nav>
+
+<script>
+  const slides = Array.from(document.querySelectorAll('.slide'));
+  const total = slides.length;
+  let current = 0;
+
+  const progress = document.getElementById('progress');
+  for (let i = 0; i < total; i++) {
+    const dot = document.createElement('span');
+    progress.appendChild(dot);
+  }
+  const dots = Array.from(progress.querySelectorAll('span'));
+
+  function show(idx) {
+    slides[current].classList.remove('active');
+    dots[current].classList.remove('on');
+    current = Math.max(0, Math.min(idx, total - 1));
+    slides[current].classList.add('active');
+    dots[current].classList.add('on');
+    document.getElementById('prevBtn').disabled = current === 0;
+    document.getElementById('nextBtn').disabled = current === total - 1;
+  }
+
+  show(0);
+
+  document.getElementById('nextBtn').addEventListener('click', () => show(current + 1));
+  document.getElementById('prevBtn').addEventListener('click', () => show(current - 1));
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown') show(current + 1);
+    if (e.key === 'ArrowLeft'  || e.key === 'ArrowUp')   show(current - 1);
+  });
+</script>
+</body>
+</html>
