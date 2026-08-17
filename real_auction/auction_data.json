@@ -1,0 +1,1232 @@
+{
+  "config": {
+    "num_teams": 15,
+    "slots": 3,
+    "purse": 20000
+  },
+  "teams": [
+    {
+      "id": 1,
+      "name": "Team 1",
+      "captain": "Chetan K Muthappa",
+      "captain_gender": "M",
+      "captain_skill": "Professional",
+      "players": [
+        {
+          "player_id": 3,
+          "name": "Akhil Raj Edigottu",
+          "base_price": 5000,
+          "skill": "Intermediate",
+          "gender": "M",
+          "cost": 9000
+        },
+        {
+          "player_id": 26,
+          "name": "Ranjitha Devaraju",
+          "base_price": 2000,
+          "skill": "Beginner",
+          "gender": "F",
+          "cost": 3500
+        },
+        {
+          "player_id": 32,
+          "name": "Seedarala Likhith",
+          "base_price": 2000,
+          "skill": "Beginner",
+          "gender": "M",
+          "cost": 5000
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "name": "Team 2",
+      "captain": "D Viswanath",
+      "captain_gender": "M",
+      "captain_skill": "Intermediate",
+      "players": [
+        {
+          "player_id": 29,
+          "name": "S S Sathish",
+          "base_price": 2000,
+          "skill": "Beginner",
+          "gender": "M",
+          "cost": 3000
+        },
+        {
+          "player_id": 36,
+          "name": "Siriki Ramakrishna",
+          "base_price": 5000,
+          "skill": "Intermediate",
+          "gender": "M",
+          "cost": 9000
+        },
+        {
+          "player_id": 31,
+          "name": "Saldanha Fiona Deepti",
+          "base_price": 2000,
+          "skill": "Beginner",
+          "gender": "F",
+          "cost": 2000
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "name": "Team 3",
+      "captain": "Bhutara Devang",
+      "captain_gender": "M",
+      "captain_skill": "Intermediate",
+      "players": [
+        {
+          "player_id": 23,
+          "name": "Puneet Manojkumar Pandit",
+          "base_price": 5000,
+          "skill": "Intermediate",
+          "gender": "M",
+          "cost": 16000
+        },
+        {
+          "player_id": 41,
+          "name": "Varshitha Shankar",
+          "base_price": 2000,
+          "skill": "Beginner",
+          "gender": "F",
+          "cost": 2000
+        },
+        {
+          "player_id": 11,
+          "name": "Hosahalli Basavarajappa Pallavi",
+          "base_price": 2000,
+          "skill": "Beginner",
+          "gender": "F",
+          "cost": 2000
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "name": "Team 4",
+      "captain": "Dixon Richard",
+      "captain_gender": "M",
+      "captain_skill": "Intermediate",
+      "players": [
+        {
+          "player_id": 19,
+          "name": "P Mohammed Reyhan Khan",
+          "base_price": 5000,
+          "skill": "Intermediate",
+          "gender": "M",
+          "cost": 10500
+        },
+        {
+          "player_id": 1,
+          "name": "Abdul Qayum Nishad Mujawar",
+          "base_price": 2000,
+          "skill": "Beginner",
+          "gender": "M",
+          "cost": 5500
+        },
+        {
+          "player_id": 28,
+          "name": "Renuka G",
+          "base_price": 2000,
+          "skill": "Beginner",
+          "gender": "F",
+          "cost": 2000
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "name": "Team 5",
+      "captain": "Hanamant Lalasingi",
+      "captain_gender": "M",
+      "captain_skill": "Intermediate",
+      "players": [
+        {
+          "player_id": 21,
+          "name": "Pichchi Naveen",
+          "base_price": 2000,
+          "skill": "Beginner",
+          "gender": "M",
+          "cost": 13500
+        },
+        {
+          "player_id": 15,
+          "name": "Mallikarjuna Reddy K",
+          "base_price": 2000,
+          "skill": "Beginner",
+          "gender": "M",
+          "cost": 3500
+        },
+        {
+          "player_id": 38,
+          "name": "Soumya Jakkali",
+          "base_price": 2000,
+          "skill": "Beginner",
+          "gender": "F",
+          "cost": 2500
+        }
+      ]
+    },
+    {
+      "id": 6,
+      "name": "Team 6",
+      "captain": "Koushik M S",
+      "captain_gender": "M",
+      "captain_skill": "Professional",
+      "players": [
+        {
+          "player_id": 12,
+          "name": "Komal Gowda",
+          "base_price": 2000,
+          "skill": "Beginner",
+          "gender": "M",
+          "cost": 2000
+        },
+        {
+          "player_id": 45,
+          "name": "B S Sandhyashree",
+          "base_price": 5000,
+          "skill": "Intermediate",
+          "gender": "F",
+          "cost": 15500
+        },
+        {
+          "player_id": 5,
+          "name": "Camala Gopal Vijaya Shanti",
+          "base_price": 2000,
+          "skill": "Beginner",
+          "gender": "F",
+          "cost": 2000
+        }
+      ]
+    },
+    {
+      "id": 7,
+      "name": "Team 7",
+      "captain": "Krishna Kiran",
+      "captain_gender": "M",
+      "captain_skill": "Professional",
+      "players": [
+        {
+          "player_id": 7,
+          "name": "Daisy Mary Kombana Nanaiah",
+          "base_price": 5000,
+          "skill": "Intermediate",
+          "gender": "F",
+          "cost": 9500
+        },
+        {
+          "player_id": 33,
+          "name": "Sivarathri Ashok Chakravarthi",
+          "base_price": 2000,
+          "skill": "Beginner",
+          "gender": "M",
+          "cost": 8500
+        },
+        {
+          "player_id": 40,
+          "name": "Vani M",
+          "base_price": 2000,
+          "skill": "Beginner",
+          "gender": "F",
+          "cost": 2000
+        }
+      ]
+    },
+    {
+      "id": 8,
+      "name": "Team 8",
+      "captain": "Mukunda Sai Chaitanya Thota",
+      "captain_gender": "M",
+      "captain_skill": "Professional",
+      "players": [
+        {
+          "player_id": 20,
+          "name": "Pai R Rakshith",
+          "base_price": 2000,
+          "skill": "Beginner",
+          "gender": "M",
+          "cost": 7000
+        },
+        {
+          "player_id": 39,
+          "name": "Sowmya Lakkappa",
+          "base_price": 5000,
+          "skill": "Intermediate",
+          "gender": "F",
+          "cost": 7000
+        },
+        {
+          "player_id": 42,
+          "name": "Vikram Singh",
+          "base_price": 2000,
+          "skill": "Beginner",
+          "gender": "M",
+          "cost": 3000
+        }
+      ]
+    },
+    {
+      "id": 9,
+      "name": "Team 9",
+      "captain": "Murugesan Bala Sanjiv Kumar",
+      "captain_gender": "M",
+      "captain_skill": "Professional",
+      "players": [
+        {
+          "player_id": 25,
+          "name": "Pranit Kulkarni",
+          "base_price": 5000,
+          "skill": "Intermediate",
+          "gender": "M",
+          "cost": 10500
+        },
+        {
+          "player_id": 43,
+          "name": "Vishwal Pundalik Kakade",
+          "base_price": 5000,
+          "skill": "Intermediate",
+          "gender": "F",
+          "cost": 5500
+        },
+        {
+          "player_id": 24,
+          "name": "Rakshitha Thattekere Ravi",
+          "base_price": 2000,
+          "skill": "Beginner",
+          "gender": "F",
+          "cost": 2500
+        }
+      ]
+    },
+    {
+      "id": 10,
+      "name": "Team 10",
+      "captain": "Natarajan Sozhan",
+      "captain_gender": "M",
+      "captain_skill": "Professional",
+      "players": [
+        {
+          "player_id": 35,
+          "name": "Sharath Bhaskar",
+          "base_price": 5000,
+          "skill": "Intermediate",
+          "gender": "M",
+          "cost": 10500
+        },
+        {
+          "player_id": 14,
+          "name": "M Madhan",
+          "base_price": 2000,
+          "skill": "Beginner",
+          "gender": "M",
+          "cost": 2000
+        },
+        {
+          "player_id": 27,
+          "name": "Roopali",
+          "base_price": 5000,
+          "skill": "Intermediate",
+          "gender": "F",
+          "cost": 6000
+        }
+      ]
+    },
+    {
+      "id": 11,
+      "name": "Team 11",
+      "captain": "Projoy Roy",
+      "captain_gender": "M",
+      "captain_skill": "Intermediate",
+      "players": [
+        {
+          "player_id": 9,
+          "name": "G Chirag",
+          "base_price": 2000,
+          "skill": "Beginner",
+          "gender": "M",
+          "cost": 9500
+        },
+        {
+          "player_id": 44,
+          "name": "B U Shaman Bhat",
+          "base_price": 5000,
+          "skill": "Intermediate",
+          "gender": "M",
+          "cost": 5000
+        },
+        {
+          "player_id": 34,
+          "name": "Sowmya B S",
+          "base_price": 2000,
+          "skill": "Beginner",
+          "gender": "F",
+          "cost": 3500
+        }
+      ]
+    },
+    {
+      "id": 12,
+      "name": "Team 12",
+      "captain": "Ramakrishna Shashank",
+      "captain_gender": "M",
+      "captain_skill": "Intermediate",
+      "players": [
+        {
+          "player_id": 2,
+          "name": "Ajith Shenoy R",
+          "base_price": 2000,
+          "skill": "Beginner",
+          "gender": "M",
+          "cost": 5000
+        },
+        {
+          "player_id": 16,
+          "name": "Mohammed Arbaz Khan",
+          "base_price": 5000,
+          "skill": "Intermediate",
+          "gender": "M",
+          "cost": 9500
+        },
+        {
+          "player_id": 4,
+          "name": "Anusha S",
+          "base_price": 2000,
+          "skill": "Beginner",
+          "gender": "F",
+          "cost": 2500
+        }
+      ]
+    },
+    {
+      "id": 13,
+      "name": "Team 13",
+      "captain": "S Sowmya",
+      "captain_gender": "F",
+      "captain_skill": "Beginner",
+      "players": [
+        {
+          "player_id": 13,
+          "name": "Krishnaraja Kodavoor",
+          "base_price": 2000,
+          "skill": "Beginner",
+          "gender": "M",
+          "cost": 2000
+        },
+        {
+          "player_id": 10,
+          "name": "Gokulnaath B",
+          "base_price": 5000,
+          "skill": "Intermediate",
+          "gender": "M",
+          "cost": 9000
+        },
+        {
+          "player_id": 30,
+          "name": "Sachin Kumar",
+          "base_price": 2000,
+          "skill": "Beginner",
+          "gender": "M",
+          "cost": 2500
+        }
+      ]
+    },
+    {
+      "id": 14,
+      "name": "Team 14",
+      "captain": "Sanjana Sibi Thomas",
+      "captain_gender": "F",
+      "captain_skill": "Intermediate",
+      "players": [
+        {
+          "player_id": 6,
+          "name": "Chellammai Chellappan",
+          "base_price": 5000,
+          "skill": "Intermediate",
+          "gender": "F",
+          "cost": 9500
+        },
+        {
+          "player_id": 17,
+          "name": "Narendra Vasireddy",
+          "base_price": 5000,
+          "skill": "Intermediate",
+          "gender": "M",
+          "cost": 5000
+        },
+        {
+          "player_id": 18,
+          "name": "Naveen Ramesh",
+          "base_price": 2000,
+          "skill": "Beginner",
+          "gender": "M",
+          "cost": 2000
+        }
+      ]
+    },
+    {
+      "id": 15,
+      "name": "Team 15",
+      "captain": "Vighnesh Nagesh Pai",
+      "captain_gender": "M",
+      "captain_skill": "Professional",
+      "players": [
+        {
+          "player_id": 22,
+          "name": "Prabhu Hari Deva",
+          "base_price": 2000,
+          "skill": "Beginner",
+          "gender": "M",
+          "cost": 2000
+        },
+        {
+          "player_id": 8,
+          "name": "Dinesh Kumar Reddy Gore",
+          "base_price": 2000,
+          "skill": "Beginner",
+          "gender": "M",
+          "cost": 2500
+        },
+        {
+          "player_id": 37,
+          "name": "Sneha P Hiremath",
+          "base_price": 2000,
+          "skill": "Beginner",
+          "gender": "F",
+          "cost": 8500
+        }
+      ]
+    }
+  ],
+  "players": [
+    {
+      "id": 1,
+      "name": "Abdul Qayum Nishad Mujawar",
+      "base_price": 2000,
+      "skill": "Beginner",
+      "gender": "M",
+      "sold": true,
+      "team_id": 4
+    },
+    {
+      "id": 2,
+      "name": "Ajith Shenoy R",
+      "base_price": 2000,
+      "skill": "Beginner",
+      "gender": "M",
+      "sold": true,
+      "team_id": 12
+    },
+    {
+      "id": 3,
+      "name": "Akhil Raj Edigottu",
+      "base_price": 5000,
+      "skill": "Intermediate",
+      "gender": "M",
+      "sold": true,
+      "team_id": 1
+    },
+    {
+      "id": 4,
+      "name": "Anusha S",
+      "base_price": 2000,
+      "skill": "Beginner",
+      "gender": "F",
+      "sold": true,
+      "team_id": 12
+    },
+    {
+      "id": 5,
+      "name": "Camala Gopal Vijaya Shanti",
+      "base_price": 2000,
+      "skill": "Beginner",
+      "gender": "F",
+      "sold": true,
+      "team_id": 6
+    },
+    {
+      "id": 6,
+      "name": "Chellammai Chellappan",
+      "base_price": 5000,
+      "skill": "Intermediate",
+      "gender": "F",
+      "sold": true,
+      "team_id": 14
+    },
+    {
+      "id": 7,
+      "name": "Daisy Mary Kombana Nanaiah",
+      "base_price": 5000,
+      "skill": "Intermediate",
+      "gender": "F",
+      "sold": true,
+      "team_id": 7
+    },
+    {
+      "id": 8,
+      "name": "Dinesh Kumar Reddy Gore",
+      "base_price": 2000,
+      "skill": "Beginner",
+      "gender": "M",
+      "sold": true,
+      "team_id": 15
+    },
+    {
+      "id": 9,
+      "name": "G Chirag",
+      "base_price": 2000,
+      "skill": "Beginner",
+      "gender": "M",
+      "sold": true,
+      "team_id": 11
+    },
+    {
+      "id": 10,
+      "name": "Gokulnaath B",
+      "base_price": 5000,
+      "skill": "Intermediate",
+      "gender": "M",
+      "sold": true,
+      "team_id": 13
+    },
+    {
+      "id": 11,
+      "name": "Hosahalli Basavarajappa Pallavi",
+      "base_price": 2000,
+      "skill": "Beginner",
+      "gender": "F",
+      "sold": true,
+      "team_id": 3
+    },
+    {
+      "id": 12,
+      "name": "Komal Gowda",
+      "base_price": 2000,
+      "skill": "Beginner",
+      "gender": "M",
+      "sold": true,
+      "team_id": 6
+    },
+    {
+      "id": 13,
+      "name": "Krishnaraja Kodavoor",
+      "base_price": 2000,
+      "skill": "Beginner",
+      "gender": "M",
+      "sold": true,
+      "team_id": 13
+    },
+    {
+      "id": 14,
+      "name": "M Madhan",
+      "base_price": 2000,
+      "skill": "Beginner",
+      "gender": "M",
+      "sold": true,
+      "team_id": 10
+    },
+    {
+      "id": 15,
+      "name": "Mallikarjuna Reddy K",
+      "base_price": 2000,
+      "skill": "Beginner",
+      "gender": "M",
+      "sold": true,
+      "team_id": 5
+    },
+    {
+      "id": 16,
+      "name": "Mohammed Arbaz Khan",
+      "base_price": 5000,
+      "skill": "Intermediate",
+      "gender": "M",
+      "sold": true,
+      "team_id": 12
+    },
+    {
+      "id": 17,
+      "name": "Narendra Vasireddy",
+      "base_price": 5000,
+      "skill": "Intermediate",
+      "gender": "M",
+      "sold": true,
+      "team_id": 14
+    },
+    {
+      "id": 18,
+      "name": "Naveen Ramesh",
+      "base_price": 2000,
+      "skill": "Beginner",
+      "gender": "M",
+      "sold": true,
+      "team_id": 14
+    },
+    {
+      "id": 19,
+      "name": "P Mohammed Reyhan Khan",
+      "base_price": 5000,
+      "skill": "Intermediate",
+      "gender": "M",
+      "sold": true,
+      "team_id": 4
+    },
+    {
+      "id": 20,
+      "name": "Pai R Rakshith",
+      "base_price": 2000,
+      "skill": "Beginner",
+      "gender": "M",
+      "sold": true,
+      "team_id": 8
+    },
+    {
+      "id": 21,
+      "name": "Pichchi Naveen",
+      "base_price": 2000,
+      "skill": "Beginner",
+      "gender": "M",
+      "sold": true,
+      "team_id": 5
+    },
+    {
+      "id": 22,
+      "name": "Prabhu Hari Deva",
+      "base_price": 2000,
+      "skill": "Beginner",
+      "gender": "M",
+      "sold": true,
+      "team_id": 15
+    },
+    {
+      "id": 23,
+      "name": "Puneet Manojkumar Pandit",
+      "base_price": 5000,
+      "skill": "Intermediate",
+      "gender": "M",
+      "sold": true,
+      "team_id": 3
+    },
+    {
+      "id": 24,
+      "name": "Rakshitha Thattekere Ravi",
+      "base_price": 2000,
+      "skill": "Beginner",
+      "gender": "F",
+      "sold": true,
+      "team_id": 9
+    },
+    {
+      "id": 25,
+      "name": "Pranit Kulkarni",
+      "base_price": 5000,
+      "skill": "Intermediate",
+      "gender": "M",
+      "sold": true,
+      "team_id": 9
+    },
+    {
+      "id": 26,
+      "name": "Ranjitha Devaraju",
+      "base_price": 2000,
+      "skill": "Beginner",
+      "gender": "F",
+      "sold": true,
+      "team_id": 1
+    },
+    {
+      "id": 27,
+      "name": "Roopali",
+      "base_price": 5000,
+      "skill": "Intermediate",
+      "gender": "F",
+      "sold": true,
+      "team_id": 10
+    },
+    {
+      "id": 28,
+      "name": "Renuka G",
+      "base_price": 2000,
+      "skill": "Beginner",
+      "gender": "F",
+      "sold": true,
+      "team_id": 4
+    },
+    {
+      "id": 29,
+      "name": "S S Sathish",
+      "base_price": 2000,
+      "skill": "Beginner",
+      "gender": "M",
+      "sold": true,
+      "team_id": 2
+    },
+    {
+      "id": 30,
+      "name": "Sachin Kumar",
+      "base_price": 2000,
+      "skill": "Beginner",
+      "gender": "M",
+      "sold": true,
+      "team_id": 13
+    },
+    {
+      "id": 31,
+      "name": "Saldanha Fiona Deepti",
+      "base_price": 2000,
+      "skill": "Beginner",
+      "gender": "F",
+      "sold": true,
+      "team_id": 2
+    },
+    {
+      "id": 32,
+      "name": "Seedarala Likhith",
+      "base_price": 2000,
+      "skill": "Beginner",
+      "gender": "M",
+      "sold": true,
+      "team_id": 1
+    },
+    {
+      "id": 33,
+      "name": "Sivarathri Ashok Chakravarthi",
+      "base_price": 2000,
+      "skill": "Beginner",
+      "gender": "M",
+      "sold": true,
+      "team_id": 7
+    },
+    {
+      "id": 34,
+      "name": "Sowmya B S",
+      "base_price": 2000,
+      "skill": "Beginner",
+      "gender": "F",
+      "sold": true,
+      "team_id": 11
+    },
+    {
+      "id": 35,
+      "name": "Sharath Bhaskar",
+      "base_price": 5000,
+      "skill": "Intermediate",
+      "gender": "M",
+      "sold": true,
+      "team_id": 10
+    },
+    {
+      "id": 36,
+      "name": "Siriki Ramakrishna",
+      "base_price": 5000,
+      "skill": "Intermediate",
+      "gender": "M",
+      "sold": true,
+      "team_id": 2
+    },
+    {
+      "id": 37,
+      "name": "Sneha P Hiremath",
+      "base_price": 2000,
+      "skill": "Beginner",
+      "gender": "F",
+      "sold": true,
+      "team_id": 15
+    },
+    {
+      "id": 38,
+      "name": "Soumya Jakkali",
+      "base_price": 2000,
+      "skill": "Beginner",
+      "gender": "F",
+      "sold": true,
+      "team_id": 5
+    },
+    {
+      "id": 39,
+      "name": "Sowmya Lakkappa",
+      "base_price": 5000,
+      "skill": "Intermediate",
+      "gender": "F",
+      "sold": true,
+      "team_id": 8
+    },
+    {
+      "id": 40,
+      "name": "Vani M",
+      "base_price": 2000,
+      "skill": "Beginner",
+      "gender": "F",
+      "sold": true,
+      "team_id": 7
+    },
+    {
+      "id": 41,
+      "name": "Varshitha Shankar",
+      "base_price": 2000,
+      "skill": "Beginner",
+      "gender": "F",
+      "sold": true,
+      "team_id": 3
+    },
+    {
+      "id": 42,
+      "name": "Vikram Singh",
+      "base_price": 2000,
+      "skill": "Beginner",
+      "gender": "M",
+      "sold": true,
+      "team_id": 8
+    },
+    {
+      "id": 43,
+      "name": "Vishwal Pundalik Kakade",
+      "base_price": 5000,
+      "skill": "Intermediate",
+      "gender": "F",
+      "sold": true,
+      "team_id": 9
+    },
+    {
+      "id": 44,
+      "name": "B U Shaman Bhat",
+      "base_price": 5000,
+      "skill": "Intermediate",
+      "gender": "M",
+      "sold": true,
+      "team_id": 11
+    },
+    {
+      "id": 45,
+      "name": "B S Sandhyashree",
+      "base_price": 5000,
+      "skill": "Intermediate",
+      "gender": "F",
+      "sold": true,
+      "team_id": 6
+    }
+  ],
+  "log": [
+    {
+      "team_id": 1,
+      "player_id": 3,
+      "player": "Akhil Raj Edigottu",
+      "cost": 9000,
+      "ts": "2026-07-08T15:08:33"
+    },
+    {
+      "team_id": 13,
+      "player_id": 13,
+      "player": "Krishnaraja Kodavoor",
+      "cost": 2000,
+      "ts": "2026-07-08T15:10:06"
+    },
+    {
+      "team_id": 8,
+      "player_id": 20,
+      "player": "Pai R Rakshith",
+      "cost": 7000,
+      "ts": "2026-07-08T15:11:47"
+    },
+    {
+      "team_id": 2,
+      "player_id": 29,
+      "player": "S S Sathish",
+      "cost": 3000,
+      "ts": "2026-07-08T15:13:33"
+    },
+    {
+      "team_id": 11,
+      "player_id": 9,
+      "player": "G Chirag",
+      "cost": 9500,
+      "ts": "2026-07-08T15:15:51"
+    },
+    {
+      "team_id": 3,
+      "player_id": 23,
+      "player": "Puneet Manojkumar Pandit",
+      "cost": 16000,
+      "ts": "2026-07-08T15:19:26"
+    },
+    {
+      "team_id": 4,
+      "player_id": 19,
+      "player": "P Mohammed Reyhan Khan",
+      "cost": 10500,
+      "ts": "2026-07-08T15:20:44"
+    },
+    {
+      "team_id": 3,
+      "player_id": 41,
+      "player": "Varshitha Shankar",
+      "cost": 2000,
+      "ts": "2026-07-08T15:24:19"
+    },
+    {
+      "team_id": 9,
+      "player_id": 25,
+      "player": "Pranit Kulkarni",
+      "cost": 10500,
+      "ts": "2026-07-08T15:25:26"
+    },
+    {
+      "team_id": 13,
+      "player_id": 10,
+      "player": "Gokulnaath B",
+      "cost": 9000,
+      "ts": "2026-07-08T15:26:43"
+    },
+    {
+      "team_id": 10,
+      "player_id": 35,
+      "player": "Sharath Bhaskar",
+      "cost": 10500,
+      "ts": "2026-07-08T15:28:28"
+    },
+    {
+      "team_id": 13,
+      "player_id": 30,
+      "player": "Sachin Kumar",
+      "cost": 2500,
+      "ts": "2026-07-08T15:29:36"
+    },
+    {
+      "team_id": 12,
+      "player_id": 2,
+      "player": "Ajith Shenoy R",
+      "cost": 5000,
+      "ts": "2026-07-08T15:32:54"
+    },
+    {
+      "team_id": 14,
+      "player_id": 6,
+      "player": "Chellammai Chellappan",
+      "cost": 9500,
+      "ts": "2026-07-08T15:34:16"
+    },
+    {
+      "team_id": 4,
+      "player_id": 1,
+      "player": "Abdul Qayum Nishad Mujawar",
+      "cost": 5500,
+      "ts": "2026-07-08T15:36:36"
+    },
+    {
+      "team_id": 7,
+      "player_id": 7,
+      "player": "Daisy Mary Kombana Nanaiah",
+      "cost": 9500,
+      "ts": "2026-07-08T15:38:17"
+    },
+    {
+      "team_id": 14,
+      "player_id": 17,
+      "player": "Narendra Vasireddy",
+      "cost": 5000,
+      "ts": "2026-07-08T15:39:07"
+    },
+    {
+      "team_id": 14,
+      "player_id": 18,
+      "player": "Naveen Ramesh",
+      "cost": 2000,
+      "ts": "2026-07-08T15:40:11"
+    },
+    {
+      "team_id": 10,
+      "player_id": 14,
+      "player": "M Madhan",
+      "cost": 2000,
+      "ts": "2026-07-08T15:41:12"
+    },
+    {
+      "team_id": 10,
+      "player_id": 27,
+      "player": "Roopali",
+      "cost": 6000,
+      "ts": "2026-07-08T15:43:32"
+    },
+    {
+      "team_id": 5,
+      "player_id": 21,
+      "player": "Pichchi Naveen",
+      "cost": 13500,
+      "ts": "2026-07-08T15:47:44"
+    },
+    {
+      "team_id": 2,
+      "player_id": 36,
+      "player": "Siriki Ramakrishna",
+      "cost": 9000,
+      "ts": "2026-07-08T15:48:36"
+    },
+    {
+      "team_id": 8,
+      "player_id": 39,
+      "player": "Sowmya Lakkappa",
+      "cost": 7000,
+      "ts": "2026-07-08T15:50:28"
+    },
+    {
+      "team_id": 5,
+      "player_id": 15,
+      "player": "Mallikarjuna Reddy K",
+      "cost": 3500,
+      "ts": "2026-07-08T15:52:04"
+    },
+    {
+      "team_id": 15,
+      "player_id": 22,
+      "player": "Prabhu Hari Deva",
+      "cost": 2000,
+      "ts": "2026-07-08T15:53:48"
+    },
+    {
+      "team_id": 1,
+      "player_id": 26,
+      "player": "Ranjitha Devaraju",
+      "cost": 3500,
+      "ts": "2026-07-08T15:55:03"
+    },
+    {
+      "team_id": 4,
+      "player_id": 28,
+      "player": "Renuka G",
+      "cost": 2000,
+      "ts": "2026-07-08T15:56:02"
+    },
+    {
+      "team_id": 12,
+      "player_id": 16,
+      "player": "Mohammed Arbaz Khan",
+      "cost": 9500,
+      "ts": "2026-07-08T15:57:27"
+    },
+    {
+      "team_id": 9,
+      "player_id": 43,
+      "player": "Vishwal Pundalik Kakade",
+      "cost": 5500,
+      "ts": "2026-07-08T15:59:35"
+    },
+    {
+      "team_id": 12,
+      "player_id": 4,
+      "player": "Anusha S",
+      "cost": 2500,
+      "ts": "2026-07-08T16:00:47"
+    },
+    {
+      "team_id": 9,
+      "player_id": 24,
+      "player": "Rakshitha Thattekere Ravi",
+      "cost": 2500,
+      "ts": "2026-07-08T16:02:44"
+    },
+    {
+      "team_id": 1,
+      "player_id": 32,
+      "player": "Seedarala Likhith",
+      "cost": 5000,
+      "ts": "2026-07-08T16:04:26"
+    },
+    {
+      "team_id": 8,
+      "player_id": 42,
+      "player": "Vikram Singh",
+      "cost": 3000,
+      "ts": "2026-07-08T16:06:30"
+    },
+    {
+      "team_id": 15,
+      "player_id": 8,
+      "player": "Dinesh Kumar Reddy Gore",
+      "cost": 2500,
+      "ts": "2026-07-08T16:09:19"
+    },
+    {
+      "team_id": 7,
+      "player_id": 33,
+      "player": "Sivarathri Ashok Chakravarthi",
+      "cost": 8500,
+      "ts": "2026-07-08T16:12:25"
+    },
+    {
+      "team_id": 6,
+      "player_id": 12,
+      "player": "Komal Gowda",
+      "cost": 2000,
+      "ts": "2026-07-08T16:14:20"
+    },
+    {
+      "team_id": 6,
+      "player_id": 45,
+      "player": "B S Sandhyashree",
+      "cost": 15500,
+      "ts": "2026-07-08T16:17:00"
+    },
+    {
+      "team_id": 11,
+      "player_id": 44,
+      "player": "B U Shaman Bhat",
+      "cost": 5000,
+      "ts": "2026-07-08T16:17:57"
+    },
+    {
+      "team_id": 15,
+      "player_id": 37,
+      "player": "Sneha P Hiremath",
+      "cost": 8500,
+      "ts": "2026-07-08T16:20:07"
+    },
+    {
+      "team_id": 6,
+      "player_id": 5,
+      "player": "Camala Gopal Vijaya Shanti",
+      "cost": 2000,
+      "ts": "2026-07-08T16:20:47"
+    },
+    {
+      "team_id": 2,
+      "player_id": 31,
+      "player": "Saldanha Fiona Deepti",
+      "cost": 2000,
+      "ts": "2026-07-08T16:22:10"
+    },
+    {
+      "team_id": 11,
+      "player_id": 34,
+      "player": "Sowmya B S",
+      "cost": 3500,
+      "ts": "2026-07-08T16:23:08"
+    },
+    {
+      "team_id": 5,
+      "player_id": 38,
+      "player": "Soumya Jakkali",
+      "cost": 2500,
+      "ts": "2026-07-08T16:23:57"
+    },
+    {
+      "team_id": 7,
+      "player_id": 40,
+      "player": "Vani M",
+      "cost": 2000,
+      "ts": "2026-07-08T16:24:09"
+    },
+    {
+      "team_id": 3,
+      "player_id": 11,
+      "player": "Hosahalli Basavarajappa Pallavi",
+      "cost": 2000,
+      "ts": "2026-07-08T16:24:22"
+    }
+  ],
+  "current_bid_player_id": null,
+  "theme": "court",
+  "show_rules": false,
+  "show_splash": false
+}
